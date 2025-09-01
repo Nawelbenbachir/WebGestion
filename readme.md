@@ -1,3 +1,3 @@
 Projet WebDev
-Projet de développement d'un logiciel de facturation généraliste pour petites entreprises 
-Nawel Benbachir 2025
+Projet de développement d'une application web de facturation généraliste pour petites entreprises 
+Copyright Nawel Benbachir 2025
