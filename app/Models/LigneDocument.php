@@ -8,13 +8,17 @@ class LigneDocument extends Model
 {
     protected $fillable = [
         'document_id',
+        'produit_id',
         'description',
         'quantite',
-        'prix_unitaire',
-        'tva',
+        'prix_unitaire_ht',
+        'taux_tva',
         'total_ht',
         'total_ttc',
+        'total_tva',
+        'commentaire',
     ];
+
 
     public function document()
     {

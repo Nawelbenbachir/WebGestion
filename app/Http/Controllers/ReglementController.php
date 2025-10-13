@@ -3,63 +3,95 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reglement;
+use App\Models\EnTeteDocument;
 use Illuminate\Http\Request;
 
 class ReglementController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Liste de tous les règlements
      */
     public function index()
     {
-        //
+        $reglements = Reglement::with('document')->get();
+        return view('reglements.index', compact('reglements'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Formulaire de création d’un règlement
      */
-    public function create()
+    public function create($document_id = null)
     {
-        //
+        $document = null;
+        if ($document_id) {
+            $document = EnTeteDocument::findOrFail($document_id);
+        }
+        return view('reglements.create', compact('document'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistrement d’un règlement
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'document_id' => 'required|exists:en_tete_documents,id',
+            'mode'        => 'required|string', // CB, chèque, virement…
+            'montant'     => 'required|numeric|min:0.01',
+            'date_paiement' => 'required|date',
+        ]);
+
+        Reglement::create($validated);
+
+        return redirect()->route('reglements.index')
+            ->with('success', 'Règlement enregistré avec succès.');
     }
 
     /**
-     * Display the specified resource.
+     * Affichage d’un règlement
      */
-    public function show(Reglement $reglement)
+    public function show($id)
     {
-        //
+        $reglement = Reglement::with('document')->findOrFail($id);
+        return view('reglements.show', compact('reglement'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Formulaire d’édition d’un règlement
      */
-    public function edit(Reglement $reglement)
+    public function edit($id)
     {
-        //
+        $reglement = Reglement::findOrFail($id);
+        return view('reglements.edit', compact('reglement'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mise à jour d’un règlement
      */
-    public function update(Request $request, Reglement $reglement)
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'mode'        => 'required|string',
+            'montant'     => 'required|numeric|min:0.01',
+            'date_paiement' => 'required|date',
+        ]);
+
+        $reglement = Reglement::findOrFail($id);
+        $reglement->update($validated);
+
+        return redirect()->route('reglements.index')
+            ->with('success', 'Règlement mis à jour avec succès.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Suppression d’un règlement
      */
-    public function destroy(Reglement $reglement)
+    public function destroy($id)
     {
-        //
+        $reglement = Reglement::findOrFail($id);
+        $reglement->delete();
+
+        return redirect()->route('reglements.index')
+            ->with('success', 'Règlement supprimé.');
     }
 }
