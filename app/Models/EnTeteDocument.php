@@ -7,14 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 class EnTeteDocument extends Model
 {
     protected $fillable = [
-        'type_document',
+        'societe_id',
+        'code_document',
+        'type_document', 
         'date_document',
-        'client_id',
         'total_ht',
+        'total_tva',
         'total_ttc',
-        'tva',
-        'statut',
-        'remise',
-        'commentaire',
+        'client_id',
+        'client_nom',
+        'logo',
+        'adresse',
+        'telephone',
+        'email',
+
     ];
+    public function societe()
+    {
+        return $this->belongsTo(Societe::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function lignes()
+    {
+        return $this->hasMany(LigneDocument::class, 'document_id');
+    }
 }
