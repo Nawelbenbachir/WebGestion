@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('en_tete_documents', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
             $table->unsignedBigInteger('societe_id');
             $table->foreign('societe_id')->references('id')->on('societes')->onDelete('cascade');
 

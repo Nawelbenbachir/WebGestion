@@ -38,7 +38,8 @@ return new class extends Migration
             $table->integer('echeance_jour')->default(30);
             $table->string("tva")->nullable();
             $table->text('notes')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
            
         });
     }

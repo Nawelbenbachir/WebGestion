@@ -7,59 +7,38 @@ use Illuminate\Http\Request;
 
 class ProduitController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function show($id)
     {
-        //
+        $produit = Produit::findOrFail($id);
+        return view('produits.show', compact('produit'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function edit($id)
     {
-        //
+        $produit = Produit::findOrFail($id);
+        return view('produits.edit', compact('produit'));
     }
-
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Produit $produit)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Produit $produit)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Mise à jour du produit existant.
      */
     public function update(Request $request, Produit $produit)
     {
-        //
+        $validated = $request->validate([
+            'code_societe'   => 'required|string|max:255',
+            'code_produit'   => 'required|string|max:255|unique:produits,code_produit,' . $produit->id,
+            'code_comptable' => 'required|string|max:255',
+            'description'    => 'nullable|string|max:255',
+            'prix_ht'        => 'nullable|numeric|min:0',
+            'tva'            => 'nullable|numeric|min:0',
+            'qt_stock'       => 'nullable|integer|min:0',
+            'categorie'      => 'nullable|string|max:255',
+        ]);
+
+        $produit->update($validated);
+
+        return redirect()
+            ->route('produits.index')
+            ->with('success', '✅ Produit mis à jour avec succès.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Produit $produit)
-    {
-        //
-    }
-}
+};

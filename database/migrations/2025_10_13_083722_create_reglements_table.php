@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('reglements', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
             $table->unsignedBigInteger('reglement_id');
             $table->foreign('document_id')->references('id')->on('en_tete_documents')->onDelete('cascade');
             $table->date('date_reglement')->nullable();

@@ -22,7 +22,8 @@ return new class extends Migration
         $table->decimal('tva', 5, 2)->default(20)->nullable();
         $table->integer('qt_stock')->nullable();
         $table->string('categorie')->nullable();
-        $table->timestamps();
+        $table->timestamp('created_at')->useCurrent();
+        $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
         
     });
     }
