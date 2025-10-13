@@ -23,4 +23,8 @@ class Societe extends Model
         'tva',
         'logo',
     ];
+        public function documents()
+    {
+        return $this->hasMany(EnTeteDocument::class, 'code_societe', 'code_societe');
+    }
 }

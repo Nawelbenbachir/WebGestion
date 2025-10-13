@@ -8,58 +8,103 @@ use Illuminate\Http\Request;
 class SocieteController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche la liste des sociétés.
      */
     public function index()
     {
-        //
+        $societes = Societe::all();
+        return view('parametres.index', compact('societes'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Affiche le formulaire de création.
      */
     public function create()
     {
-        //
+        return view('parametres.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistre une nouvelle société.
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'code_societe' => 'required|string|max:255|unique:societes,code_societe',
+            'nom_societe' => 'required|string|max:255',
+            'email' => 'required|email|unique:societes,email',
+            'siret' => 'nullable|string|max:14',
+            'telephone' => 'nullable|string|max:20',
+            'adresse1' => 'nullable|string|max:255',
+            'adresse2' => 'nullable|string|max:255',
+            'complement_adresse' => 'nullable|string|max:255',
+            'code_postal' => 'nullable|string|max:10',
+            'ville' => 'nullable|string|max:255',
+            'pays' => 'nullable|string|max:255',
+            'iban' => 'nullable|string|max:34',
+            'swift' => 'nullable|string|max:11',
+            'tva' => 'nullable|string|max:20',
+            'logo' => 'nullable|string|max:255',
+        ]);
+
+        Societe::create($validated);
+
+        return redirect()->route('parametres.index')->with('success', 'Société créée avec succès.');
     }
 
     /**
-     * Display the specified resource.
+     * Affiche les détails d’une société.
      */
-    public function show(Societe $societe)
+    public function show($id)
     {
-        //
+        $societe = Societe::findOrFail($id);
+        return view('parametres.show', compact('societe'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Affiche le formulaire d’édition.
      */
-    public function edit(Societe $societe)
+    public function edit($id)
     {
-        //
+        $societe = Societe::findOrFail($id);
+        return view('parametres.edit', compact('societe'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Met à jour une société.
      */
     public function update(Request $request, Societe $societe)
     {
-        //
+
+        $validated = $request->validate([
+            'nom_societe' => 'required|string|max:255',
+            'email' => 'required|email|unique:societes,email,' . $societe->id,
+            'siret' => 'nullable|string|max:14',
+            'telephone' => 'nullable|string|max:20',
+            'adresse1' => 'nullable|string|max:255',
+            'adresse2' => 'nullable|string|max:255',
+            'complement_adresse' => 'nullable|string|max:255',
+            'code_postal' => 'nullable|string|max:10',
+            'ville' => 'nullable|string|max:255',
+            'pays' => 'nullable|string|max:255',
+            'iban' => 'nullable|string|max:34',
+            'swift' => 'nullable|string|max:11',
+            'tva' => 'nullable|string|max:20',
+            'logo' => 'nullable|string|max:255',
+        ]);
+
+        $societe->update($validated);
+
+        return redirect()->route('parametres.index')->with('success', 'Société mise à jour avec succès.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprime une société.
      */
     public function destroy(Societe $societe)
     {
-        //
+        $societe->delete();
+        return redirect()->route('parametres.index')->with('success', 'Société supprimée avec succès.');
     }
 }
+

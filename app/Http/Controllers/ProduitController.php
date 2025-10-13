@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 
 class ProduitController extends Controller
 {
+    public function index()
+    {
+        // Récupère tous les produits depuis la base
+        $produits = Produit::orderBy('id', 'desc')->get();
+
+        // Retourne la vue 'produits.index' avec la variable $produits
+        return view('produits.index', compact('produits'));
+    }
+    
     public function show($id)
     {
         $produit = Produit::findOrFail($id);
