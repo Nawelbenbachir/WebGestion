@@ -15,14 +15,13 @@ return new class extends Migration
             $table->id();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
-            $table->unsignedBigInteger('reglement_id');
+            $table->unsignedBigInteger('document_id');
             $table->foreign('document_id')->references('id')->on('en_tete_documents')->onDelete('cascade');
             $table->date('date_reglement')->nullable();
             $table->decimal('montant', 10, 2)->nullable();
             $table->string('mode_reglement')->nullable();
             $table->string('reference')->nullable();
             $table->text('commentaire')->nullable();
-           $table->foreign('type_document')->references('type_document')->on('en_tete_documents')->onDelete('cascade');
 
         });
     }

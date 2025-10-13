@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreign('societe_id')->references('id')->on('societes')->onDelete('cascade');
 
             $table->string('code_document')->unique();
-            $table->enum('type_document', ['facture', 'devis', 'avoir'])->nullable();
+            $table->enum('type_document', ['F', 'D', 'A'])->nullable();
             $table->date('date_document')->nullable();
             
             
