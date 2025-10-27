@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    @include('layouts.navigation') {{-- ta barre de navigation --}}
+    @include('layouts.navigation') 
 
     <main class="container mx-auto py-8 px-4">
         @yield('content')

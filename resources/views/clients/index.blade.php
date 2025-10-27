@@ -1,46 +1,47 @@
-@extends('layouts.app')
+@extends('layouts.table')
 
-@section('content')
-<div class="container">
-    <h2>Liste des clients</h2>
+@php
+    $title = 'Liste des clients';
+    $createRoute = 'clients.create';
+    $createLabel = 'Ajouter un client';
+@endphp
 
-    <a href="{{ route('clients.create') }}" class="btn btn-primary mb-3">➕ Ajouter un client</a>
-
-    @if($clients->count() > 0)
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Type</th>
-                    <th>Email</th>
-                    <th>Téléphone</th>
-                    <th>Actions</th>
+@section('table')
+    <table id="clients-table" class="min-w-full border border-gray-200">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Nom</th>
+                <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Type</th>
+                <th class="px-6 py-3 border-b border-gray-300 text-center">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($clients as $client)
+                <tr data-id="{{ $client->id }}" class="cursor-pointer hover:bg-blue-100">
+                    <td class="px-6 py-4 border-b border-r border-gray-300">{{ $client->nom }}</td>
+                    <td class="px-6 py-4 border-b border-r border-gray-300">{{ ucfirst($client->type) }}</td>
+                    <td class="px-6 py-4 border-b border-gray-300">{{ $client->email ?? '—' }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach($clients as $client)
-                    <tr>
-                        <td>{{ $client->nom }}</td>
-                        <td>{{ ucfirst($client->type) }}</td>
-                        <td>{{ $client->email ?? '—' }}</td>
-                        <td>{{ $client->telephone ?? '—' }}</td>
-                        <td>
-                            <a href="{{ route('clients.show', $client->id) }}" class="btn btn-sm btn-info">Voir</a>
-                            <a href="{{ route('clients.edit', $client->id) }}" class="btn btn-sm btn-warning">Modifier</a>
-                            <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ce client ?')">Supprimer</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+            @endforeach
+        </tbody>
+    </table>
 
-        {{ $clients->links() }} {{-- pagination --}}
-    @else
-        <p>Aucun client enregistré.</p>
-    @endif
-</div>
+
+    <script>
+        document.querySelectorAll('#clients-table tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                const id = row.getAttribute('data-id');
+                document.querySelectorAll('#clients-table tr').forEach(r => r.classList.remove('bg-blue-200'));
+                row.classList.add('bg-blue-200');
+
+                // Met à jour les liens dynamiquement
+                document.getElementById('view-btn').href = `/clients/${id}`;
+                document.getElementById('edit-btn').href = `/clients/${id}/edit`;
+                document.getElementById('delete-form').action = `/clients/${id}`;
+
+                // Affiche la zone d’action
+                document.getElementById('action-buttons').classList.remove('hidden');
+            });
+        });
+    </script>
 @endsection

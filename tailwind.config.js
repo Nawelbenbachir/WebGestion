@@ -14,8 +14,14 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                // Étend explicitement les couleurs que tu veux utiliser
+                yellow: defaultTheme.colors.yellow,
+                indigo: defaultTheme.colors.indigo,
+            },
         },
     },
 
     plugins: [forms],
 };
+
