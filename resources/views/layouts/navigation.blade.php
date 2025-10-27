@@ -11,20 +11,39 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                     <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.index')">
-                        {{ __('Clients') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('produits.index')" :active="request()->routeIs('produits.index')">
-                        {{ __('Produits') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('documents.index')" :active="request()->routeIs('factures.index')">
-                        {{ __('Documents') }}
-                    </x-nav-link>
-                     <x-nav-link :href="route('reglements.index')" :active="request()->routeIs('factures.index')">
-                        {{ __('Reglements') }}
-                    </x-nav-link>
-                </div>
+             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.index')">
+                    {{ __('Clients') }}
+                </x-nav-link>
+                
+                <x-nav-link :href="route('produits.index')" :active="request()->routeIs('produits.index')">
+                    {{ __('Produits') }}
+                </x-nav-link>
+
+                {{-- Devis, Factures, Avoirs : redirigent vers le même contrôleur, avec un paramètre "type" --}}
+                <x-nav-link :href="route('documents.index', ['type' => 'devis'])" :active="request()->fullUrlIs('*type=devis*')">
+                    {{ __('Devis') }}
+                </x-nav-link>
+
+                <x-nav-link :href="route('documents.index', ['type' => 'facture'])" :active="request()->fullUrlIs('*type=facture*')">
+                    {{ __('Factures') }}
+                </x-nav-link>
+
+                <x-nav-link :href="route('documents.index', ['type' => 'avoir'])" :active="request()->fullUrlIs('*type=avoir*')">
+                    {{ __('Avoirs') }}
+                </x-nav-link>
+
+                <x-nav-link :href="route('reglements.index')" :active="request()->routeIs('reglements.index')">
+                    {{ __('Règlements') }}
+                </x-nav-link>
+                <x-nav-link :href="route('parametres.index')" :active="request()->routeIs('parametres.index')">
+                    {{ __('Paramètres') }}
+                </x-nav-link>
+                <x-nav-link :href="route('utilisateurs.index')" :active="request()->routeIs('utilisateurs.index')">
+                    {{ __('Utilisateurs') }}
+                </x-nav-link>
+            </div>
+
             </div>
 
             <!-- Settings Dropdown -->

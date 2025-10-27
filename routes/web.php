@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::resource('utilisateurs', UserController::class);
+
 Route::resource('clients', ClientController::class);
 
 Route::resource('produits', ProduitController::class);
@@ -21,11 +23,11 @@ Route::resource('societes', SocieteController::class);
 
 Route::resource('documents',EnTeteDocumentController::class);
 
-Route::resource('lignes', LigneDocumentController::class);
 
 Route::resource('reglements', ReglementController::class);
 
-Route::resource('utilisateurs', UserController::class);
+Route::resource('parametres', ParametreController::class);
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
