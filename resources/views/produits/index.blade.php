@@ -30,11 +30,11 @@
                     <td class="px-6 py-4 border-b border-r border-gray-300">{{ $produit->description }}</td>
                     <td class="px-6 py-4 border-b border-r border-gray-300">{{ number_format($produit->prix, 2, ',', ' ') }} €</td>
                     <td class="px-6 py-4 border-b border-gray-300 flex gap-2">
-                        <a href="{{ route('articles.edit', $article->id) }}" 
+                        <a href="{{ route('produits.destroy', $produit->id) }}" 
                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
                             Modifier
                         </a>
-                        <form action="{{ route('articles.destroy', $article->id) }}" method="POST" onsubmit="return confirm('Confirmer la suppression ?');">
+                        <form action="{{ route('produits.edit', $produit->id) }}" method="POST" onsubmit="return confirm('Confirmer la suppression ?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" 
