@@ -5,7 +5,6 @@
 
     {{-- 🔹 En-tête : titre + boutons --}}
     <div class="flex flex-col items-start mb-6 gap-3">
-        <h2 class="text-2xl font-semibold">{{ $title ?? 'Liste' }}</h2>
 
         @if(isset($createRoute))
             {{-- Bouton Ajouter --}}
@@ -16,13 +15,13 @@
 
             {{-- Bouton Voir --}}
             <a id="view-btn" href="#" 
-               class="hidden bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg w-full sm:w-auto text-center">
+               class="hidden bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full sm:w-auto text-center">
                 👁️ Voir
             </a>
 
             {{-- Bouton Modifier --}}
             <a id="edit-btn" href="#" 
-               class="hidden bg-yellow-500 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg w-full sm:w-auto text-center">
+               class="hidden bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg w-full sm:w-auto text-center">
                 ✏️ Modifier
             </a>
 
