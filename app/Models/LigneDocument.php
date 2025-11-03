@@ -11,7 +11,7 @@ class LigneDocument extends Model
         'produit_id',
         'description',
         'quantite',
-        'prix_unitaire_ht',
+        'prix_ht',
         'taux_tva',
         'total_ht',
         'total_ttc',

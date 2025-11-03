@@ -29,20 +29,26 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'code_societe'  => 'required|string|max:50',
-            'code_client'   => 'required|string|max:50|unique:clients,code_client',
-            'nom'           => 'required|string|max:255',
-            'type'          => 'required|string|in:particulier,artisan,entreprise',
-            'email'         => 'required|email|unique:clients,email',
-            'telephone'     => 'nullable|string|max:20',
-            'adresse'       => 'nullable|string|max:255',
-            'ville'         => 'nullable|string|max:100',
-            'code_postal'   => 'nullable|string|max:10',
-            'pays'          => 'nullable|string|max:50',
-        ]);
+        $validate=$request->validate([
+            'code_cli' => 'nullable|string|unique:clients,code_cli',
+            'code_comptable'  => 'nullable|string|unique:clients,code_compta',
+            'nom'       => 'nullable|string|max:255',          // facultatif
+            'prenom'    => 'nullable|string|max:255',          // facultatif
+            'societe'   => 'required|string|max:255',          // obligatoire
+            'email'     => 'nullable|email|max:255',          // facultatif
+            'telephone' => 'nullable|string|max:20',          // facultatif
+            'type'      => 'required|in:particulier,artisan,entreprise', // obligatoire
+            'adresse1'  => 'nullable|string',                 // facultatif
+]);
+        if (empty($validate['code_cli'])) {
+           $validate['code_cli'] = 'CLT' . strtoupper(substr($validate['nom'], 0, 3)) . rand(100, 999);
+        }
+            // Générer un code comptable si vide
+    if (empty($validate['code_comptable'])) {
 
-        Client::create($validated);
+        $validate['code_comptable'] = 'CPT' . strtoupper(substr($validate['nom'] ?? '', 0, 1)) . now()->format('YmdHis');
+    }
+        Client::create($validate);
 
         return redirect()->route('clients.index')->with('success', '✅ Client ajouté avec succès.');
     }
@@ -70,18 +76,16 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
+      
         $validated = $request->validate([
-            'code_societe'  => 'required|string|max:50',
-            'code_client'   => 'required|string|max:50|unique:clients,code_client,' . $client->id,
+        
             'nom'           => 'required|string|max:255',
             'type'          => 'required|string|in:particulier,artisan,entreprise',
-            'email'         => 'required|email|unique:clients,email,' . $client->id,
+            'email'         => 'nullable|email|unique:clients,email,' . $client->id,
             'telephone'     => 'nullable|string|max:20',
-            'adresse'       => 'nullable|string|max:255',
-            'ville'         => 'nullable|string|max:100',
-            'code_postal'   => 'nullable|string|max:10',
-            'pays'          => 'nullable|string|max:50',
+            'adresse1'       => 'nullable|string|max:255',
         ]);
+        
 
         $client->update($validated);
 

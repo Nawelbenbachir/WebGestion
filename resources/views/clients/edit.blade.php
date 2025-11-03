@@ -24,19 +24,19 @@
         <div class="mb-3">
             <label for="nom" class="form-label">Nom du client</label>
             <input type="text" name="nom" class="form-control"
-                   value="{{ old('nom', $client->nom) }}" required>
+                   value="{{ old('nom', $client->societe ) }}" required>
         </div>
 
         <div class="mb-3">
             <label for="email" class="form-label">Adresse e-mail</label>
             <input type="email" name="email" class="form-control"
-                   value="{{ old('email', $client->email) }}">
+                   value="{{ old('email', $client->email ?? '') }}">
         </div>
 
         <div class="mb-3">
             <label for="telephone" class="form-label">Téléphone</label>
             <input type="text" name="telephone" class="form-control"
-                   value="{{ old('telephone', $client->telephone) }}">
+                   value="{{ old('telephone', $client->telephone ?? '') }}">
         </div>
 
         <div class="mb-3">
@@ -50,8 +50,8 @@
         </div>
 
         <div class="mb-3">
-            <label for="adresse" class="form-label">Adresse</label>
-            <textarea name="adresse" class="form-control" rows="3">{{ old('adresse', $client->adresse) }}</textarea>
+            <label for="adresse1" class="form-label">Adresse</label>
+            <textarea name="adresse1" class="form-control" rows="3">{{ old('adresse1', $client->adresse1) ?? ''}}</textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>

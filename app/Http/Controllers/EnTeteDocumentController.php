@@ -74,33 +74,51 @@ class EnTeteDocumentController extends Controller
 }
 
 
-    /**
-     * Création d’un nouveau document
-     */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'societe_id'    => 'required|exists:societes,id',
-            'code_document' => 'required|string|max:50|unique:en_tete_documents,code_document',
-            'type_document' => 'required|in:facture,devis,avoir',
-            'date_document' => 'required|date',
-            'total_ht'      => 'required|numeric|min:0',
-            'total_tva'     => 'required|numeric|min:0',
-            'total_ttc'     => 'required|numeric|min:0',
-            'client_id'     => 'required|exists:clients,id',
-            'client_nom'    => 'nullable|string|max:255',
-            'logo'          => 'nullable|string',
-            'adresse'       => 'nullable|string',
-            'telephone'     => 'nullable|string|max:20',
-            'email'         => 'nullable|email',
+{
+    // Validation en-tête + lignes
+    $validated = $request->validate([
+        'societe_id'    => 'required|exists:societes,id',
+        'code_document' => 'required|string|max:50|unique:en_tete_documents,code_document',
+        'type_document' => 'required|in:facture,devis,avoir',
+        'date_document' => 'required|date',
+        'total_ht'      => 'required|numeric|min:0',
+        'total_tva'     => 'required|numeric|min:0',
+        'total_ttc'     => 'required|numeric|min:0',
+        'client_id'     => 'required|exists:clients,id',
+        'client_nom'    => 'nullable|string|max:255',
+        'logo'          => 'nullable|string',
+        'adresse'       => 'nullable|string',
+        'telephone'     => 'nullable|string|max:20',
+        'email'         => 'nullable|email',
+        'lignes'        => 'required|array|min:1',
+        'lignes.*.produit_code'      => 'required|string',
+        'lignes.*.quantite'          => 'required|numeric|min:1',
+        'lignes.*.prix_unitaire_ht'  => 'required|numeric|min:0',
+        'lignes.*.taux_tva'          => 'required|numeric|min:0',
+        'lignes.*.total_ttc'         => 'required|numeric|min:0',
+    ]);
+
+    // Créer l'en-tête
+    $document = EnTeteDocument::create($validated);
+
+    // Créer les lignes
+    foreach ($validated['lignes'] as $ligne) {
+        LigneDocument::create([
+            'document_id' => $document->id,  // Associer la ligne à l'en-tête
+            'produit_code' => $ligne['produit_code'],
+            'quantite' => $ligne['quantite'],
+            'prix_ht' => $ligne['prix_ht'],
+            'taux_tva' => $ligne['taux_tva'],
+            'total_ttc' => $ligne['total_ttc'],
         ]);
-
-        $document = EnTeteDocument::create($validated);
-
-        return redirect()
-            ->route('documents.index', ['type' => $validated['type_document']])
-            ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
     }
+
+    return redirect()
+        ->route('documents.index', ['type' => $validated['type_document']])
+        ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
+}
+
 
     /**
      * Formulaire d’édition

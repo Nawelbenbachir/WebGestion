@@ -29,7 +29,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return "Enregistrement d'un nouvel utilisateur";
     }
 
     /**
@@ -37,7 +37,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return "Détail de l'utilisateur avec l'ID : " . $id;
     }
 
     /**
@@ -45,7 +45,7 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return "Formulaire d'édition de l'utilisateur avec l'ID : " . $id;
     }
 
     /**
@@ -53,7 +53,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        return "Mise à jour de l'utilisateur avec l'ID : " . $id;
     }
 
     /**
@@ -61,6 +61,6 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        return "Suppression de l'utilisateur avec l'ID : " . $id;
     }
 }

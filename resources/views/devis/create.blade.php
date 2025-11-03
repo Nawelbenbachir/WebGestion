@@ -158,6 +158,16 @@ document.addEventListener('DOMContentLoaded', function() {
         tbody.appendChild(newRow);
         updateAllNames();
     }); 
+//Met à jour les noms des inputs pour chaque ligne
+    function updateAllNames() {
+    tbody.querySelectorAll('tr').forEach((row, i) => {
+        row.querySelector('.produit-input').setAttribute('name', `lignes[${i}][produit_code]`);
+        row.querySelector('.quantite').setAttribute('name', `lignes[${i}][quantite]`);
+        row.querySelector('.prix').setAttribute('name', `lignes[${i}][prix_unitaire_ht]`);
+        row.querySelector('.tva').setAttribute('name', `lignes[${i}][taux_tva]`);
+        row.querySelector('.total').setAttribute('name', `lignes[${i}][total_ttc]`);
+    });
+}
 });
 </script>
 
