@@ -62,7 +62,7 @@
                             <th>Prix HT (€)</th>
                             <th>TVA (%)</th>
                             <th>Total TTC (€)</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,8 +108,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const lignesTable = document.getElementById('lignesTable');
+     const tbody = document.querySelector('#lignesTable tbody');
     const datalist = document.getElementById('produits');
+    const addRowBtn = document.getElementById('addRow');
+
 
     function updatePrixTTC(row) {
         const qte = parseFloat(row.querySelector('.quantite').value) || 0;
@@ -143,11 +145,20 @@ document.addEventListener('DOMContentLoaded', function() {
             updatePrixTTC(row);
         }
     });
+        addRowBtn.addEventListener('click', () => {
+        const firstRow = tbody.querySelector('tr');
+        const newRow = firstRow.cloneNode(true);
+
+        newRow.querySelector('.produit-input').value = '';
+        newRow.querySelector('.quantite').value = 1;
+        newRow.querySelector('.prix').value = '';
+        newRow.querySelector('.tva').value = '';
+        newRow.querySelector('.total').value = '';
+
+        tbody.appendChild(newRow);
+        updateAllNames();
+    }); 
 });
 </script>
-
-
-
-
 
 @endsection
