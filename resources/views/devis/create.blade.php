@@ -20,7 +20,7 @@
     <form action="{{ route('documents.store') }}" method="POST">
         @csrf
 
-        {{-- 🔹 Informations générales --}}
+        {{--  Informations générales --}}
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <strong>Informations générales</strong>
@@ -68,12 +68,11 @@
                     <tbody>
                         <tr>
                             <td>
-                                <input list="produits" name="lignes[0][produit_code]" class="form-control produit-input"
-                                       placeholder="Tapez le nom ou le code du produit..." required>
+                               <input list="produits" class="form-control produit-input" placeholder="Choisir un produit...">
                             </td>
                             <td><input type="number" name="lignes[0][quantite]" class="form-control quantite" value="1" min="1"></td>
-                            <td><input type="number" name="lignes[0][prix_unitaire_ht]" class="form-control prix" step="0.01"></td>
-                            <td><input type="number" name="lignes[0][taux_tva]" class="form-control tva" step="0.1"></td>
+                            <td><input type="number" name="lignes[0][prix_unitaire_ht]" class="form-control prix" step="0.01" readonly ></td>
+                            <td><input type="number" name="lignes[0][taux_tva]" class="form-control tva" step="0.1" readonly></td>
                             <td><input type="number" name="lignes[0][total_ttc]" class="form-control total" step="0.01" readonly></td>
                             <td class="text-center">
                                 <button type="button" class="btn btn-danger btn-sm removeRow">🗑️</button>
@@ -85,7 +84,7 @@
                 <datalist id="produits">
                     @foreach ($produits as $produit)
                         <option value="{{ $produit->code_produit }}"
-                                data-prix="{{ $produit->prix }}"
+                                data-prix="{{ $produit->prix_ht }}"
                                 data-tva="{{ $produit->tva }}"
                                 data-designation="{{ $produit->description }}">
                             {{ $produit->description }} ({{ $produit->code_produit }})
@@ -106,46 +105,49 @@
 </div>
 
 {{--  Script dynamique pour produits + calculs + lignes --}}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const lignesTable = document.getElementById('lignesTable');
-
-    // Dictionnaire des produits
-    const produits = {
-        @foreach($produits as $produit)
-            "{{ $produit->code_produit }}": { prix: {{ $produit->prix }}, tva: {{ $produit->tva ?? 20 }} },
-        @endforeach
-    };
+    const datalist = document.getElementById('produits');
 
     function updatePrixTTC(row) {
-        const quantite = parseFloat(row.querySelector('.quantite').value) || 0;
+        const qte = parseFloat(row.querySelector('.quantite').value) || 0;
         const prix = parseFloat(row.querySelector('.prix').value) || 0;
         const tva = parseFloat(row.querySelector('.tva').value) || 0;
-
-        const totalTTC = prix * quantite * (1 + tva / 100);
-        row.querySelector('.total').value = totalTTC.toFixed(2);
+        const total = prix * qte * (1 + tva / 100);
+        row.querySelector('.total').value = total.toFixed(2);
     }
 
-    lignesTable.addEventListener('input', function(e) {
+    lignesTable.addEventListener('input', (e) => {
         const row = e.target.closest('tr');
 
-        // Lorsqu'on choisit un produit
-        if (e.target.matches('input[list="produits"]')) {
+        //  Quand on sélectionne un produit
+        if (e.target.classList.contains('produit-input')) {
             const code = e.target.value.trim();
-            const produit = produits[code];
-            if (produit) {
-                row.querySelector('.prix').value = produit.prix.toFixed(2);
-                row.querySelector('.tva').value = produit.tva;
+            const option = Array.from(datalist.options).find(opt => opt.value === code);
+
+            if (option) {
+                row.querySelector('.prix').value = option.dataset.prix;
+                row.querySelector('.tva').value = option.dataset.tva;
                 updatePrixTTC(row);
+            } else {
+                // Réinitialisation si code inconnu
+                row.querySelector('.prix').value = '';
+                row.querySelector('.tva').value = '';
+                row.querySelector('.total').value = '';
             }
         }
 
-        // Recalcul dynamique
-        if (e.target.matches('.quantite, .prix, .tva')) {
+        if (e.target.classList.contains('quantite') || e.target.classList.contains('tva')) {
             updatePrixTTC(row);
         }
     });
 });
-
 </script>
+
+
+
+
+
 @endsection
