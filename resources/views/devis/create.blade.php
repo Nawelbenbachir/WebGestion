@@ -105,7 +105,7 @@
     </form>
 </div>
 
-{{-- 🧠 Script dynamique pour produits + calculs + lignes --}}
+{{--  Script dynamique pour produits + calculs + lignes --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let rowIndex = 1;
