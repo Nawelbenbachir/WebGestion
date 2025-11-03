@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <h2 class="mb-4">🧾 Créer un nouveau document</h2>
 
-    {{-- ⚠️ Affichage des erreurs --}}
+    {{--  Affichage des erreurs --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Erreurs détectées :</strong>
@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    {{-- 🧾 Formulaire principal --}}
+    {{--  Formulaire principal --}}
     <form action="{{ route('documents.store') }}" method="POST">
         @csrf
 
@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        {{-- 🔹 Lignes du document --}}
+        {{-- Lignes du document --}}
         <div class="card mb-4">
             <div class="card-header bg-secondary text-white">
                 <strong>Lignes du document</strong>
@@ -97,7 +97,7 @@
             </div>
         </div>
 
-        {{-- 🔹 Boutons d’action --}}
+        {{-- Boutons d’action --}}
         <div class="d-flex justify-content-between">
             <a href="{{ route('documents.index') }}" class="btn btn-secondary">⬅️ Annuler</a>
             <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
@@ -108,67 +108,44 @@
 {{--  Script dynamique pour produits + calculs + lignes --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let rowIndex = 1;
+    const lignesTable = document.getElementById('lignesTable');
 
-    // Crée un dictionnaire JS des produits
+    // Dictionnaire des produits
     const produits = {
         @foreach($produits as $produit)
-            "{{ $produit->code_produit }}": { 
-                prix: {{ $produit->prix }},
-                tva: {{ $produit->tva }}
-            },
+            "{{ $produit->code_produit }}": { prix: {{ $produit->prix }}, tva: {{ $produit->tva ?? 20 }} },
         @endforeach
     };
 
-    // Calcul du total TTC pour une ligne donnée
     function updatePrixTTC(row) {
         const quantite = parseFloat(row.querySelector('.quantite').value) || 0;
         const prix = parseFloat(row.querySelector('.prix').value) || 0;
         const tva = parseFloat(row.querySelector('.tva').value) || 0;
-        row.querySelector('.total').value = (prix * quantite * (1 + tva / 100)).toFixed(2);
+
+        const totalTTC = prix * quantite * (1 + tva / 100);
+        row.querySelector('.total').value = totalTTC.toFixed(2);
     }
 
-    // Gère la sélection d’un produit
-    function handleProduitChange(input) {
-        const row = input.closest('tr');
-        const code = input.value;
-        if (produits[code]) {
-            row.querySelector('.prix').value = produits[code].prix.toFixed(2);
-            row.querySelector('.tva').value = produits[code].tva;
-            updatePrixTTC(row);
-        }
-    }
-
-    // Gère les changements sur toute la table
-    document.querySelector('#lignesTable').addEventListener('input', function(e) {
+    lignesTable.addEventListener('input', function(e) {
         const row = e.target.closest('tr');
-        if (e.target.classList.contains('produit-input')) handleProduitChange(e.target);
-        if (['quantite', 'prix', 'tva'].some(cls => e.target.classList.contains(cls))) updatePrixTTC(row);
-    });
 
-    // Bouton : ajouter une ligne
-    document.getElementById('addRow').addEventListener('click', function() {
-        const tbody = document.querySelector('#lignesTable tbody');
-        const newRow = tbody.querySelector('tr').cloneNode(true);
+        // Lorsqu'on choisit un produit
+        if (e.target.matches('input[list="produits"]')) {
+            const code = e.target.value.trim();
+            const produit = produits[code];
+            if (produit) {
+                row.querySelector('.prix').value = produit.prix.toFixed(2);
+                row.querySelector('.tva').value = produit.tva;
+                updatePrixTTC(row);
+            }
+        }
 
-        newRow.querySelectorAll('input').forEach(el => {
-            el.value = '';
-            const name = el.getAttribute('name');
-            if (name) el.name = name.replace(/\[\d+\]/, `[${rowIndex}]`);
-        });
-
-        tbody.appendChild(newRow);
-        rowIndex++;
-    });
-
-    // Supprimer une ligne
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('removeRow')) {
-            const row = e.target.closest('tr');
-            const rows = document.querySelectorAll('#lignesTable tbody tr');
-            if (rows.length > 1) row.remove();
+        // Recalcul dynamique
+        if (e.target.matches('.quantite, .prix, .tva')) {
+            updatePrixTTC(row);
         }
     });
 });
+
 </script>
 @endsection
