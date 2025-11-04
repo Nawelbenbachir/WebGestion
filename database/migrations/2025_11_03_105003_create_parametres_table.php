@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('parametres', function (Blueprint $table) {
+            $table->id();
+            $table->bigInteger('derniere_societe')->foreign()->references('id')->on('societes')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
+        });
+        DB::unprepared('
+        CREATE TRIGGER before_insert_parametres
+        BEFORE INSERT ON parametres
+        FOR EACH ROW
+        BEGIN
+            DELETE FROM parametres;
+        END
+    ');
+
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('parametres');
+    }
+};

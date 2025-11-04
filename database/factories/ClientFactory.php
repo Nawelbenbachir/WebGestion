@@ -9,7 +9,7 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            'code_societe' => 'SOC' . rand(100, 999),
+            'id_societe' => rand(1, 3),
             'code_comptable' => 'COMPT' . rand(1000, 9999),
             'code_cli' => strtoupper($this->faker->lexify('CLT-????')),
             'societe' => $this->faker->company,

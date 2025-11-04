@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Societe;
 
 class UserController extends Controller
 {
@@ -63,4 +64,5 @@ class UserController extends Controller
     {
         return "Suppression de l'utilisateur avec l'ID : " . $id;
     }
+    
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\SocieteController;
+use App\Http\Controllers\ParametreController;
 use App\Http\Controllers\EnTeteDocumentController;
 use App\Http\Controllers\LigneDocumentController;
 use App\Http\Controllers\ReglementController;

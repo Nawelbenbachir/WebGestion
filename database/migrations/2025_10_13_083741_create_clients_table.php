@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table ->string("code_cli");
             $table->string('code_comptable');
-            $table->string('code_societe')->foreign()->references('code_societe')->on('societes');
+            $table->bigInteger('id_societe')->foreign()->references('id')->on('societes');
             $table->string('siret',14)->nullable();
             $table->string('societe')->nullable();
             $table->string('prenom')->nullable();

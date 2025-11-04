@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto p-6">
 
-    {{-- 🔹 En-tête : titre + boutons --}}
+    {{--  En-tête : titre + boutons --}}
     <div class="flex flex-col items-start mb-6 gap-3">
 
         @if(isset($createRoute))
@@ -39,14 +39,14 @@
         @endif
     </div>
 
-    {{-- 🔹 Zone du tableau --}}
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    {{--  Zone du tableau --}}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
         @yield('table')
     </div>
 
 </div>
 
-{{-- 🔹 Script pour activer les boutons selon la ligne sélectionnée --}}
+{{-- Script pour activer les boutons selon la ligne sélectionnée --}}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('tr[data-id]').forEach(row => {

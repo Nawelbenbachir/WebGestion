@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\Societe;
+use App\Models\Parametre;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -16,21 +18,43 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $societes = Societe::all();
+        $parametre = Parametre::first();
+        $societeDefaut = $parametre ? $parametre->derniere_societe : null;
+
+        return view('auth.login', compact('societes', 'societeDefaut'));
     }
 
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+  public function store(LoginRequest $request): RedirectResponse
+{
+    $request->authenticate(); // authentifie l'utilisateur
 
-        $request->session()->regenerate();
+    $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+    // Récupérer l'ID de la société sélectionnée
+    $societeId = $request->input('societe_id');
+
+    if ($societeId) {
+        // Ici le trigger se charge de supprimer l'ancienne ligne si elle existe
+        Parametre::create(['derniere_societe' => $societeId]);
     }
 
+
+    return redirect()->intended(route('dashboard', absolute: false));
+}
+    protected function authenticated(Request $request, $user)
+{
+    $societeId = $request->input('societe_id');
+    if ($societeId) {
+        // Mettre à jour ou créer la ligne Parametre pour stocker la dernière société
+        Parametre::updateOrCreate([], ['derniere_societe' => $societeId]);
+    }
+   
+    return redirect()->intended('dashboard');
+}
     /**
      * Destroy an authenticated session.
      */
