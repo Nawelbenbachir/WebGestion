@@ -26,7 +26,6 @@
 
         <!-- Choix de la société -->
     <div class="mt-4">
-        <label for="societe_id">Société</label>
         <select id="societe_id" name="societe_id" required>
             <option value="">-- Sélectionnez une société --</option>
             @foreach (\App\Models\Societe::all() as $societe)

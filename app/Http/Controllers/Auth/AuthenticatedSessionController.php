@@ -39,11 +39,12 @@ class AuthenticatedSessionController extends Controller
 
     if ($societeId) {
         // Ici le trigger se charge de supprimer l'ancienne ligne si elle existe
+        Parametre::truncate(); 
         Parametre::create(['derniere_societe' => $societeId]);
     }
 
 
-    return redirect()->intended(route('dashboard', absolute: false));
+    return redirect()->intended(route('clients.index', absolute: false));
 }
     protected function authenticated(Request $request, $user)
 {

@@ -17,15 +17,30 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
         });
-        DB::unprepared('
-        CREATE TRIGGER before_insert_parametres
-        BEFORE INSERT ON parametres
-        FOR EACH ROW
-        BEGIN
-            DELETE FROM parametres;
-        END
-    ');
-
+        // DB::unprepared('DROP TRIGGER IF EXISTS before_insert_parametres;');
+        // DB::unprepared('
+        //     CREATE TRIGGER before_insert_parametres
+        //     BEFORE INSERT ON parametres
+        //     FOR EACH ROW
+        //     BEGIN
+        //         DECLARE last_id BIGINT;
+        //         SELECT id INTO last_id FROM parametres ORDER BY id DESC LIMIT 1;
+        //         IF last_id IS NOT NULL THEN
+        //             DELETE FROM parametres WHERE id = last_id;
+        //         END IF;
+        //     END;
+        //     ');
+        // DB::unprepared('
+        
+        //     CREATE TRIGGER before_insert_parametres
+        //     BEFORE INSERT ON parametres
+        //     FOR EACH ROW
+        //     BEGIN
+        //         DELETE FROM parametres;
+        //     END;
+        // ');
+        
+        
 
     }
 
