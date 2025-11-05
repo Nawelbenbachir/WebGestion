@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('produits', function (Blueprint $table) {
           
         $table->id();
-        $table->string('code_societe')->foreign()->references('code_societe')->on('societes');
+        $table->string('id_societe')->foreign()->references('id')->on('societes');
         $table->string('code_produit')->unique();
         $table->string('code_comptable')->default('70001');
         $table->string('description')->nullable();

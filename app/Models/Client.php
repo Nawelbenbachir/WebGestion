@@ -10,6 +10,7 @@ class Client extends Model
     use HasFactory;
     protected $fillable = [
         'code_cli',
+        'id_societe',
         'code_comptable',
         'nom',
         'prenom',
@@ -21,12 +22,14 @@ class Client extends Model
         'telephone',
         'adresse1',
         'adresse2',
+        'code_postal',
+        'ville',
+        'pays',
         'complement_adresse',
         'forme_juridique',
         'type',
         'iban',
         'reglement',
-        'echeance_jour',
         'tva',
         'interlocuteur',
     ];

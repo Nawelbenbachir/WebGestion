@@ -6,7 +6,7 @@
 @endphp
 
 @section('table')
-    <table id="produits-table" class="min-w-full border border-gray-200">
+    <table id="produits-table" class="min-w-full w-full border border-gray-200">
         <thead class="bg-gray-100">
             <tr>
                 <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Code</th>

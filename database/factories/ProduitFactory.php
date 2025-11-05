@@ -12,7 +12,7 @@ class ProduitFactory extends Factory
     public function definition(): array
     {
         return [
-            'code_societe'   => 'SOC001',
+            'id_societe'   => rand(1, 3),
             'code_produit'   => strtoupper($this->faker->bothify('PRD-###')),
             'code_comptable' => $this->faker->numerify('7###'),
             'description'    => $this->faker->words(3, true),

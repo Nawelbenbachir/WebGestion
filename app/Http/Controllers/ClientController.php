@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use Illuminate\Http\Request;
+use App\Models\Parametre;
 
 class ClientController extends Controller
 {
@@ -12,7 +13,17 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = Client::orderBy('nom')->paginate(10); // pagination par 10
+         // Récupérer l'ID de la dernière société
+        $parametre = Parametre::first();
+        $societeId = $parametre ? $parametre->derniere_societe : null;
+
+        // Filtrer les clients de cette société seulement
+        $clients = Client::when($societeId, function($query, $societeId) {
+            return $query->where('id_societe', $societeId);
+        })
+        ->orderBy('nom')
+        ->paginate(10);
+
         return view('clients.index', compact('clients'));
     }
 
@@ -31,23 +42,41 @@ class ClientController extends Controller
     {
         $validate=$request->validate([
             'code_cli' => 'nullable|string|unique:clients,code_cli',
-            'code_comptable'  => 'nullable|string|unique:clients,code_compta',
+            'code_comptable'  => 'nullable|string|unique:clients,code_comptable',
             'nom'       => 'nullable|string|max:255',          // facultatif
             'prenom'    => 'nullable|string|max:255',          // facultatif
             'societe'   => 'required|string|max:255',          // obligatoire
+            'reglement'   => 'nullable|in:virement,cheques,especes', // facultatif
             'email'     => 'nullable|email|max:255',          // facultatif
             'telephone' => 'nullable|string|max:20',          // facultatif
             'type'      => 'required|in:particulier,artisan,entreprise', // obligatoire
+            'portable1' => 'nullable|string|max:20',     // facultatif
+            'portable2' => 'nullable|string|max:20',     // facultatif
             'adresse1'  => 'nullable|string',                 // facultatif
-]);
-        if (empty($validate['code_cli'])) {
-           $validate['code_cli'] = 'CLT' . strtoupper(substr($validate['nom'], 0, 3)) . rand(100, 999);
-        }
-            // Générer un code comptable si vide
-    if (empty($validate['code_comptable'])) {
+            'adresse2'  => 'nullable|string',                 // facultatif
+            'complement_adresse'  => 'nullable|string',       // facultatif
+            'code_postal'  => 'nullable|string|max:10',       // facultatif
+            'ville'      => 'nullable|string|max:255',        // facultatif
+        ]);
+         // Récupérer l'id de la société depuis les paramètres
+        $parametre = Parametre::first();
+        $idSociete = $parametre ? $parametre->derniere_societe : null;
 
-        $validate['code_comptable'] = 'CPT' . strtoupper(substr($validate['nom'] ?? '', 0, 1)) . now()->format('YmdHis');
-    }
+        if (!$idSociete) {
+            return back()->withErrors('Aucune société sélectionnée dans les paramètres.');
+        }
+
+        // Ajouter l'id de la société aux données validées
+        $validate['id_societe'] = $idSociete;
+
+        if (empty($validate['code_cli'])) {
+            $validate['code_cli'] = 'CLT' . strtoupper(substr($validate['nom'], 0, 3)) . rand(100, 999);
+        }
+                // Générer un code comptable si vide
+        if (empty($validate['code_comptable'])) {
+
+            $validate['code_comptable'] = 'CPT' . strtoupper(substr($validate['nom'] ?? '', 0, 1)) . now()->format('YmdHis');
+        }
         Client::create($validate);
 
         return redirect()->route('clients.index')->with('success', '✅ Client ajouté avec succès.');

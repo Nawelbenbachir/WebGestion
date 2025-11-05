@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -35,7 +36,8 @@ return new class extends Migration
             $table->string('adresse')->nullable();
             $table->string('telephone')->nullable();
             $table->string('email')->nullable();
-            
+            $table->date('date_echeance')->nullable();
+            $table->text('commentaire')->nullable();
         });
     }
 

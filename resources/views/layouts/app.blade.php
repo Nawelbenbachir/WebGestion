@@ -10,7 +10,7 @@
 
     @include('layouts.navigation') 
 
-    <main class="container mx-auto py-8 px-4">
+    <main class="max-w-full py-8 px-4">
         @yield('content')
     </main>
 

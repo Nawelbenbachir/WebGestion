@@ -48,16 +48,49 @@
                 <option value="entreprise" @selected(old('type') == 'entreprise')>Entreprise</option>
             </select>
         </div>
+        <div class="mb-3">
+            <label for="reglement" class="form-label">Mode de règlement</label>
+            <select name="reglement" id="reglement" class="form-select" required>
+                <option value="">-- Sélectionner --</option>
+                <option value="virement" @selected(old('reglement') == 'virement')>Virement</option>
+                <option value="cheques" @selected(old('reglement') == 'cheques')>Chèques</option>
+                <option value="especes" @selected(old('reglement') == 'especes')>Espèces</option>
+            </select>
+        </div>
 
 
         <div class="mb-3">
             <label for="telephone" class="form-label">Téléphone</label>
             <input type="text" name="telephone" id="telephone" class="form-control" value="{{ old('telephone') }}">
         </div>
-
+        <div class="mb-3">
+            <label for="portable1" class="form-label">Portable</label>
+            <input type="text" name="portable1" id="portable1" class="form-control" value="{{ old('portable1') }}">
+        </div>
+        <div class="mb-3">
+            <label for="portable2" class="form-label">Portable2</label>
+            <input type="text" name="portable2" id="portable2" class="form-control" value="{{ old('portable2') }}">
+        </div>
         <div class="mb-3">
             <label for="adresse1" class="form-label">Adresse</label>
             <input type="text" name="adresse1" id="adresse1" class="form-control" value="{{ old('adresse1') }}">
+        </div>
+        <div class="mb-3">
+            <label for="adresse2" class="form-label">Adresse2</label>
+            <input type="text" name="adresse2" id="adresse2" class="form-control" value="{{ old('adresse2') }}">
+        </div>
+        <div class="mb-3">
+            <label for="complement_adresse" class="form-label">Complément d'adresse</label>
+            <input type="text" name="complement_adresse" id="complement_adresse" class="form-control" value="{{ old('complement_adresse') }}">
+        </div>
+        <div class="mb-3">
+            <label for="code_postal" class="form-label">Code Postal</label>
+            <input type="text" id="code_postal" name="code_postal" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="ville" class="form-label">Ville</label>
+            <input type="text" id="ville" name="ville" class="form-control">
         </div>
 
         <button type="submit" class="btn btn-primary">✅ Enregistrer</button>

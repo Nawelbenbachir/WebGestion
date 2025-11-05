@@ -31,7 +31,7 @@ return new class extends Migration
         //     END;
         //     ');
         // DB::unprepared('
-        
+
         //     CREATE TRIGGER before_insert_parametres
         //     BEFORE INSERT ON parametres
         //     FOR EACH ROW
@@ -39,9 +39,6 @@ return new class extends Migration
         //         DELETE FROM parametres;
         //     END;
         // ');
-        
-        
-
     }
 
     /**

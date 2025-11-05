@@ -8,6 +8,7 @@
         <p><strong>Nom :</strong> {{ $client->nom }}</p>
         <p><strong>Prénom :</strong> {{ $client->prenom ?? '-' }}</p>
         <p><strong>Type :</strong> {{ ucfirst($client->type) }}</p>
+        <p><strong>Mode de règlement :</strong> {{ $client->reglement ?? '-' }}</p>
         <p><strong>Email :</strong> {{ $client->email ?? '-' }}</p>
         <p><strong>Téléphone :</strong> {{ $client->telephone ?? '-' }}</p>
         <p><strong>Adresse :</strong> {{ $client->adresse ?? '-' }}</p>

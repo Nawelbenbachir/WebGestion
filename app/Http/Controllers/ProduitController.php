@@ -4,15 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Produit;
 use Illuminate\Http\Request;
+use App\Models\Parametre;
 
 class ProduitController extends Controller
 {
     public function index()
     {
-        // Récupère tous les produits depuis la base
-        $produits = Produit::orderBy('id', 'desc')->get();
+        // Récupérer l'ID de la dernière société
+        $parametre = Parametre::first();
+        $societeId = $parametre ? $parametre->derniere_societe : null;
 
-        // Retourne la vue 'produits.index' avec la variable $produits
+        // Filtrer les produits de cette société seulement
+        $produits = Produit::when($societeId, function($query, $societeId) {
+            return $query->where('id_societe', $societeId);
+        })
+        ->orderBy('id', 'desc')
+        ->get();
+
         return view('produits.index', compact('produits'));
     }
     
