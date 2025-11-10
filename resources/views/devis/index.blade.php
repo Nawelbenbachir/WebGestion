@@ -21,7 +21,7 @@
             Aucun document enregistré pour le moment.
         </div>
     @else
-        <table id="documents-table" class="min-w-full border border-gray-200">
+        <table id="documents-table" class="min-w-full w-full border border-gray-200">
             <thead class="bg-gray-100">
                 <tr>
                     
