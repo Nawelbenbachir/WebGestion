@@ -6,7 +6,9 @@
     $createLabel = 'Ajouter une société'; 
     
 @endphp 
-{{-- Zone pour bouton Modifier (vide au départ) --}}
+<div id="edit-button-container-societe" class="mb-4 hidden">
+    <a id="edit-button-societe" href="#" class=" bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">Modifier la société sélectionnée</a>
+</div>
 
 <h2 class="text-xl font-semibold mb-4">Liste des sociétés</h2>
 <table id="parametres-table" class="min-w-full w-full border border-gray-200"> 
@@ -48,14 +50,24 @@
 </table>
 
  <h2 class="text-xl font-semibold mb-4">Liste des utilisateurs</h2>
- @php 
-    $createRoute = 'user.create';
-    $createLabel = 'Ajouter un utilisateur'; 
-    
-@endphp 
+ {{-- Bouton Ajouter --}}
+    <a href="{{ route('user.create') }}" class=" bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">➕Ajouter un utilisateur</a>
 
-<div id="edit-button-container" class="mb-4 hidden">
-    <a id="edit-button" href="#" class=" bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">Modifier</a>
+
+{{-- Bouton Supprimer --}}
+    <form id="delete-form" method="POST" action="#" 
+        class="hidden w-full sm:w-auto"
+         onsubmit="return confirm('Supprimer cet élément ?')">
+        @csrf
+         @method('DELETE')
+        <button type="submit" 
+             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-auto text-center">
+            🗑️ Supprimer
+        </button>
+    </form>
+
+<div id="edit-button-container-user" class="mb-4 hidden">
+    <a id="edit-button-user" href="#" class=" bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">Modifier l'utilisateur sélectionné</a>
 </div>
 <table id="users-table" class="min-w-full w-full border border-gray-200"> 
     <thead class="bg-gray-100"> 
@@ -76,23 +88,60 @@
 </table>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const editButtonContainer = document.getElementById('edit-button-container');
-    const editButton = document.getElementById('edit-button');
+    // -------- Table des utilisateurs --------
+    const editButtonContainerUser = document.getElementById('edit-button-container-user');
+    const editButtonUser = document.getElementById('edit-button-user');
 
     document.querySelectorAll('#users-table tbody tr').forEach(row => {
         row.addEventListener('click', () => {
-            const clientId = row.dataset.id;
+            const userId = row.dataset.id;
 
-            // Met en surbrillance la ligne sélectionnée
             document.querySelectorAll('#users-table tbody tr').forEach(r => r.classList.remove('bg-blue-200'));
             row.classList.add('bg-blue-200');
 
-            // Affiche le bouton modifier avec le bon lien
-            editButton.href = `/user/${clientId}/edit`; // route resource
-            editButtonContainer.classList.remove('hidden');
+            editButtonUser.href = `/user/${userId}/edit`;
+            editButtonContainerUser.classList.remove('hidden');
+
+            deleteForm.setAttribute('action', `/user/${userId}`);
+            deleteForm.classList.remove('hidden');
+        });
+    });
+
+    // -------- Table des sociétés --------
+    const editButtonContainerSociete = document.getElementById('edit-button-container-societe');
+    const editButtonSociete = document.getElementById('edit-button-societe');
+
+    document.querySelectorAll('#parametres-table tbody tr').forEach(row => {
+        row.addEventListener('click', () => {
+            const societeId = row.dataset.id;
+
+            // Surbrillance de la ligne sélectionnée
+            document.querySelectorAll('#parametres-table tbody tr').forEach(r => r.classList.remove('bg-blue-200'));
+            row.classList.add('bg-blue-200');
+
+            // Affiche le bouton modifier
+            editButtonSociete.href = `/parametres/${societeId}/edit`; // route resource
+            editButtonContainerSociete.classList.remove('hidden');
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', () => {
+    const deleteForm = document.getElementById('delete-form');
+
+    document.querySelectorAll('tr[data-id]').forEach(row => {
+        row.addEventListener('click', () => {
+            const clientId = row.dataset.id;
+            const baseRoute = row.dataset.route;
+
+            // Met à jour l'action du formulaire suppression
+            deleteForm.setAttribute('action', `/${baseRoute}/${clientId}`);
+
+            // Affiche le formulaire si caché
+            deleteForm.classList.remove('hidden');
         });
     });
 });
 </script>
+
 
 @endsection

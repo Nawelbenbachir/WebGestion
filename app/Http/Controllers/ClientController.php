@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use App\Models\Parametre;
+use Illuminate\Validation\Rule;
 
 class ClientController extends Controller
 {
@@ -108,22 +109,24 @@ class ClientController extends Controller
     {
       
         $validated = $request->validate([
-            'code_cli'      => 'required|string|unique:clients,code_cli',
-            'code_comptable' => 'required|string|unique:clients,code_comptable',
+            'code_cli'       => ['required', 'string', Rule::unique('clients')->ignore($client->id)],
+            'code_comptable' => ['required', 'string', Rule::unique('clients')->ignore($client->id)],
+            'societe'       => 'required|string|max:255',
             'nom'           => 'required|string|max:255',
             'prenom'        => 'nullable|string|max:255',
-            'reglement'      => 'nullable|in:virement,cheques,especes',
+            'reglement'     => 'nullable|in:virement,cheque,especes', 
             'type'          => 'required|string|in:particulier,artisan,entreprise',
-            'email'         => 'nullable|email|unique:clients,email',
+            'email'         => 'nullable|email|unique:clients,email,' . $client->id,
             'telephone'     => 'nullable|string|max:20',
             'portable1'     => 'nullable|string|max:20',
             'portable2'     => 'nullable|string|max:20',
-            'adresse1'       => 'nullable|string|max:255',
-            'adresse2'       => 'nullable|string|max:255',
+            'adresse1'      => 'nullable|string|max:255',
+            'adresse2'      => 'nullable|string|max:255',
             'complement_adresse' => 'nullable|string|max:255',
             'code_postal'   => 'nullable|string|max:10',
             'ville'         => 'nullable|string|max:255',
-        ]);
+]);
+
         
 
         $client->update($validated);

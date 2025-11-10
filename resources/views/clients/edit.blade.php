@@ -67,9 +67,11 @@
                 <label for="reglement" class="form-label">Mode de règlement</label>
                 <select name="reglement" id="reglement" class="form-select">
                     <option value="">-- Sélectionner un mode de règlement --</option>
-                    <option value="virement" {{ old('reglement', $client->reglement) == 'virement' ? 'selected' : '' }}>Virement</option>
-                    <option value="cheques" {{ old('reglement', $client->reglement) == 'cheques' ? 'selected' : '' }}>Chèques</option>
-                    <option value="especes" {{ old('reglement', $client->reglement) == 'especes' ? 'selected' : '' }}>Espèces</option>
+                    <option value="virement" {{ ($client->reglement ?? '') === 'virement' ? 'selected' : '' }}>Virement</option>
+                    <option value="cheque" {{ ($client->reglement ?? '') === 'cheque' ? 'selected' : '' }}>Chèque</option>
+                    <option value="especes" {{ ($client->reglement ?? '') === 'especes' ? 'selected' : '' }}>Espèces</option>
+
+
                 </select>
             </div>
         </div>

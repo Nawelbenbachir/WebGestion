@@ -26,7 +26,25 @@
             <td class="px-6 py-4 border-b border-r border-gray-300">{{ $client->adresse1 ?? '—' }}</td>
             <td class="px-6 py-4 border-b border-r border-gray-300">{{ $client->code_postal ?? '—' }}</td>
             <td class="px-6 py-4 border-b border-r border-gray-300">{{ $client->ville ?? '—' }}</td>
-            <td class="px-6 py-4 border-b border-r border-gray-300">{{ $client->reglement ?? '—' }}</td>
+            <td class="px-6 py-4 border-b border-r border-gray-300">
+                @php
+                    $reglement = $client->reglement ?? '';
+                    switch($reglement) {
+                        case 'virement':
+                            $reglementAffiche = 'Virement';
+                            break;
+                        case 'cheque':
+                            $reglementAffiche = 'Chèque';
+                            break;
+                        case 'especes':
+                            $reglementAffiche = 'Espèces';
+                            break;
+                        default:
+                            $reglementAffiche = '—';
+                    }
+                @endphp
+                {{ $reglementAffiche }}
+        </td>
         </tr>
         @endforeach 
     </tbody> 

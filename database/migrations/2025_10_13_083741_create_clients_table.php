@@ -34,7 +34,7 @@ return new class extends Migration
             $table->enum('civilite', ['Monsieur', 'Madame'])->nullable();   // utile si particulier ou artisan
             $table->enum('forme_juridique', ['SAS', 'SARL', 'EURL', 'SA'])->nullable();
             $table->string('iban',34)->nullable();
-            $table->enum('reglement',['Virement', 'Chèque', 'Espèces'])->nullable();
+            $table->enum('reglement',['virement', 'cheque', 'especes'])->nullable();
             $table->string("tva")->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('created_at')->useCurrent();
