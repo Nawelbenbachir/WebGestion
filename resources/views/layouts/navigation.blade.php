@@ -39,7 +39,7 @@
                 <x-nav-link :href="route('parametres.index')" :active="request()->routeIs('parametres.index')">
                     {{ __('Paramètres') }}
                 </x-nav-link>
-                <x-nav-link :href="route('utilisateurs.index')" :active="request()->routeIs('utilisateurs.index')">
+                <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                     {{ __('Utilisateurs') }}
                 </x-nav-link>
             </div>

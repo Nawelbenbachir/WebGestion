@@ -1,11 +1,13 @@
 @extends('layouts.table')
 
+@section('table')
 @php 
     $createRoute = 'parametres.create';
     $createLabel = 'Ajouter une société'; 
     
 @endphp 
-@section('table')
+{{-- Zone pour bouton Modifier (vide au départ) --}}
+
 <h2 class="text-xl font-semibold mb-4">Liste des sociétés</h2>
 <table id="parametres-table" class="min-w-full w-full border border-gray-200"> 
     <thead class="bg-gray-100"> 
@@ -46,6 +48,15 @@
 </table>
 
  <h2 class="text-xl font-semibold mb-4">Liste des utilisateurs</h2>
+ @php 
+    $createRoute = 'user.create';
+    $createLabel = 'Ajouter un utilisateur'; 
+    
+@endphp 
+
+<div id="edit-button-container" class="mb-4 hidden">
+    <a id="edit-button" href="#" class=" bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">Modifier</a>
+</div>
 <table id="users-table" class="min-w-full w-full border border-gray-200"> 
     <thead class="bg-gray-100"> 
         <tr> 
@@ -63,4 +74,25 @@
         @endforeach
     </tbody>
 </table>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const editButtonContainer = document.getElementById('edit-button-container');
+    const editButton = document.getElementById('edit-button');
+
+    document.querySelectorAll('#users-table tbody tr').forEach(row => {
+        row.addEventListener('click', () => {
+            const clientId = row.dataset.id;
+
+            // Met en surbrillance la ligne sélectionnée
+            document.querySelectorAll('#users-table tbody tr').forEach(r => r.classList.remove('bg-blue-200'));
+            row.classList.add('bg-blue-200');
+
+            // Affiche le bouton modifier avec le bon lien
+            editButton.href = `/user/${clientId}/edit`; // route resource
+            editButtonContainer.classList.remove('hidden');
+        });
+    });
+});
+</script>
+
 @endsection
