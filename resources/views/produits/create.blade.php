@@ -16,17 +16,26 @@
     @endif
 
     <!-- Formulaire -->
-    <form action="{{ route('clients.store') }}" method="POST">
+    <form action="{{ route('produits.store') }}" method="POST">
         @csrf  <!-- sécurité obligatoire -->
+        <div class="row">
+            {{-- Colonne gauche --}}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="code_produit" class="form-label">Code produit</label>
+                    <input type="text" name="code_produit" class="form-control"
+                        value="{{ old('code_produit') ?: 'PRD' . strtoupper(substr(old('description') ?? '', 0, 3)) . rand(100, 999) }}">
+                </div>
 
-        <div class="mb-3">
-            <label for="code" class="form-label">Code Produit</label>
-            <input type="text" name="code" id="code" class="form-control" value="{{ old('code') }}" required>
-        </div>
+                <div class="mb-3">
+                    <label for="code_comptable" class="form-label">Code comptable</label>
+                     <input type="text" name="code_comptable" class="form-control"
+                        value="{{ old('code_comptable') ?: 'CPT' . strtoupper(substr(old('nom') ?? '', 0, 1)) . now()->format('YmdHis') }}">
+                </div>
 
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <input type="text" name="nom" id="nom" class="form-control" value="{{ old('nom') }}" required>
+            <input type="text" name="description" id="description" class="form-control" value="{{ old('description') }}" required>
         </div>
 
         <div class="mb-3">
@@ -38,10 +47,9 @@
             <label for="tva" class="form-label">TVA</label>
             <select name="tva" id="tva" class="form-select" required>
                 <option value="">-- Sélectionner --</option>
-                <option value="normal" @selected(old('tva') == 'normal')>Normal</option>
-                <option value="reduit10" @selected(old('tva') == 'reduit10')>Reduit 10</option>
-                <option value="reduit5.5" @selected(old('tva') == 'reduit5.5')>Reduit 5.5</option>
-                <option value="particulier" @selected(old('tva') == 'particulier')>Particulier</option>
+                <option value="20" @selected(old('tva') == '20')> 20</option>
+                <option value="10" @selected(old('tva') == '10')> 10</option>
+                <option value="5.5" @selected(old('tva') == '5.5')>5.5</option>
             </select>
         </div>
 
@@ -52,6 +60,7 @@
 
         <button type="submit" class="btn btn-primary">✅ Enregistrer</button>
         <a href="{{ route('clients.index') }}" class="btn btn-secondary">⬅️ Retour</a>
+</div>
     </form>
 </div>
 @endsection
