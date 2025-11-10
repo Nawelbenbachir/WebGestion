@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="w-full p-6">
 
@@ -11,18 +10,6 @@
             <a href="{{ route($createRoute) }}" 
                class=" bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">
                ➕ {{ $createLabel ?? 'Ajouter' }}
-            </a>
-
-            {{-- Bouton Voir --}}
-            <a id="view-btn" href="#" 
-               class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">
-                👁️ Voir
-            </a>
-
-            {{-- Bouton Modifier --}}
-            <a id="edit-btn" href="#" 
-               class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-auto text-center">
-                ✏️ Modifier
             </a>
 
             {{-- Bouton Supprimer --}}
@@ -46,23 +33,23 @@
 
 </div>
 
-{{-- Script pour activer les boutons selon la ligne sélectionnée --}}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const deleteForm = document.getElementById('delete-form');
+
     document.querySelectorAll('tr[data-id]').forEach(row => {
         row.addEventListener('click', () => {
-            const id = row.dataset.id;
+            const clientId = row.dataset.id;
             const baseRoute = row.dataset.route;
 
-            document.getElementById('view-btn').href = `/${baseRoute}/${id}`;
-            document.getElementById('edit-btn').href = `/${baseRoute}/${id}/edit`;
-            document.getElementById('delete-form').action = `/${baseRoute}/${id}`;
+            // Met à jour l'action du formulaire suppression
+            deleteForm.setAttribute('action', `/${baseRoute}/${clientId}`);
 
-            document.getElementById('view-btn').classList.remove('hidden');
-            document.getElementById('edit-btn').classList.remove('hidden');
-            document.getElementById('delete-form').classList.remove('hidden');
+            // Affiche le formulaire si caché
+            deleteForm.classList.remove('hidden');
         });
     });
 });
 </script>
+
 @endsection

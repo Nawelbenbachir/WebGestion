@@ -88,8 +88,9 @@ class ClientController extends Controller
     public function show($id)
     {
         $client = Client::findOrFail($id);
-        return view('clients.show', compact('client'));
-    }
+        // Retourne uniquement le formulaire d'édition (sans layout complet)
+        return view('clients.edit', compact('client'));
+}
 
     /**
      * Affiche le formulaire d’édition d’un client
@@ -107,12 +108,21 @@ class ClientController extends Controller
     {
       
         $validated = $request->validate([
-        
+            'code_cli'      => 'required|string|unique:clients,code_cli',
+            'code_comptable' => 'required|string|unique:clients,code_comptable',
             'nom'           => 'required|string|max:255',
+            'prenom'        => 'nullable|string|max:255',
+            'reglement'      => 'nullable|in:virement,cheques,especes',
             'type'          => 'required|string|in:particulier,artisan,entreprise',
-            'email'         => 'nullable|email|unique:clients,email,' . $client->id,
+            'email'         => 'nullable|email|unique:clients,email',
             'telephone'     => 'nullable|string|max:20',
+            'portable1'     => 'nullable|string|max:20',
+            'portable2'     => 'nullable|string|max:20',
             'adresse1'       => 'nullable|string|max:255',
+            'adresse2'       => 'nullable|string|max:255',
+            'complement_adresse' => 'nullable|string|max:255',
+            'code_postal'   => 'nullable|string|max:10',
+            'ville'         => 'nullable|string|max:255',
         ]);
         
 

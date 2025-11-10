@@ -31,4 +31,25 @@
         @endforeach 
     </tbody> 
 </table>
- @endsection
+{{-- Zone du formulaire d’édition, vide au départ --}}
+<div id="client-details" class="bg-gray-50 shadow-inner rounded-lg p-4 mt-4 hidden"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('tr[data-id]').forEach(row => {
+        row.addEventListener('click', () => {
+            const clientId = row.dataset.id;
+
+            fetch(`/clients/${clientId}`)
+                .then(res => res.text())
+                .then(html => {
+                    const detailsDiv = document.getElementById('client-details');
+                    detailsDiv.innerHTML = html; // injecte le formulaire
+                    detailsDiv.classList.remove('hidden');
+                    detailsDiv.scrollIntoView({ behavior: 'smooth' });
+                });
+        });
+    });
+});
+</script>
+@endsection
