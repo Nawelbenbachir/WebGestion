@@ -68,8 +68,8 @@
         </div>
 
         <div class="mb-3">
-            <label for="stock" class="form-label">Stock</label>
-            <input type="text" name="stock" id="stock" class="form-control" value="{{ old('stock') }}">
+            <label for="qt_stock" class="form-label">Stock</label>
+            <input type="text" name="qt_stock" id="qt_stock" class="form-control" value="{{ old('qt_stock') }}">
         </div>
 
         <button type="submit" class="btn btn-primary">✅ Enregistrer</button>

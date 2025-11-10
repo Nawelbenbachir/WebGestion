@@ -11,7 +11,8 @@
             <tr>
                 <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Code</th>
                 <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Description</th>
-                <th class="px-6 py-3 border-b border-gray-300 text-center">Prix</th>
+                <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Prix</th>
+                <th class="px-6 py-3 border-b border-r border-gray-300 text-center"> Stock </th>
             </tr>
         </thead>
         <tbody>
@@ -19,7 +20,8 @@
                 <tr data-id="{{ $produit->id }}" data-route="produits" class="cursor-pointer hover:bg-blue-100">
                     <td class="px-6 py-4 border-b border-r border-gray-300">{{ $produit->code_produit }}</td>
                     <td class="px-6 py-4 border-b border-r border-gray-300">{{ $produit->description }}</td>
-                    <td class="px-6 py-4 border-b border-gray-300">{{ $produit->prix_ht }}</td>
+                    <td class="px-6 py-4 border-b border-r border-gray-300">{{ $produit->prix_ht }}</td>
+                    <td class="px-6 py-4 border-b border-r border-gray-300">{{ $produit->qt_stock }}</td>
                 </tr>
             @endforeach
         </tbody>
