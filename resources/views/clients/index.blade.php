@@ -12,7 +12,7 @@
             <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Téléphone</th>
             <th class="px-6 py-3 border-b  border-r border-gray-300 text-center">Email</th> 
             <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Adresse</th>
-             <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Code Postal</th>
+            <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Code Postal</th>
             <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Ville</th>
             <th class="px-6 py-3 border-b border-r border-gray-300 text-center">Mode de règlement</th>
         </tr> 
@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('tr[data-id]').forEach(row => {
         row.addEventListener('click', () => {
             const clientId = row.dataset.id;
-
             fetch(`/clients/${clientId}`)
                 .then(res => res.text())
                 .then(html => {
