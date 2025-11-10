@@ -25,7 +25,19 @@ class ProduitController extends Controller
     }
     public function create()
     {
-        return view('produits.create');
+     $parametre = Parametre::first();
+        $societeId = $parametre ? $parametre->derniere_societe : null;
+
+        // Récupérer toutes les catégories existantes
+        $categories = Produit::when($societeId, function($query, $societeId) {
+            return $query->where('id_societe', $societeId);
+        })
+        ->pluck('categorie') // récupérer uniquement le champ catégorie
+        ->unique()          // enlever les doublons
+        ->filter()          // enlever les valeurs nulles
+        ->values();         // réindexer
+
+        return view('produits.create', compact('categories'));
     }
 
     
@@ -51,7 +63,17 @@ public function store(Request $request)
         'tva'            => 'nullable|numeric|min:0',
         'qt_stock'       => 'nullable|integer|min:0',
         'categorie'      => 'nullable|string|max:255',
-    ]);
+        'nouvelle_categorie' => 'nullable|string|max:255',
+]);
+
+// Si l'utilisateur a saisi une nouvelle catégorie, on l'utilise
+if (!empty($validated['nouvelle_categorie'])) {
+    $validated['categorie'] = $validated['nouvelle_categorie'];
+}
+
+// Supprimer le champ temporaire pour ne pas créer de colonne inutile
+unset($validated['nouvelle_categorie']);
+   
 
     // Récupérer l'id de la société depuis les paramètres
     $parametre = Parametre::first();
@@ -73,9 +95,8 @@ public function store(Request $request)
     }
 
     Produit::create($validated);
-
-    return redirect()
-        ->route('produits.index')
+    return redirect() 
+        ->route('produits.index') 
         ->with('success', '✅ Produit créé avec succès.');
 }
 
@@ -99,6 +120,13 @@ public function store(Request $request)
         return redirect()
             ->route('produits.index')
             ->with('success', '✅ Produit mis à jour avec succès.');
+    }
+     public function destroy($id)
+    {
+        $produit = Produit::findOrFail($id);
+        $produit->delete();
+
+        return redirect()->route('produits.index')->with('success', '🗑️ Produit supprimé avec succès.');
     }
 
 };

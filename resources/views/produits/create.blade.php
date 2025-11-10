@@ -39,6 +39,20 @@
         </div>
 
         <div class="mb-3">
+            <label for="categorie" class="form-label">Catégorie</label>
+            <select name="categorie" id="categorie" class="form-select">
+                <option value="">-- Sélectionner une catégorie --</option>
+                @foreach($categories as $cat)
+                    <option value="{{ $cat }}" @selected(old('categorie') == $cat)>{{ $cat }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="nouvelle_categorie" class="form-label">Nouvelle catégorie (optionnelle)</label>
+            <input type="text" name="nouvelle_categorie" id="nouvelle_categorie" class="form-control" value="{{ old('nouvelle_categorie') }}">
+        </div>
+        <div class="mb-3">
             <label for="prix_ht" class="form-label">Prix HT</label>
             <input type="text" name="prix_ht" id="prix_ht" class="form-control" value="{{ old('prix_ht') }}" required>
         </div>
