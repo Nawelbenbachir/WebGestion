@@ -58,6 +58,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Produit</th>
+                            <th>Description</th>
                             <th>Quantité</th>
                             <th>Prix HT (€)</th>
                             <th>TVA (%)</th>
@@ -70,11 +71,13 @@
                             <td>
                                <input list="produits" class="form-control produit-input" placeholder="Choisir un produit...">
                             </td>
+                            <td><input type="text" name="lignes[0][description]" class="form-control description" readonly></td>
                             <td><input type="number" name="lignes[0][quantite]" class="form-control quantite" value="1" min="1"></td>
                             <td><input type="number" name="lignes[0][prix_unitaire_ht]" class="form-control prix" step="0.01" readonly ></td>
                             <td><input type="number" name="lignes[0][taux_tva]" class="form-control tva" step="0.1" readonly></td>
                             <td><input type="number" name="lignes[0][total_ttc]" class="form-control total" step="0.01" readonly></td>
                             <td class="text-center">
+                                <button type="button" class="btn btn-success btn-sm addRowBelow">➕</button>
                                 <button type="button" class="btn btn-danger btn-sm removeRow">🗑️</button>
                             </td>
                         </tr>
@@ -92,7 +95,6 @@
                     @endforeach
                 </datalist>
 
-                <button type="button" class="btn btn-success mt-3" id="addRow">➕ Ajouter une ligne</button>
             </div>
         </div>
 
@@ -108,11 +110,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-     const tbody = document.querySelector('#lignesTable tbody');
+    const tbody = document.querySelector('#lignesTable tbody');
     const datalist = document.getElementById('produits');
     const addRowBtn = document.getElementById('addRow');
 
-
+    //  Calcul du total TTC
     function updatePrixTTC(row) {
         const qte = parseFloat(row.querySelector('.quantite').value) || 0;
         const prix = parseFloat(row.querySelector('.prix').value) || 0;
@@ -121,23 +123,51 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.total').value = total.toFixed(2);
     }
 
-    lignesTable.addEventListener('input', (e) => {
+    // Réinitialise une ligne
+    function resetRow(row) {
+        row.querySelector('.produit-input').value = '';
+        row.querySelector('.description').value = '';
+        row.querySelector('.quantite').value = 1;
+        row.querySelector('.prix').value = '';
+        row.querySelector('.tva').value = '';
+        row.querySelector('.total').value = '';
+    }
+
+    //  Ajoute une ligne vide à la suite de celle cliquée
+    function addRowAfter(currentRow) {
+        const newRow = currentRow.cloneNode(true);
+        resetRow(newRow);
+        currentRow.insertAdjacentElement('afterend', newRow);
+        updateAllNames();
+    }
+
+    //  Met à jour les noms des inputs pour chaque ligne
+    function updateAllNames() {
+        tbody.querySelectorAll('tr').forEach((row, i) => {
+            row.querySelector('.produit-input').setAttribute('name', `lignes[${i}][produit_code]`);
+            row.querySelector('.description').setAttribute('name', `lignes[${i}][description]`);
+            row.querySelector('.quantite').setAttribute('name', `lignes[${i}][quantite]`);
+            row.querySelector('.prix').setAttribute('name', `lignes[${i}][prix_unitaire_ht]`);
+            row.querySelector('.tva').setAttribute('name', `lignes[${i}][taux_tva]`);
+            row.querySelector('.total').setAttribute('name', `lignes[${i}][total_ttc]`);
+        });
+    }
+
+    //  Gestion des saisies (produit, quantite, tva)
+    tbody.addEventListener('input', (e) => {
         const row = e.target.closest('tr');
 
-        //  Quand on sélectionne un produit
         if (e.target.classList.contains('produit-input')) {
             const code = e.target.value.trim();
             const option = Array.from(datalist.options).find(opt => opt.value === code);
 
             if (option) {
-                row.querySelector('.prix').value = option.dataset.prix;
-                row.querySelector('.tva').value = option.dataset.tva;
+                row.querySelector('.description').value = option.dataset.designation || '';
+                row.querySelector('.prix').value = option.dataset.prix || '';
+                row.querySelector('.tva').value = option.dataset.tva || '';
                 updatePrixTTC(row);
             } else {
-                // Réinitialisation si code inconnu
-                row.querySelector('.prix').value = '';
-                row.querySelector('.tva').value = '';
-                row.querySelector('.total').value = '';
+                resetRow(row);
             }
         }
 
@@ -145,30 +175,33 @@ document.addEventListener('DOMContentLoaded', function() {
             updatePrixTTC(row);
         }
     });
+
+    //  Bouton global "Ajouter une ligne" (à la fin du tableau)
+    if (addRowBtn) {
         addRowBtn.addEventListener('click', () => {
-        const firstRow = tbody.querySelector('tr');
-        const newRow = firstRow.cloneNode(true);
+            const firstRow = tbody.querySelector('tr');
+            const newRow = firstRow.cloneNode(true);
+            resetRow(newRow);
+            tbody.appendChild(newRow);
+            updateAllNames();
+        });
+    }
 
-        newRow.querySelector('.produit-input').value = '';
-        newRow.querySelector('.quantite').value = 1;
-        newRow.querySelector('.prix').value = '';
-        newRow.querySelector('.tva').value = '';
-        newRow.querySelector('.total').value = '';
-
-        tbody.appendChild(newRow);
-        updateAllNames();
-    }); 
-//Met à jour les noms des inputs pour chaque ligne
-    function updateAllNames() {
-    tbody.querySelectorAll('tr').forEach((row, i) => {
-        row.querySelector('.produit-input').setAttribute('name', `lignes[${i}][produit_code]`);
-        row.querySelector('.quantite').setAttribute('name', `lignes[${i}][quantite]`);
-        row.querySelector('.prix').setAttribute('name', `lignes[${i}][prix_unitaire_ht]`);
-        row.querySelector('.tva').setAttribute('name', `lignes[${i}][taux_tva]`);
-        row.querySelector('.total').setAttribute('name', `lignes[${i}][total_ttc]`);
+    //  Boutons dans chaque ligne (➕ et 🗑️)
+    tbody.addEventListener('click', (e) => {
+        const row = e.target.closest('tr');
+        if (e.target.classList.contains('addRowBelow')) {
+            addRowAfter(row);
+        }
+        if (e.target.classList.contains('removeRow')) {
+            if (tbody.querySelectorAll('tr').length > 1) {
+                row.remove();
+                updateAllNames();
+            }
+        }
     });
-}
 });
 </script>
+
 
 @endsection

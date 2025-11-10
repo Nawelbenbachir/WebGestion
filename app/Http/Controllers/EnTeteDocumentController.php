@@ -6,6 +6,7 @@ use App\Models\EnTeteDocument;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Produit;
+use App\Models\Parametre;
 
 class EnTeteDocumentController extends Controller
 {
@@ -51,27 +52,36 @@ class EnTeteDocumentController extends Controller
     /**
      * Formulaire de création (vue selon le type demandé)
      */
-    public function create(Request $request)
+
+
+public function create(Request $request)
 {
     $type = $request->get('type', 'devis');
 
-     // Exemple : société courante (ici on suppose "S001")
-    $codeSociete = session('code_societe', 'S001');
+    //  Récupération de l’ID de la société depuis la table "parametres"
+    $parametre = Parametre::first();
+    $idSociete = $parametre ? $parametre->derniere_societe : null;
 
-    // Récupération des clients et produits associés à cette société
-    $clients = Client::where('code_societe', $codeSociete)->get();
-    $produits = Produit::where('code_societe', $codeSociete)->get();
+    if (!$idSociete) {
+        return back()->withErrors('Aucune société sélectionnée dans les paramètres.');
+    }
 
-    
-    // Sélection de la vue selon le type
+    // Récupération des clients et produits liés à cette société
+    $clients = Client::where('id_societe', $idSociete)->get();
+    $produits = Produit::where('id_societe', $idSociete)->get();
+
+  
     $view = match ($type) {
         'facture' => 'factures.create',
         'avoir'   => 'avoirs.create',
         default   => 'devis.create',
     };
 
+ 
     return view($view, compact('type', 'clients', 'produits'));
 }
+
+
 
 
     public function store(Request $request)
