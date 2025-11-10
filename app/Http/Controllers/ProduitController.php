@@ -41,9 +41,8 @@ class ProduitController extends Controller
     public function update(Request $request, Produit $produit)
     {
         $validated = $request->validate([
-            'code_societe'   => 'required|string|max:255',
+            'code_comptable' => 'required|string|max:255|unique:produits,code_comptable,' . $produit->id,
             'code_produit'   => 'required|string|max:255|unique:produits,code_produit,' . $produit->id,
-            'code_comptable' => 'required|string|max:255',
             'description'    => 'nullable|string|max:255',
             'prix_ht'        => 'nullable|numeric|min:0',
             'tva'            => 'nullable|numeric|min:0',

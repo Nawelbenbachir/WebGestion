@@ -1,19 +1,28 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container">
-    <h2>Modifier le produit</h2>
 
     <form action="{{ route('produits.update', $produit->id) }}" method="POST">
         @csrf
         @method('PUT')
 
         <div class="mb-3">
-            <label for="designation" class="form-label">Désignation</label>
-            <input type="text" name="designation" id="designation"
-                class="form-control @error('designation') is-invalid @enderror"
-                value="{{ old('designation', $produit->designation) }}" required>
-            @error('designation')
+            <label for="code_produit" class="form-label">Code</label>
+            <input type="text" name="code_produit" id="code_produit"
+                class="form-control"
+                value="{{ old('code_produit', $produit->code_produit) }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="code_comptable" class="form-label">Code comptable</label>
+            <input type="text" name="code_comptable" id="code_comptable"
+                class="form-control"
+                value="{{ old('code_comptable', $produit->code_comptable) }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" name="description" id="description"
+                class="form-control @error('description') is-invalid @enderror"
+                value="{{ old('description', $produit->description) }}" required>
+            @error('description')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
@@ -39,11 +48,11 @@
         </div>
 
         <div class="mb-3">
-            <label for="stock" class="form-label">Stock</label>
-            <input type="number" name="stock" id="stock"
-                class="form-control @error('stock') is-invalid @enderror"
-                value="{{ old('stock', $produit->stock ?? 0) }}" required>
-            @error('stock')
+            <label for="qt_stock" class="form-label">Stock</label>
+            <input type="number" name="qt_stock" id="qt_stock"
+                class="form-control @error('qt_stock') is-invalid @enderror"
+                value="{{ old('qt_stock', $produit->qt_stock ?? 0) }}" required>
+            @error('qt_stock')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
@@ -58,8 +67,7 @@
             @enderror
         </div>
 
-        <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
-        <a href="{{ route('produits.index') }}" class="btn btn-secondary">⬅ Retour</a>
+        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        <a href="{{ route('produits.index') }}" class="btn btn-secondary"> Retour</a>
     </form>
-</div>
-@endsection
+
