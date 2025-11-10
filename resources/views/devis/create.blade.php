@@ -21,6 +21,12 @@
         @csrf
 
         {{--  Informations générales --}}
+        <input type="hidden" name="societe_id" value="{{ $parametre->derniere_societe ?? '' }}">
+        <input type="hidden" name="type_document" value="{{ $type ?? 'devis' }}">
+        <input type="hidden" name="code_document" value="{{ 'DOC' . strtoupper(uniqid()) }}">
+        <input type="hidden" id="total_ht" name="total_ht" value="0">
+        <input type="hidden" id="total_tva" name="total_tva" value="0">
+        <input type="hidden" id="total_ttc" name="total_ttc" value="0">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <strong>Informations générales</strong>
@@ -69,7 +75,7 @@
                     <tbody>
                         <tr>
                             <td>
-                               <input list="produits" class="form-control produit-input" placeholder="Choisir un produit...">
+                               <input list="produits" name="lignes[0][produit_code]" class="form-control produit-input" placeholder="Choisir un produit...">
                             </td>
                             <td><input type="text" name="lignes[0][description]" class="form-control description" readonly></td>
                             <td><input type="number" name="lignes[0][quantite]" class="form-control quantite" value="1" min="1"></td>
@@ -97,7 +103,11 @@
 
             </div>
         </div>
-
+        <div class="text-end mt-3">
+            <strong>Total HT :</strong> <span id="display_total_ht">0.00 €</span><br>
+            <strong>Total TVA :</strong> <span id="display_total_tva">0.00 €</span><br>
+            <strong>Total TTC :</strong> <span id="display_total_ttc">0.00 €</span>
+        </div>
         {{-- Boutons d’action --}}
         <div class="d-flex justify-content-between">
             <a href="{{ route('documents.index') }}" class="btn btn-secondary">⬅️ Annuler</a>
@@ -151,6 +161,8 @@ document.addEventListener('DOMContentLoaded', function() {
             row.querySelector('.tva').setAttribute('name', `lignes[${i}][taux_tva]`);
             row.querySelector('.total').setAttribute('name', `lignes[${i}][total_ttc]`);
         });
+        updateTotals();
+        updatePrixTTC(row);
     }
 
     //  Gestion des saisies (produit, quantite, tva)
@@ -199,7 +211,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateAllNames();
             }
         }
+
     });
+    function updateTotals() {
+    let totalHT = 0, totalTVA = 0, totalTTC = 0;
+
+    tbody.querySelectorAll('tr').forEach(row => {
+        const qte = parseFloat(row.querySelector('.quantite').value) || 0;
+        const prix = parseFloat(row.querySelector('.prix').value) || 0;
+        const tva = parseFloat(row.querySelector('.tva').value) || 0;
+        const totalLigneHT = qte * prix;
+        const totalLigneTVA = totalLigneHT * (tva / 100);
+        const totalLigneTTC = totalLigneHT + totalLigneTVA;
+
+        totalHT += totalLigneHT;
+        totalTVA += totalLigneTVA;
+        totalTTC += totalLigneTTC;
+    });
+    document.getElementById('total_ht').value = totalHT.toFixed(2);
+    document.getElementById('total_tva').value = totalTVA.toFixed(2);
+    document.getElementById('total_ttc').value = totalTTC.toFixed(2);
+
+    // affichage visuel
+    document.getElementById('display_total_ht').textContent = totalHT.toFixed(2) + ' €';
+    document.getElementById('display_total_tva').textContent = totalTVA.toFixed(2) + ' €';
+    document.getElementById('display_total_ttc').textContent = totalTTC.toFixed(2) + ' €';
+    
+}
+
 });
 </script>
 

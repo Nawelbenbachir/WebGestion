@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Produit;
 use App\Models\Parametre;
+use App\Models\LigneDocument;
+use Illuminate\Support\Facades\Validator;
 
 class EnTeteDocumentController extends Controller
 {
@@ -15,12 +17,17 @@ class EnTeteDocumentController extends Controller
      */
     public function index(Request $request)
     {
-        // Si un type est passé dans l’URL (ex: devis, facture, avoir)
-        $type = $request->get('type', 'devis'); // valeur par défaut : devis
+        $typeMap = [
+        'facture' => 'F',
+        'devis'   => 'D',
+        'avoir'   => 'A',
+        ];
 
-        // On récupère uniquement les documents du type demandé
+        $type = $request->get('type', 'devis');
+        $typeCode = $typeMap[$type] ?? 'D'; // D par défaut
+
         $documents = EnTeteDocument::with(['societe', 'client'])
-            ->where('type_document', $type)
+            ->where('type_document', $typeCode)
             ->get();
 
         // Vue dynamique selon le type
@@ -31,7 +38,8 @@ class EnTeteDocumentController extends Controller
         };
 
         return view($view, compact('documents'));
-    }
+
+ }
 
     /**
      * Affiche un document précis selon son type
@@ -78,16 +86,17 @@ public function create(Request $request)
     };
 
  
-    return view($view, compact('type', 'clients', 'produits'));
+    return view($view, compact('type', 'clients', 'produits', 'parametre'));
+
 }
 
 
 
 
-    public function store(Request $request)
+ public function store(Request $request)
 {
     // Validation en-tête + lignes
-    $validated = $request->validate([
+   $validated = $request->validate([
         'societe_id'    => 'required|exists:societes,id',
         'code_document' => 'required|string|max:50|unique:en_tete_documents,code_document',
         'type_document' => 'required|in:facture,devis,avoir',
@@ -95,12 +104,7 @@ public function create(Request $request)
         'total_ht'      => 'required|numeric|min:0',
         'total_tva'     => 'required|numeric|min:0',
         'total_ttc'     => 'required|numeric|min:0',
-        'client_id'     => 'required|exists:clients,id',
-        'client_nom'    => 'nullable|string|max:255',
-        'logo'          => 'nullable|string',
-        'adresse'       => 'nullable|string',
-        'telephone'     => 'nullable|string|max:20',
-        'email'         => 'nullable|email',
+        'client_code'   => 'required|string|exists:clients,code_cli',
         'lignes'        => 'required|array|min:1',
         'lignes.*.produit_code'      => 'required|string',
         'lignes.*.quantite'          => 'required|numeric|min:1',
@@ -108,27 +112,53 @@ public function create(Request $request)
         'lignes.*.taux_tva'          => 'required|numeric|min:0',
         'lignes.*.total_ttc'         => 'required|numeric|min:0',
     ]);
+    
+    $typeMap = [
+    'facture' => 'F',
+    'devis'   => 'D',
+    'avoir'   => 'A',
+    ];
 
-    // Créer l'en-tête
-    $document = EnTeteDocument::create($validated);
+    $typeDocument = $typeMap[$validated['type_document']] ?? null;
 
-    // Créer les lignes
+    //  Récupérer le client à partir de son code
+    $client = Client::where('code_cli', $validated['client_code'])->firstOrFail();
+
+    //  Créer le document (en-tête)
+    $document = EnTeteDocument::create([
+        'societe_id'    => $validated['societe_id'],
+        'code_document' => $validated['code_document'],
+        'type_document' => $typeDocument,
+        'date_document' => $validated['date_document'],
+        'total_ht'      => $validated['total_ht'],
+        'total_tva'     => $validated['total_tva'],
+        'total_ttc'     => $validated['total_ttc'],
+        'client_id'     => $client->id,
+        'client_nom'    => $client->societe,
+        'adresse'       => $client->adresse ?? null,
+        'telephone'     => $client->telephone ?? null,
+        'email'         => $client->email ?? null,
+    ]);
+
+    //  Créer les lignes
     foreach ($validated['lignes'] as $ligne) {
         LigneDocument::create([
-            'document_id' => $document->id,  // Associer la ligne à l'en-tête
-            'produit_code' => $ligne['produit_code'],
-            'quantite' => $ligne['quantite'],
-            'prix_ht' => $ligne['prix_ht'],
-            'taux_tva' => $ligne['taux_tva'],
-            'total_ttc' => $ligne['total_ttc'],
+            'document_id'   => $document->id, // Associer à l'en-tête
+            'produit_code'  => $ligne['produit_code'],
+            'description'   => $ligne['description'] ?? '',
+            'quantite'      => $ligne['quantite'],
+            'prix_unitaire_ht'       => $ligne['prix_unitaire_ht'],
+            'taux_tva'      => $ligne['taux_tva'],
+            'total_ttc'     => $ligne['total_ttc'],
         ]);
     }
+   
 
+    //  Redirection
     return redirect()
         ->route('documents.index', ['type' => $validated['type_document']])
         ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
 }
-
 
     /**
      * Formulaire d’édition

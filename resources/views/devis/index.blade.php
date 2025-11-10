@@ -33,14 +33,14 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($devis as $document)
+                @foreach($documents as $document)
                     <tr data-id="{{ $document->id }}" data-route="documents" class="cursor-pointer hover:bg-blue-100">
                         
                         <td class="px-6 py-4 border-b border-r border-gray-300">{{ $document->code_document }}</td>
                         <td class="px-6 py-4 border-b border-r border-gray-300">{{ ucfirst($document->type_document) }}</td>
                         <td class="px-6 py-4 border-b border-r border-gray-300">{{ $document->date_document }}</td>
                         <td class="px-6 py-4 border-b border-r border-gray-300">{{ $document->client_nom }}</td>
-                        <td class="text-end">{{ number_format($document->total_ttc, 2, ',', ' ') }}</td>
+                        <td class="text-end border-b border-r">{{ number_format($document->total_ttc, 2, ',', ' ') }}</td>
                     </tr>
                 @endforeach
             </tbody>
