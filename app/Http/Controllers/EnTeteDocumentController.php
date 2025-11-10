@@ -167,13 +167,23 @@ public function create(Request $request)
     {
         $document = EnTeteDocument::findOrFail($id);
 
-        $view = match ($document->type_document) {
-            'facture' => 'factures.edit',
-            'avoir'   => 'avoirs.edit',
-            default   => 'devis.edit',
-        };
+        // Récupère l'ID de la société du document
+        $idSociete = $document->societe_id;
 
-        return view($view, compact('document'));
+        // Récupère tous les clients liés à cette société
+        $clients = Client::where('id_societe', $idSociete)->get();
+
+        // Récupère les produits de la société
+        $produits = Produit::where('id_societe', $idSociete)->get();
+        $document = EnTeteDocument::findOrFail($id);
+
+            $view = match ($document->type_document) {
+                'facture' => 'factures.edit',
+                'avoir'   => 'avoirs.edit',
+                default   => 'devis.edit',
+            };
+
+        return view($view, compact('document', 'clients', 'produits'));
     }
 
     /**

@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     rows.forEach(row => {
         row.addEventListener('dblclick', function() {
             const documentId = this.dataset.id;
-            const editUrl = `/devis/${documentId}/edit`; // route edit standard
+            const editUrl = `/documents/${documentId}/edit`; // route edit standard
             window.location.href = editUrl;
         });
     });
