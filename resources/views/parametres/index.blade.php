@@ -1,9 +1,11 @@
-@extends('layouts.table') 
+@extends('layouts.table')
+
 @php 
     $createRoute = 'parametres.create';
     $createLabel = 'Ajouter une société'; 
+    
 @endphp 
-@section('table') 
+@section('table')
 <h2 class="text-xl font-semibold mb-4">Liste des sociétés</h2>
 <table id="parametres-table" class="min-w-full w-full border border-gray-200"> 
     <thead class="bg-gray-100"> 
