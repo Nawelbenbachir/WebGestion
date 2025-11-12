@@ -8,8 +8,8 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <x-navigation>
-    </x-navigation>
+    <x-navigation-layout>
+    </x-navigation-layout>
 
     <main class="max-w-full py-8 px-4">
         @yield('content')
