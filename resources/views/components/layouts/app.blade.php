@@ -8,13 +8,14 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <x-navigation-layout>
-    </x-navigation-layout>
+    <x-navigation>
+    </x-navigation>
 
     <main class="max-w-full py-8 px-4">
-        @yield('content')
+       {{ $slot }}
     </main>
-
+    <!-- pour exécuter les scripts -->
+    @stack('scripts') 
 </body>
 </html>
 
