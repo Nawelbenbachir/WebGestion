@@ -1,6 +1,37 @@
 <x-layouts.app>
     <x-layouts.table createRoute="produits.create" createLabel="Ajouter un produit">
-        <!-- Formulaire d'ajout produit -->
+
+        <table id="produits-table" class="min-w-full w-full border border-gray-200">
+            <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">Code produit</th>
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">Description</th>
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">Catégorie</th>
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">Prix HT</th>
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">TVA</th>
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">Stock</th>
+                </tr>
+            </thead>
+
+            {{-- Corps du tableau --}}
+            <tbody class="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+                @foreach ($produits as $produit)
+                    <tr data-id="{{ $produit->id }}" data-route="produits"
+                        class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900 transition">
+                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->code_produit }}</td>
+                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->description }}</td>
+                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->categorie ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">
+                            {{ number_format($produit->prix_ht, 2, ',', ' ') }} €
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->tva }} %</td>
+                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->qt_stock ?? 0 }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        {{-- Modal d’édition produit --}}
         <div id="editModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative flex flex-col max-h-[80vh]">
 
@@ -11,99 +42,43 @@
                 </button>
 
                 <!-- Contenu scrollable -->
-                <div class="overflow-auto p-6 flex-1 space-y-4">
-                    <!-- Affichage des erreurs -->
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    <form id="produit-form" action="{{ route('produits.store') }}" method="POST">
-                        @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="code_produit" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Code produit</label>
-                                <input type="text" name="code_produit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                       value="{{ old('code_produit') ?: 'PRD' . strtoupper(substr(old('description') ?? '', 0, 3)) . rand(100, 999) }}">
-                            </div>
-
-                            <div>
-                                <label for="code_comptable" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Code comptable</label>
-                                <input type="text" name="code_comptable" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                       value="{{ old('code_comptable') ?: 'CPT' . strtoupper(substr(old('nom') ?? '', 0, 1)) . now()->format('YmdHis') }}">
-                            </div>
-
-                            <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
-                                <input type="text" name="description" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" 
-                                       value="{{ old('description') }}" required>
-                            </div>
-
-                            <div>
-                                <label for="categorie" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Catégorie</label>
-                                <select name="categorie" id="categorie" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <option value="">-- Sélectionner une catégorie --</option>
-                                    @foreach($categories as $cat)
-                                        <option value="{{ $cat }}" @selected(old('categorie') == $cat)>{{ $cat }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="nouvelle_categorie" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nouvelle catégorie (optionnelle)</label>
-                                <input type="text" name="nouvelle_categorie" id="nouvelle_categorie" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" 
-                                       value="{{ old('nouvelle_categorie') }}">
-                            </div>
-
-                            <div>
-                                <label for="prix_ht" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Prix HT</label>
-                                <input type="text" name="prix_ht" id="prix_ht" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" 
-                                       value="{{ old('prix_ht') }}" required>
-                            </div>
-
-                            <div>
-                                <label for="tva" class="block text-sm font-medium text-gray-700 dark:text-gray-200">TVA</label>
-                                <select name="tva" id="tva" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-                                    <option value="">-- Sélectionner --</option>
-                                    <option value="20" @selected(old('tva') == '20')> 20</option>
-                                    <option value="10" @selected(old('tva') == '10')> 10</option>
-                                    <option value="5.5" @selected(old('tva') == '5.5')>5.5</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="qt_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Stock</label>
-                                <input type="text" name="qt_stock" id="qt_stock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" 
-                                       value="{{ old('qt_stock') }}">
-                            </div>
-                        </div>
-                    </form>
+                <div id="produit-details" class="overflow-auto p-6 flex-1 space-y-4">
+                    <!-- Formulaire injecté dynamiquement ici -->
                 </div>
 
-                <!-- Boutons en bas -->
+                <!-- Boutons en bas
                 <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                    <x-secondary-button as="a" href="{{ route('produits.index') }}">⬅️ Annuler</x-secondary-button>
+                    <x-secondary-button as="a" href="#" onclick="closeModal()">⬅️ Annuler</x-secondary-button>
                     <x-primary-button type="submit" form="produit-form">💾 Enregistrer</x-primary-button>
-                </div>
+                </div> -->
             </div>
         </div>
 
         <script>
-            function closeModal() {
-                document.getElementById('editModal').classList.add('hidden');
-            }
-            function openModal() {
-                document.getElementById('editModal').classList.remove('hidden');
-            }
+        function openModal() {
+            document.getElementById('editModal').classList.remove('hidden');
+        }
 
-            document.addEventListener('DOMContentLoaded', () => {
-                openModal(); // ouvrir le modal directement pour "ajouter" un produit
+        function closeModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // Chargement dynamique du formulaire au clic sur une ligne
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('tr[data-id]').forEach(row => {
+                row.addEventListener('click', () => {
+                    const produitId = row.dataset.id;
+                    fetch(`/produits/${produitId}/edit`)
+                        .then(res => res.text())
+                        .then(html => {
+                            document.getElementById('produit-details').innerHTML = html;
+                            openModal();
+                        })
+                        .catch(err => console.error('Erreur de chargement :', err));
+                });
             });
+        });
         </script>
+
     </x-layouts.table>
 </x-layouts.app>

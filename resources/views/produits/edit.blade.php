@@ -1,73 +1,97 @@
+<form id="produit-form" action="{{ route('produits.update', $produit->id) }}" method="POST" class="space-y-4">
+    @csrf
+    @method('PUT')
 
-    <form action="{{ route('produits.update', $produit->id) }}" method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="mb-3">
-            <label for="code_produit" class="form-label">Code</label>
+    <!-- Grid à 2 colonnes -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Code produit -->
+        <div>
+            <label for="code_produit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Code</label>
             <input type="text" name="code_produit" id="code_produit"
-                class="form-control"
-                value="{{ old('code_produit', $produit->code_produit) }}" required>
+                   value="{{ old('code_produit', $produit->code_produit) }}"
+                   required
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
         </div>
 
-        <div class="mb-3">
-            <label for="code_comptable" class="form-label">Code comptable</label>
+        <!-- Code comptable -->
+        <div>
+            <label for="code_comptable" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Code comptable</label>
             <input type="text" name="code_comptable" id="code_comptable"
-                class="form-control"
-                value="{{ old('code_comptable', $produit->code_comptable) }}" required>
+                   value="{{ old('code_comptable', $produit->code_comptable) }}"
+                   required
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
         </div>
 
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
+        <!-- Description -->
+        <div class="md:col-span-2">
+            <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
             <input type="text" name="description" id="description"
-                class="form-control @error('description') is-invalid @enderror"
-                value="{{ old('description', $produit->description) }}" required>
+                   value="{{ old('description', $produit->description) }}"
+                   required
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
             @error('description')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
 
-        <div class="mb-3">
-            <label for="prix_ht" class="form-label">Prix HT</label>
+        <!-- Prix HT -->
+        <div>
+            <label for="prix_ht" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prix HT</label>
             <input type="number" name="prix_ht" id="prix_ht" step="0.01"
-                class="form-control @error('prix_ht') is-invalid @enderror"
-                value="{{ old('prix_ht', $produit->prix_ht) }}" required>
+                   value="{{ old('prix_ht', $produit->prix_ht) }}"
+                   required
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
             @error('prix_ht')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
 
-        <div class="mb-3">
-            <label for="tva" class="form-label">TVA (%)</label>
+        <!-- TVA -->
+        <div>
+            <label for="tva" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TVA (%)</label>
             <input type="number" name="tva" id="tva" step="0.01"
-                class="form-control @error('tva') is-invalid @enderror"
-                value="{{ old('tva', $produit->tva ?? 20) }}" required>
+                   value="{{ old('tva', $produit->tva ?? 20) }}"
+                   required
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
             @error('tva')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
 
-        <div class="mb-3">
-            <label for="qt_stock" class="form-label">Stock</label>
+        <!-- Stock -->
+        <div>
+            <label for="qt_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock</label>
             <input type="number" name="qt_stock" id="qt_stock"
-                class="form-control @error('qt_stock') is-invalid @enderror"
-                value="{{ old('qt_stock', $produit->qt_stock ?? 0) }}" required>
+                   value="{{ old('qt_stock', $produit->qt_stock ?? 0) }}"
+                   required
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
             @error('qt_stock')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
 
-        <div class="mb-3">
-            <label for="categorie" class="form-label">Catégorie</label>
+        <!-- Catégorie -->
+        <div>
+            <label for="categorie" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catégorie</label>
             <input type="text" name="categorie" id="categorie"
-                class="form-control @error('categorie') is-invalid @enderror"
-                value="{{ old('categorie', $produit->categorie) }}">
+                   value="{{ old('categorie', $produit->categorie) }}"
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 
+                          text-gray-900 dark:text-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500">
             @error('categorie')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
+    </div>
 
-        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-        <a href="{{ route('produits.index') }}" class="btn btn-secondary"> Retour</a>
-    </form>
-
+    <!-- Ces boutons ne s’afficheront que si on ouvre cette page directement (pas en modal) -->
+    <div class="flex justify-end gap-3 pt-4">
+        <x-secondary-button as="a" href="{{ route('produits.index') }}"> Retour</x-secondary-button>
+        <x-primary-button type="submit"> Enregistrer</x-primary-button>
+    </div>
+</form>

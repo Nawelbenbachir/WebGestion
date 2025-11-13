@@ -1,118 +1,68 @@
-@extends('layouts.app')
+<x-layouts.app>
+    <div class="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+        <h1 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">➕ Ajouter un client</h1>
 
-@section('content')
-<div class="container">
-    <h1 class="mb-4">Ajouter un client</h1>
+        <form id="client-form" action="{{ route('clients.store') }}" method="POST" class="space-y-6">
+            @csrf
 
-    <form action="{{ route('clients.store') }}" method="POST">
-        @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Colonne gauche --}}
+                <div class="space-y-4">
+                    <x-input-group label="Code client" name="code_cli"
+                        :value="old('code_cli') ?: 'CLT' . strtoupper(substr(old('nom') ?? '', 0, 3)) . rand(100, 999)" />
 
-        <div class="row">
-            {{-- Colonne gauche --}}
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="code_cli" class="form-label">Code client</label>
-                    <input type="text" name="code_cli" class="form-control"
-                        value="{{ old('code_cli') ?: 'CLT' . strtoupper(substr(old('nom') ?? '', 0, 3)) . rand(100, 999) }}">
-                </div>
+                    <x-input-group label="Code comptable" name="code_comptable"
+                        :value="old('code_comptable') ?: 'CPT' . strtoupper(substr(old('nom') ?? '', 0, 1)) . now()->format('YmdHis')" />
 
-                <div class="mb-3">
-                    <label for="code_comptable" class="form-label">Code comptable</label>
-                     <input type="text" name="code_comptable" class="form-control"
-                        value="{{ old('code_comptable') ?: 'CPT' . strtoupper(substr(old('nom') ?? '', 0, 1)) . now()->format('YmdHis') }}">
-                </div>
+                    <x-input-group label="Société" name="societe" :value="old('societe')" required />
 
-                <div class="mb-3">
-                    <label for="societe" class="form-label">Société</label>
-                    <input type="text" name="societe" class="form-control" value="{{ old('societe') }}" required>
-                </div>
+                    <x-input-group label="Nom" name="nom" :value="old('nom')" required />
 
-                <div class="mb-3">
-                    <label for="nom" class="form-label">Nom</label>
-                    <input type="text" name="nom" class="form-control" value="{{ old('nom') }}" required>
-                </div>
+                    <x-input-group label="Prénom" name="prenom" :value="old('prenom')" />
 
-                <div class="mb-3">
-                    <label for="prenom" class="form-label">Prénom</label>
-                    <input type="text" name="prenom" class="form-control" value="{{ old('prenom') }}">
-                </div>
+                    <x-input-group type="email" label="Adresse e-mail" name="email" :value="old('email')" />
 
-                <div class="mb-3">
-                    <label for="email" class="form-label">Adresse e-mail</label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email') }}">
-                </div>
+                    <x-input-group label="Téléphone" name="telephone" :value="old('telephone')" />
 
-                <div class="mb-3">
-                    <label for="telephone" class="form-label">Téléphone</label>
-                    <input type="text" name="telephone" class="form-control" value="{{ old('telephone') }}">
-                </div>
+                    <x-input-group label="Portable 1" name="portable1" :value="old('portable1')" />
 
-                <div class="mb-3">
-                    <label for="portable1" class="form-label">Portable 1</label>
-                    <input type="text" name="portable1" class="form-control" value="{{ old('portable1') }}">
-                </div>
+                    <x-input-group label="Portable 2" name="portable2" :value="old('portable2')" />
 
-                <div class="mb-3">
-                    <label for="portable2" class="form-label">Portable 2</label>
-                    <input type="text" name="portable2" class="form-control" value="{{ old('portable2') }}">
-                </div>
-
-                <div class="mb-3">
-                    <label for="type" class="form-label">Type de client</label>
-                    <select name="type" class="form-select" required>
+                    <x-select-group label="Type de client" name="type" required>
                         <option value="">-- Sélectionner un type --</option>
-                        <option value="particulier" {{ old('type') == 'particulier' ? 'selected' : '' }}>Particulier</option>
-                        <option value="artisan" {{ old('type') == 'artisan' ? 'selected' : '' }}>Artisan</option>
-                        <option value="entreprise" {{ old('type') == 'entreprise' ? 'selected' : '' }}>Entreprise</option>
-                    </select>
-                </div>
+                        <option value="particulier" @selected(old('type') == 'particulier')>Particulier</option>
+                        <option value="artisan" @selected(old('type') == 'artisan')>Artisan</option>
+                        <option value="entreprise" @selected(old('type') == 'entreprise')>Entreprise</option>
+                    </x-select-group>
 
-                <div class="mb-3">
-                    <label for="reglement" class="form-label">Mode de règlement</label>
-                    <select name="reglement" class="form-select">
+                    <x-select-group label="Mode de règlement" name="reglement">
                         <option value="">-- Sélectionner un mode de règlement --</option>
-                        <option value="virement" {{ old('reglement') == 'virement' ? 'selected' : '' }}>Virement</option>
-                        <option value="cheque" {{ old('reglement') == 'cheque' ? 'selected' : '' }}>Chèque</option>
-                        <option value="especes" {{ old('reglement') == 'especes' ? 'selected' : '' }}>Espèces</option>
-                    </select>
-                </div>
-            </div>
-
-            {{-- Colonne droite --}}
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="adresse1" class="form-label">Adresse</label>
-                    <textarea name="adresse1" class="form-control" rows="2">{{ old('adresse1') }}</textarea>
+                        <option value="virement" @selected(old('reglement') == 'virement')>Virement</option>
+                        <option value="cheque" @selected(old('reglement') == 'cheque')>Chèque</option>
+                        <option value="especes" @selected(old('reglement') == 'especes')>Espèces</option>
+                    </x-select-group>
                 </div>
 
-                <div class="mb-3">
-                    <label for="adresse2" class="form-label">Adresse 2</label>
-                    <textarea name="adresse2" class="form-control" rows="2">{{ old('adresse2') }}</textarea>
-                </div>
+                {{-- Colonne droite --}}
+                <div class="space-y-4">
+                    <x-textarea-group label="Adresse" name="adresse1" rows="2">{{ old('adresse1') }}</x-textarea-group>
 
-                <div class="mb-3">
-                    <label for="complement_adresse" class="form-label">Complément d'adresse</label>
-                    <textarea name="complement_adresse" class="form-control" rows="2">{{ old('complement_adresse') }}</textarea>
-                </div>
+                    <x-textarea-group label="Adresse 2" name="adresse2" rows="2">{{ old('adresse2') }}</x-textarea-group>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="ville" class="form-label">Ville</label>
-                        <input type="text" name="ville" class="form-control" value="{{ old('ville') }}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="code_postal" class="form-label">Code Postal</label>
-                        <input type="text" name="code_postal" class="form-control" value="{{ old('code_postal') }}">
+                    <x-textarea-group label="Complément d'adresse" name="complement_adresse" rows="2">{{ old('complement_adresse') }}</x-textarea-group>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <x-input-group label="Ville" name="ville" :value="old('ville')" />
+                        <x-input-group label="Code postal" name="code_postal" :value="old('code_postal')" />
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Boutons --}}
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-primary">💾 Enregistrer le client</button>
-            <a href="{{ route('clients.index') }}" class="btn btn-secondary">⬅️ Retour</a>
-        </div>
-    </form>
-</div>
-@endsection
+            {{-- Boutons --}}
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <x-secondary-button as="a" href="{{ route('clients.index') }}"> Retour</x-secondary-button>
+                <x-primary-button type="submit"> Enregistrer le client</x-primary-button>
+            </div>
+        </form>
+    </div>
+</x-layouts.app>
