@@ -88,6 +88,7 @@
                 row.addEventListener('click', () => {
                     const clientId = row.dataset.id;
 
+                    // ⚠️ Correction ici → utilisation des backticks
                     fetch(`/clients/${clientId}/edit`)
                         .then(res => {
                             if (!res.ok) throw new Error('HTTP error ' + res.status);
