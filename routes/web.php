@@ -16,7 +16,7 @@ Route::get('/', function () {
 });
 Route::resource('user', UserController::class);
 
-Route::resource('clients', ClientController::class);
+Route::resource('clients', ClientController::class)->except(['show']);
 
 Route::resource('produits', ProduitController::class);
 

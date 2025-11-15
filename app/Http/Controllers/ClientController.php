@@ -86,12 +86,12 @@ class ClientController extends Controller
     /**
      * Affiche le détail d’un client
      */
-    public function show($id)
-    {
-        $client = Client::findOrFail($id);
-        // Retourne uniquement le formulaire d'édition (sans layout complet)
-        return view('clients.edit', compact('client'));
-}
+//     public function show($id)
+//     {
+//         $client = Client::findOrFail($id);
+//         // Retourne uniquement le formulaire d'édition (sans layout complet)
+//         return view('clients.edit', compact('client'));
+// }
 
     /**
      * Affiche le formulaire d’édition d’un client
