@@ -1,5 +1,5 @@
 <x-layouts.app>
-<x-layouts.table createRoute="users.create" createLabel="Ajouter un utilisateur">
+<x-layouts.table createRoute="user.create" createLabel="Ajouter un utilisateur">
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

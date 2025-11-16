@@ -84,11 +84,13 @@
 
         // Chargement dynamique du formulaire
         document.addEventListener('DOMContentLoaded', () => {
+            const deleteForm = document.getElementById('delete-form');
+             if (!deleteForm) return;
             document.querySelectorAll('tr[data-id]').forEach(row => {
-                row.addEventListener('click', () => {
+                row.addEventListener('dblclick', () => {
+                    
                     const clientId = row.dataset.id;
-
-                    // ⚠️ Correction ici → utilisation des backticks
+                    
                     fetch(`/clients/${clientId}/edit`)
                         .then(res => {
                             if (!res.ok) throw new Error('HTTP error ' + res.status);
@@ -116,6 +118,16 @@
                             console.error('Erreur de chargement :', err);
                             alert('Erreur lors du chargement du formulaire.');
                         });
+                });
+                row.addEventListener('click', () => {
+                    const id = row.dataset.id;
+                    const route = row.dataset.route;
+
+                    // Met à jour l’URL de suppression
+                    deleteForm.setAttribute('action', `/${route}/${id}`);
+
+                    // Affiche le bouton supprimer
+                    deleteForm.classList.remove('hidden');
                 });
             });
         });

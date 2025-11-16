@@ -30,14 +30,56 @@
                 @endforeach
             </tbody>
         </table>
+        {{-- Modal d’édition devis --}}
+        <div id="editModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative flex flex-col max-h-[80vh]">
 
+                <!-- Bouton fermer -->
+                <button onclick="closeModal()" 
+                        class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 font-bold text-xl z-10">
+                    ✖
+                </button>
+
+                <!-- Contenu scrollable -->
+                <div id="document-details" class="overflow-auto p-6 flex-1 space-y-4">
+                    <!-- Formulaire injecté dynamiquement ici -->
+                </div>
+
+                <!-- Boutons en bas
+                <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <x-secondary-button as="a" href="#" onclick="closeModal()">⬅️ Annuler</x-secondary-button>
+                    <x-primary-button type="submit" form="produit-form">💾 Enregistrer</x-primary-button>
+                </div> -->
+            </div>
+        </div>
         <script>
+             function openModal() {
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
             document.addEventListener('DOMContentLoaded', function() {
+                const deleteForm = document.getElementById('delete-form');
+                if (!deleteForm) return;
                 document.querySelectorAll('#documents-table tbody tr').forEach(row => {
                     row.addEventListener('dblclick', () => {
+                        
                         const docId = row.dataset.id;
                         window.location.href = `/documents/${docId}/edit`;
                     });
+                    row.addEventListener('click', () => {
+                        const id = row.dataset.id;
+                        const route = row.dataset.route;
+
+                        // Met à jour l’URL de suppression
+                        deleteForm.setAttribute('action', `/${route}/${id}`);
+
+                        // Affiche le bouton supprimer
+                        deleteForm.classList.remove('hidden');
+                    });
+
                 });
             });
         </script>

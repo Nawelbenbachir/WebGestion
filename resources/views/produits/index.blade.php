@@ -65,8 +65,11 @@
 
         // Chargement dynamique du formulaire au clic sur une ligne
         document.addEventListener('DOMContentLoaded', () => {
+            const deleteForm = document.getElementById('delete-form');
+            if (!deleteForm) return;
             document.querySelectorAll('tr[data-id]').forEach(row => {
-                row.addEventListener('click', () => {
+                row.addEventListener('dblclick', () => {
+                    
                     const produitId = row.dataset.id;
                     fetch(`/produits/${produitId}/edit`)
                         .then(res => res.text())
@@ -75,6 +78,16 @@
                             openModal();
                         })
                         .catch(err => console.error('Erreur de chargement :', err));
+                });
+                row.addEventListener('click', () => {
+                    const id = row.dataset.id;
+                    const route = row.dataset.route;
+
+                    // Met à jour l’URL de suppression
+                    deleteForm.setAttribute('action', `/${route}/${id}`);
+
+                    // Affiche le bouton supprimer
+                    deleteForm.classList.remove('hidden');
                 });
             });
         });

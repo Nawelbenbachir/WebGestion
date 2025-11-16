@@ -1,20 +1,3 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container mt-4">
-    <h2 class="mb-4">✏️ Modifier le document : {{ $document->code_document }}</h2>
-
-    {{-- Affichage des erreurs --}}
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong>Erreurs détectées :</strong>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <form action="{{ route('documents.update', $document->id) }}" method="POST">
         @csrf
@@ -115,11 +98,11 @@
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-            <a href="{{ route('documents.index', ['type' => $document->type_document]) }}" class="btn btn-secondary">⬅️ Retour</a>
-            <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
+            <a href="{{ route('documents.index', ['type' => $document->type_document]) }}" class="btn btn-secondary"> Retour</a>
+            <button type="submit" class="btn btn-primary"> Enregistrer les modifications</button>
         </div>
     </form>
 </div>
 
 
-@endsection
+
