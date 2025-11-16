@@ -9,7 +9,7 @@
                     'Code', 'Siret', 'Nom', 'Téléphone', 'Portable 1', 'Portable 2', 'Email',
                     'Adresse', 'Adresse 2', 'Complément', 'Code Postal', 'Ville', 'IBAN'
                 ] as $col)
-                    <th class="px-6 py-3 border-b border-gray-300 dark:border-gray-600 text-center">
+                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">
                         {{ $col }}
                     </th>
                 @endforeach
@@ -22,19 +22,19 @@
                     data-route="parametres"
                     class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900 transition">
 
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->code_societe }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->siret ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ ucfirst($societe->nom_societe) }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->telephone ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->portable1 ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->portable2 ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->email ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->adresse1 ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->adresse2 ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->complement_adresse ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->code_postal ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->ville ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b dark:border-gray-700">{{ $societe->iban ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->code_societe }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->siret ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ ucfirst($societe->nom_societe) }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->telephone ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->portable1 ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->portable2 ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->email ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->adresse1 ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->adresse2 ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->complement_adresse ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->code_postal ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->ville ?? '—' }}</td>
+                    <td class="px-6 py-4 border-b text-end dark:border-gray-700">{{ $societe->iban ?? '—' }}</td>
 
                 </tr>
             @endforeach

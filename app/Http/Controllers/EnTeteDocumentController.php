@@ -182,8 +182,15 @@ public function create(Request $request)
                 'avoir'   => 'avoirs.edit',
                 default   => 'devis.edit',
             };
+             // Si requête AJAX (fetch), renvoyer uniquement le formulaire
+            if (request()->ajax()) {
+                return view($view, compact('document', 'clients', 'produits'));
+            }
 
-        return view($view, compact('document', 'clients', 'produits'));
+            // Sinon renvoyer la page complète
+            return view($view, compact('document', 'clients', 'produits'));
+
+        
     }
 
     /**

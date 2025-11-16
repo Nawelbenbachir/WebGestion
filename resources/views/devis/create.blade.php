@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <div class="container mt-4">
     <h2 class="mb-4">🧾 Créer un nouveau document</h2>
 
@@ -243,4 +241,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
-@endsection
+

@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <div class="container">
     <h1> Ajouter un produit</h1>
 
@@ -77,4 +75,3 @@
 </div>
     </form>
 </div>
-@endsection

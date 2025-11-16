@@ -18,14 +18,14 @@
                 @foreach ($produits as $produit)
                     <tr data-id="{{ $produit->id }}" data-route="produits"
                         class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900 transition">
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->code_produit }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->description }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->categorie ?? '—' }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $produit->code_produit }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $produit->description }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $produit->categorie ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b text-end border-gray-300 dark:border-gray-700">
                             {{ number_format($produit->prix_ht, 2, ',', ' ') }} €
                         </td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->tva }} %</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $produit->qt_stock ?? 0 }}</td>
+                        <td class="px-6 py-4 border-b text-end border-gray-300 dark:border-gray-700">{{ $produit->tva }} %</td>
+                        <td class="px-6 py-4 border-b text-end border-gray-300 dark:border-gray-700">{{ $produit->qt_stock ?? 0 }}</td>
                     </tr>
                 @endforeach
             </tbody>

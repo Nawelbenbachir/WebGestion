@@ -18,14 +18,14 @@
             <tbody class="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                 @foreach ($clients as $client)
                     <tr data-id="{{ $client->id }}" class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900">
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $client->societe }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ ucfirst($client->type) }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $client->telephone ?? '—' }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $client->email ?? '—' }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $client->adresse1 ?? '—' }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $client->code_postal ?? '—' }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">{{ $client->ville ?? '—' }}</td>
-                        <td class="px-6 py-4 border-b border-gray-300 dark:border-gray-700">
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->societe }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ ucfirst($client->type) }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->telephone ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->email ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->adresse1 ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->code_postal ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->ville ?? '—' }}</td>
+                        <td class="px-6 py-4 border-b text-end border-gray-300 dark:border-gray-700">
                             {{ match($client->reglement ?? '') {
                                 'virement' => 'Virement',
                                 'cheque' => 'Chèque',
@@ -55,8 +55,8 @@
 
                 <!-- Boutons en bas -->
                 <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                    <x-secondary-button id="cancelModalBtn">⬅️ Annuler</x-secondary-button>
-                    <x-primary-button id="saveModalBtn" type="button">💾 Enregistrer</x-primary-button>
+                    <x-secondary-button id="cancelModalBtn">Annuler</x-secondary-button>
+                    <x-primary-button id="saveModalBtn" type="button"> Enregistrer</x-primary-button>
                 </div>
             </div>
         </div>
