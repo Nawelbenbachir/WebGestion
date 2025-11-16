@@ -20,6 +20,9 @@ class EnTeteDocument extends Model
         'adresse',
         'telephone',
         'email',
+        'date_echeance',
+        'commentaire',
+        'statut',
 
     ];
     public function societe()

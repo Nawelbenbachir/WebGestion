@@ -46,6 +46,14 @@
                         @endforeach
                     </datalist>
                 </div>
+                <div class="mb-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select name="statut" id="statut" class="form-control">
+                        <option value="brouillon">Brouillon</option>
+                        <option value="envoye">Envoyé</option>
+                        <option value="paye">Payé</option>
+                    </select>
+                </div>
             </div>
         </div>
 

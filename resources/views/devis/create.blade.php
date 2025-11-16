@@ -1,6 +1,6 @@
 
 <div class="container mt-4">
-    <h2 class="mb-4">🧾 Créer un nouveau document</h2>
+    <h2 class="mb-4">Créer un nouveau document</h2>
 
     {{--  Affichage des erreurs --}}
     @if ($errors->any())
@@ -47,6 +47,14 @@
                             </option>
                         @endforeach
                     </datalist>
+                </div>
+                <div class="mb-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select name="statut" id="statut" class="form-control">
+                        <option value="brouillon">Brouillon</option>
+                        <option value="envoye">Envoyé</option>
+                        <option value="paye">Payé</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -108,8 +116,8 @@
         </div>
         {{-- Boutons d’action --}}
         <div class="d-flex justify-content-between">
-            <a href="{{ route('documents.index') }}" class="btn btn-secondary">⬅️ Annuler</a>
-            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+            <a href="{{ route('documents.index') }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary"> Enregistrer</button>
         </div>
     </form>
 </div>
@@ -239,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
+
 
 
 

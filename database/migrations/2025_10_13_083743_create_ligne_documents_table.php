@@ -38,9 +38,7 @@ return new class extends Migration
 
     //  Commentaire pour la ligne
     $table->text('commentaire')->nullable();
-});
-
-       
+});  
     }
 
     /**
