@@ -13,7 +13,7 @@
             </ul>
         </div>
     @endif
-
+    
     {{--  Formulaire principal --}}
     <form action="{{ route('documents.store') }}" method="POST">
         @csrf
@@ -122,15 +122,14 @@
     </form>
 </div>
 
-{{--  Script dynamique pour produits + calculs + lignes --}}
-
+<!-- {{--  Script dynamique pour produits + calculs + lignes --}}
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const tbody = document.querySelector('#lignesTable tbody');
     const datalist = document.getElementById('produits');
-    const addRowBtn = document.getElementById('addRow');
 
-    //  Calcul du total TTC
+    // --- Fonctions utilitaires ---
     function updatePrixTTC(row) {
         const qte = parseFloat(row.querySelector('.quantite').value) || 0;
         const prix = parseFloat(row.querySelector('.prix').value) || 0;
@@ -139,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.total').value = total.toFixed(2);
     }
 
-    // Réinitialise une ligne
     function resetRow(row) {
         row.querySelector('.produit-input').value = '';
         row.querySelector('.description').value = '';
@@ -147,17 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
         row.querySelector('.prix').value = '';
         row.querySelector('.tva').value = '';
         row.querySelector('.total').value = '';
+
+        // S'assure que l'input reste lié au datalist
+        row.querySelector('.produit-input').setAttribute('list', 'produits');
+
+        updatePrixTTC(row);
     }
 
-    //  Ajoute une ligne vide à la suite de celle cliquée
-    function addRowAfter(currentRow) {
-        const newRow = currentRow.cloneNode(true);
-        resetRow(newRow);
-        currentRow.insertAdjacentElement('afterend', newRow);
-        updateAllNames();
-    }
-
-    //  Met à jour les noms des inputs pour chaque ligne
     function updateAllNames() {
         tbody.querySelectorAll('tr').forEach((row, i) => {
             row.querySelector('.produit-input').setAttribute('name', `lignes[${i}][produit_code]`);
@@ -168,21 +162,59 @@ document.addEventListener('DOMContentLoaded', function() {
             row.querySelector('.total').setAttribute('name', `lignes[${i}][total_ttc]`);
         });
         updateTotals();
-        updatePrixTTC(row);
     }
 
-    //  Gestion des saisies (produit, quantite, tva)
+    function updateTotals() {
+        let totalHT = 0, totalTVA = 0, totalTTC = 0;
+
+        tbody.querySelectorAll('tr').forEach(row => {
+            const qte = parseFloat(row.querySelector('.quantite').value) || 0;
+            const prix = parseFloat(row.querySelector('.prix').value) || 0;
+            const tva = parseFloat(row.querySelector('.tva').value) || 0;
+
+            const totalLigneHT = qte * prix;
+            const totalLigneTVA = totalLigneHT * (tva / 100);
+            const totalLigneTTC = totalLigneHT + totalLigneTVA;
+
+            totalHT += totalLigneHT;
+            totalTVA += totalLigneTVA;
+            totalTTC += totalLigneTTC;
+        });
+
+        document.getElementById('total_ht').value = totalHT.toFixed(2);
+        document.getElementById('total_tva').value = totalTVA.toFixed(2);
+        document.getElementById('total_ttc').value = totalTTC.toFixed(2);
+
+        document.getElementById('display_total_ht').textContent = totalHT.toFixed(2) + ' €';
+        document.getElementById('display_total_tva').textContent = totalTVA.toFixed(2) + ' €';
+        document.getElementById('display_total_ttc').textContent = totalTTC.toFixed(2) + ' €';
+    }
+
+    function addRowAfter(currentRow) {
+        const newRow = currentRow.cloneNode(true);
+        resetRow(newRow);
+        currentRow.insertAdjacentElement('afterend', newRow);
+        updateAllNames();
+    }
+
+    // --- Gestion des événements ---
     tbody.addEventListener('input', (e) => {
         const row = e.target.closest('tr');
 
         if (e.target.classList.contains('produit-input')) {
             const code = e.target.value.trim();
-            const option = Array.from(datalist.options).find(opt => opt.value === code);
+            let selectedOption = null;
+            for (let option of datalist.options) {
+                if (option.value === code) {
+                    selectedOption = option;
+                    break;
+                }
+            }
 
-            if (option) {
-                row.querySelector('.description').value = option.dataset.designation || '';
-                row.querySelector('.prix').value = option.dataset.prix || '';
-                row.querySelector('.tva').value = option.dataset.tva || '';
+            if (selectedOption) {
+                row.querySelector('.description').value = selectedOption.dataset.designation || '';
+                row.querySelector('.prix').value = selectedOption.dataset.prix || '';
+                row.querySelector('.tva').value = selectedOption.dataset.tva || '';
                 updatePrixTTC(row);
             } else {
                 resetRow(row);
@@ -191,21 +223,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (e.target.classList.contains('quantite') || e.target.classList.contains('tva')) {
             updatePrixTTC(row);
+            updateTotals();
         }
     });
 
-    //  Bouton global "Ajouter une ligne" (à la fin du tableau)
-    if (addRowBtn) {
-        addRowBtn.addEventListener('click', () => {
-            const firstRow = tbody.querySelector('tr');
-            const newRow = firstRow.cloneNode(true);
-            resetRow(newRow);
-            tbody.appendChild(newRow);
-            updateAllNames();
-        });
-    }
-
-    //  Boutons dans chaque ligne (➕ et 🗑️)
     tbody.addEventListener('click', (e) => {
         const row = e.target.closest('tr');
         if (e.target.classList.contains('addRowBelow')) {
@@ -217,37 +238,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateAllNames();
             }
         }
-
     });
-    function updateTotals() {
-    let totalHT = 0, totalTVA = 0, totalTTC = 0;
 
-    tbody.querySelectorAll('tr').forEach(row => {
-        const qte = parseFloat(row.querySelector('.quantite').value) || 0;
-        const prix = parseFloat(row.querySelector('.prix').value) || 0;
-        const tva = parseFloat(row.querySelector('.tva').value) || 0;
-        const totalLigneHT = qte * prix;
-        const totalLigneTVA = totalLigneHT * (tva / 100);
-        const totalLigneTTC = totalLigneHT + totalLigneTVA;
+    // Si tu as un bouton global "Ajouter une ligne" en bas
+    const addRowBtn = document.getElementById('addRow');
+    if (addRowBtn) {
+        addRowBtn.addEventListener('click', () => {
+            const firstRow = tbody.querySelector('tr');
+            const newRow = firstRow.cloneNode(true);
+            resetRow(newRow);
+            tbody.appendChild(newRow);
+            updateAllNames();
+        });
+    }
 
-        totalHT += totalLigneHT;
-        totalTVA += totalLigneTVA;
-        totalTTC += totalLigneTTC;
-    });
-    document.getElementById('total_ht').value = totalHT.toFixed(2);
-    document.getElementById('total_tva').value = totalTVA.toFixed(2);
-    document.getElementById('total_ttc').value = totalTTC.toFixed(2);
-
-    // affichage visuel
-    document.getElementById('display_total_ht').textContent = totalHT.toFixed(2) + ' €';
-    document.getElementById('display_total_tva').textContent = totalTVA.toFixed(2) + ' €';
-    document.getElementById('display_total_ttc').textContent = totalTTC.toFixed(2) + ' €';
-    
-}
-
+    // Initialisation au chargement
+    updateAllNames();
 });
 </script>
-
-
+@endpush
+ -->
 
 

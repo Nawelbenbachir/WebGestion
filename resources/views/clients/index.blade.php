@@ -17,7 +17,7 @@
 
             <tbody class="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                 @foreach ($clients as $client)
-                    <tr data-id="{{ $client->id }}" class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900">
+                    <tr data-id="{{ $client->id }}" data-route="clients" class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900">
                         <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->societe }}</td>
                         <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ ucfirst($client->type) }}</td>
                         <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $client->telephone ?? '—' }}</td>

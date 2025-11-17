@@ -138,6 +138,7 @@ public function create(Request $request)
         'adresse'       => $client->adresse ?? null,
         'telephone'     => $client->telephone ?? null,
         'email'         => $client->email ?? null,
+        'statut'        => $validated['statut'] ?? 'brouillon',
     ]);
 
     //  Créer les lignes

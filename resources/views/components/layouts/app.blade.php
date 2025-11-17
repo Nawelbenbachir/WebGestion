@@ -8,14 +8,13 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <x-navigation>
-    </x-navigation>
+    <x-navigation></x-navigation>
 
     <main class="max-w-full py-8 px-4">
        {{ $slot }}
     </main>
-    <!-- pour exécuter les scripts -->
+
+    <!-- Stack pour les scripts -->
     @stack('scripts') 
 </body>
 </html>
-
