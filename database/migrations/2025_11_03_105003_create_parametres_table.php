@@ -17,18 +17,27 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
         });
-        // Trigger pour limiter la table à 1 ligne
-        DB::unprepared('
-            CREATE TRIGGER trig_verif_unique_parametre
-            BEFORE INSERT ON parametres
-            FOR EACH ROW
-            BEGIN
-                IF (SELECT COUNT(*) FROM parametres) >= 1 THEN
-                    SIGNAL SQLSTATE "45000" SET MESSAGE_TEXT = "Une seule ligne est autorisée dans la table parametres";
-                END IF;
-            END;
-        ');
     }
+
+//         DB::unprepared('
+//        CREATE TRIGGER trig_after_insert_parametre
+// AFTER INSERT ON parametres
+// FOR EACH ROW
+// BEGIN
+//     DELETE FROM parametres WHERE id != NEW.id;
+// END;
+//         ');
+//     
+
+//         CREATE TRIGGER trig_verif_unique_parametre
+// BEFORE INSERT ON parametres
+// FOR EACH ROW
+// BEGIN
+//     IF (SELECT COUNT(*) FROM parametres) >= 1 THEN
+//         SIGNAL SQLSTATE "45000" SET MESSAGE_TEXT = "Une seule ligne est autorisée dans la table parametres";
+//     END IF;
+// END;
+    
 
 
         // DB::unprepared('DROP TRIGGER IF EXISTS before_insert_parametres;');
@@ -60,7 +69,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS trig_verif_unique_parametre');
+        //DB::unprepared('DROP TRIGGER IF EXISTS trig_verif_unique_parametre');
+       // DB::unprepared('DROP TRIGGER IF EXISTS trig_keep_one_parametre');
         Schema::dropIfExists('parametres');
     }
 };

@@ -39,6 +39,7 @@ class AuthenticatedSessionController extends Controller
 
     if ($societeId) {
         // Ici le trigger se charge de supprimer l'ancienne ligne si elle existe
+        //sans trigger : c'est truncate qui supp la ligne existante
         Parametre::truncate(); 
         Parametre::create(['derniere_societe' => $societeId]);
     }

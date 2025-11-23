@@ -19,7 +19,7 @@
                         id="{{ $field }}" 
                         value="{{ old($field, $produit->$field ?? '') }}"
                         required
-                        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        class=""
                     >
                     <x-input-error :messages="$errors->get($field)" />
                 </div>
@@ -36,7 +36,7 @@
                         step="0.01"
                         value="{{ old('prix_ht', $produit->prix_ht ?? '') }}"
                         required
-                        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        class=""
                     >
                     <x-input-error :messages="$errors->get('prix_ht')" />
                 </div>
@@ -49,7 +49,7 @@
                         step="0.01"
                         value="{{ old('tva', $produit->tva ?? 20) }}"
                         required
-                        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        class=""
                     >
                     <x-input-error :messages="$errors->get('tva')" />
                 </div>
@@ -64,7 +64,7 @@
                     id="qt_stock" 
                     value="{{ old('qt_stock', $produit->qt_stock ?? 0) }}"
                     required
-                    class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    class=""
                 >
                 <x-input-error :messages="$errors->get('qt_stock')" />
             </div>
@@ -73,40 +73,33 @@
         {{-- Colonne droite --}}
         <div class="space-y-4">
             {{-- Sélecteur de catégories existantes --}}
-    <div>
-        <x-input-label for="categorie_select" value="Catégorie existante" />
-        <select 
-            name="categorie_select" 
-            id="categorie_select" 
-            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-        >
-            <option value="">-- Sélectionner une catégorie --</option>
-            @foreach($categories as $categorie)
-                <option value="{{ $categorie }}" {{ old('categorie_select', $produit->categorie) == $categorie ? 'selected' : '' }}>
-                    {{ $categorie }}
-                </option>
-            @endforeach
-        </select>
-        <x-input-error :messages="$errors->get('categorie_select')" />
-    </div>
+            <div>
+                <x-input-label for="categorie_select" value="Catégorie existante" />
+                <select name="categorie_select" id="categorie_select" class="">
+                    <option value="">-- Sélectionner une catégorie --</option>
+                    @foreach($categories as $categorie)
+                        <option value="{{ $categorie }}" {{ old('categorie_select', $produit->categorie) == $categorie ? 'selected' : '' }}>
+                            {{ $categorie }}
+                        </option>
+                    @endforeach
+                </select>
+                <x-input-error :messages="$errors->get('categorie_select')" />
+            </div>
 
-    {{-- Champ pour nouvelle catégorie --}}
-    <div>
-        <x-input-label for="categorie" value="Nouvelle catégorie" />
-        <input 
-            type="text" 
-            name="categorie" 
-            id="categorie" 
-            value="{{ old('categorie', $produit->categorie ?? '') }}"
-            placeholder="Ajouter une nouvelle catégorie"
-            class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-        >
-        <x-input-error :messages="$errors->get('categorie')" />
-    </div>
+            {{-- Champ pour nouvelle catégorie --}}
+            <div>
+                <x-input-label for="categorie" value="Nouvelle catégorie" />
+                <input 
+                    type="text" 
+                    name="categorie" 
+                    id="categorie" 
+                    value="{{ old('categorie', $produit->categorie ?? '') }}"
+                    placeholder="Ajouter une nouvelle catégorie"
+                    class=""
+                >
+                <x-input-error :messages="$errors->get('categorie')" />
+            </div>
         </div> {{-- Fin colonne droite --}}
-
-        
-
     </div> {{-- Fin grid --}}
 
     {{-- Boutons --}}

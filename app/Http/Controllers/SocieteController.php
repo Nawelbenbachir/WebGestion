@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Societe;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Illuminate\Http\Response;
+use App\Models\Parametre;
 
 class SocieteController extends Controller
 {
@@ -97,7 +101,19 @@ class SocieteController extends Controller
 
         return redirect()->route('parametres.index')->with('success', 'Société mise à jour avec succès.');
     }
+    public function updateSelection(Request $request)
+    {
+        $request->validate([
+            'societe_id' => 'required|exists:societes,id',
+        ]);
 
+        $societeId = $request->input('societe_id');
+
+        // Mettre à jour ou créer la ligne Parametre pour stocker la dernière société
+        Parametre::updateOrCreate([], ['derniere_societe' => $societeId]);
+
+        return redirect()->back();
+    }
     /**
      * Supprime une société.
      */

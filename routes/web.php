@@ -12,7 +12,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 Route::resource('user', UserController::class);
 
@@ -21,7 +21,9 @@ Route::resource('clients', ClientController::class)->except(['show']);
 Route::resource('produits', ProduitController::class);
 
 Route::resource('societes', SocieteController::class);
-
+Route::post('/societe/update-selection', [SocieteController::class, 'updateSelection'])
+    ->name('societe.update')
+    ->middleware('auth');
 Route::resource('documents',EnTeteDocumentController::class);
 
 
