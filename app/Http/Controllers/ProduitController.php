@@ -50,7 +50,8 @@ class ProduitController extends Controller
     public function edit($id)
     {
         $produit = Produit::findOrFail($id);
-        return view('produits.edit', compact('produit'));
+       $categories = Produit::distinct()->pluck('categorie'); 
+        return view('produits.edit', compact('produit', 'categories'));
     }
 
 public function store(Request $request)

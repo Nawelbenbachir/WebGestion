@@ -49,10 +49,10 @@ class AuthenticatedSessionController extends Controller
     protected function authenticated(Request $request, $user)
 {
     $societeId = $request->input('societe_id');
-    if ($societeId) {
-        // Mettre à jour ou créer la ligne Parametre pour stocker la dernière société
-        Parametre::updateOrCreate([], ['derniere_societe' => $societeId]);
-    }
+    // if ($societeId) {
+    //     // Mettre à jour ou créer la ligne Parametre pour stocker la dernière société
+    //     Parametre::updateOrCreate([], ['derniere_societe' => $societeId]);
+    // }
    
     return redirect()->intended('dashboard');
 }

@@ -156,8 +156,9 @@
         </div>
     </div>
 
-    <div class="flex justify-end gap-3 mt-4">
-        <x-secondary-button type="button" onclick="closeCreateModal()">Annuler</x-secondary-button>
-        <x-primary-button type="submit">Enregistrer</x-primary-button>
+    <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <x-primary-button type="submit" class="btn btn-primary">Enregistrer</x-primary-button>
+        <x-secondary-button type="button">  <a href="{{ route('clients.index') }}" class="btn btn-secondary"> Retour</a>
+        </x-secondary-button>
     </div>
 </form>

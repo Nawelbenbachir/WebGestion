@@ -1,6 +1,6 @@
 
 <div class="container mt-4">
-    <h2 class="mb-4">Créer un nouveau document</h2>
+    
 
     {{--  Affichage des erreurs --}}
     @if ($errors->any())
@@ -26,9 +26,6 @@
         <input type="hidden" id="total_tva" name="total_tva" value="0">
         <input type="hidden" id="total_ttc" name="total_ttc" value="0">
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <strong>Informations générales</strong>
-            </div>
             <div class="card-body">
                 <div class="mb-3">
                     <label for="date_document" class="form-label">Date du document</label>
@@ -114,15 +111,15 @@
             <strong>Total TVA :</strong> <span id="display_total_tva">0.00 €</span><br>
             <strong>Total TTC :</strong> <span id="display_total_ttc">0.00 €</span>
         </div>
-        {{-- Boutons d’action --}}
-        <div class="d-flex justify-content-between">
-            <a href="{{ route('documents.index') }}" class="btn btn-secondary">Annuler</a>
-            <button type="submit" class="btn btn-primary"> Enregistrer</button>
+        <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <x-primary-button type="submit" class="btn btn-primary">Enregistrer</x-primary-button>
+            <a href="{{ route('devis.index') }}" class="btn btn-secondary">⬅️ Retour</a>
+           
         </div>
     </form>
 </div>
 
-<!-- {{--  Script dynamique pour produits + calculs + lignes --}}
+{{--  Script dynamique pour produits + calculs + lignes --}}
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -257,6 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
- -->
+
 
 

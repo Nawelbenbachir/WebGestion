@@ -11,19 +11,19 @@
             <div class="flex gap-3">
                 <x-primary-button
                     type="button"
-                    onclick="openCreateModal('{{ route($createRoute) }}')"
+                    onclick="openModal('{{ route($createRoute) }}')"
                     class="bg-blue-600 hover:bg-blue-700 text-white">
                     {{ $createLabel }}
                 </x-primary-button>
 
-                {{-- Bouton Supprimer --}}
+                <!-- {{-- Bouton Supprimer --}}
                 <form id="delete-form" method="POST" action="#" class="hidden" onsubmit="return confirm('Supprimer cet élément ?')">
                     @csrf
                     @method('DELETE')
                     <x-danger-button type="submit" class="bg-red-600 hover:bg-red-700 text-white">
                         Supprimer
                     </x-danger-button>
-                </form>
+                </form> -->
             </div>
         @endif
     </div>
@@ -33,59 +33,131 @@
         {{ $slot }}
     </div>
 
-    {{-- Modal création/édition --}}
-    <div id="createModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative flex flex-col max-h-[80vh]">
+   {{-- Modal unique pour create/edit --}}
+<div id="modal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-5xl relative flex flex-col max-h-[90vh]">
 
-            <button onclick="closeCreateModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 font-bold text-xl z-10">✖</button>
+        <!-- Bouton fermer -->
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 font-bold text-xl z-10">✖</button>
 
-            <div id="create-form-container" class="overflow-auto p-6 flex-1 space-y-4"></div>
+        <!-- Contenu dynamique -->
+        <div id="modal-content" class="overflow-y-auto p-6 flex-1 space-y-4"></div>
 
-            <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <x-secondary-button type="button" onclick="closeCreateModal()">Annuler</x-secondary-button>
-                <x-primary-button type="submit" form="document-form"> Enregistrer</x-primary-button>
-            </div>
-        </div>
     </div>
 </div>
 
+
 @push('scripts')
 <script>
-// --- Modal fetch ---
-function openCreateModal(url) {
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Double-clic sur la ligne
+    document.querySelectorAll('tr[data-id]').forEach(row => {
+        row.addEventListener('dblclick', () => {
+            // URL construite dynamiquement
+            const route = row.dataset.route; // ex: 'clients', 'produits', ...
+            const id = row.dataset.id;
+            if (!route || !id) return;
+            const url = `/${route}/${id}/edit`; 
+            openModal(url);
+        });
+    });
+
+        // Clic sur le crayon
+        document.querySelectorAll('[data-edit-url]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation(); // pour ne pas déclencher le dblclick
+                const url = btn.dataset.editUrl;
+                console.log('Ouverture modal pour URL :', url);
+                openModal(url); // utilise le modal du composant table
+            });
+        });
+
+    });
+
+function openModal(url) {
     fetch(url)
-        .then(res => res.ok ? res.text() : Promise.reject('Erreur '+res.status))
+        .then(res => {
+            if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
+            return res.text();
+        })
         .then(html => {
-            const container = document.getElementById('create-form-container');
+            const container = document.getElementById('modal-content');
             container.innerHTML = html;
+            // Initialiser le UX pour catégorie
+            const selectCategorie = container.querySelector('#categorie_select');
+            const inputCategorie = container.querySelector('#categorie');
 
-            // Ajout des classes Tailwind
+            if (selectCategorie && inputCategorie) {
+                function toggleCategorieInput() {
+                    inputCategorie.disabled = selectCategorie.value !== "";
+                }
+
+            // Initial
+            toggleCategorieInput();
+
+            // Quand le select change
+            selectCategorie.addEventListener('change', toggleCategorieInput);
+        }
+            // Appliquer styles
             container.querySelectorAll('input, select, textarea').forEach(el => {
-                if (!el.classList.contains('rounded-md')) {
-                    el.classList.add('w-full','rounded-md','border-gray-300','dark:border-gray-600','bg-white','dark:bg-gray-800','text-gray-900','dark:text-gray-100','shadow-sm','px-2','py-1');
-                }
-            });
-            container.querySelectorAll('label').forEach(lb => {
-                if (!lb.classList.contains('block')) {
-                    lb.classList.add('block','text-sm','font-medium','text-gray-700','dark:text-gray-300','mb-1');
-                }
+                el.classList.add(
+                    'w-full','rounded-md','border-gray-300','dark:border-gray-600',
+                    'bg-white','dark:bg-gray-800','text-gray-900','dark:text-gray-100',
+                    'shadow-sm','px-2','py-1'
+                );
             });
 
-            initDevisForm(container); // <-- Initialisation du formulaire
-
-            document.getElementById('createModal').classList.remove('hidden');
+            document.getElementById('modal').classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
+
+            // Si c'est un formulaire de devis, initialiser le script
+            if (container.querySelector('#lignesTable')) {
+                initDevisForm(container);
+            }
         })
         .catch(err => {
-            console.error('Erreur chargement formulaire :', err);
+            console.error('Erreur de chargement du formulaire :', err);
             alert('Erreur lors du chargement du formulaire.');
         });
 }
 
-function closeCreateModal() {
-    document.getElementById('createModal').classList.add('hidden');
+function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
 }
+
+
+//soumettre le formulaire actuellement chargé
+function submitCurrentForm() {
+    const container = document.getElementById('create-form-container');
+    if(!container) return;
+
+    const form = container.querySelector('form');
+    if(!form) return alert('Aucun formulaire trouvé !');
+
+    const formData = new FormData(form);
+    fetch(form.action, {
+        method: form.method || 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            alert('Enregistré avec succès !');
+            closeCreateModal();
+            if(document.getElementById('documents-table-container')){
+                refreshDocumentsTable();
+            }
+        } else if(data.errors){
+            console.log(data.errors);
+            alert('Erreur : voir console.');
+        }
+    })
+    .catch(err => { console.error(err); alert('Erreur lors de l\'enregistrement'); });
+}
+
 
 // --- Fonction d'initialisation du formulaire de devis ---
 function initDevisForm(container) {

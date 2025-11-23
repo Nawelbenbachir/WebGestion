@@ -66,7 +66,7 @@ public function create(Request $request)
 {
     $type = $request->get('type', 'devis');
 
-    //  Récupération de l’ID de la société depuis la table "parametres"
+    // Récupération de l’ID de la société depuis la table "parametres"
     $parametre = Parametre::first();
     $idSociete = $parametre ? $parametre->derniere_societe : null;
 
@@ -78,17 +78,17 @@ public function create(Request $request)
     $clients = Client::where('id_societe', $idSociete)->get();
     $produits = Produit::where('id_societe', $idSociete)->get();
 
-  
+    // Choix de la vue selon le type de document
     $view = match ($type) {
         'facture' => 'factures.create',
         'avoir'   => 'avoirs.create',
         default   => 'devis.create',
     };
 
- 
-    return view($view, compact('type', 'clients', 'produits', 'parametre'));
-
+     return view($view, compact('type', 'clients', 'produits', 'parametre'));
 }
+
+
 
 
 
@@ -155,10 +155,11 @@ public function create(Request $request)
     }
    
 
-    //  Redirection
-    return redirect()
-        ->route('documents.index', ['type' => $validated['type_document']])
-        ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
+   
+    // //  Redirection
+    // return redirect()
+    //     ->route('documents.index', ['type' => $validated['type_document']])
+       // ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
 }
 
     /**

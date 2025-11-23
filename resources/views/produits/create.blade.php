@@ -70,8 +70,10 @@
             <input type="text" name="qt_stock" id="qt_stock" class="form-control" value="{{ old('qt_stock') }}">
         </div>
 
-        <button type="submit" class="btn btn-primary">✅ Enregistrer</button>
-        <a href="{{ route('clients.index') }}" class="btn btn-secondary">⬅️ Retour</a>
-</div>
+        <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <x-primary-button type="submit" class="btn btn-primary">Enregistrer</x-primary-button>
+        <x-secondary-button type="button"> <a href="{{ route('produits.index') }}" class="btn btn-secondary"> Retour</a> </x-secondary-button>
+        </div>
+    
     </form>
 </div>
