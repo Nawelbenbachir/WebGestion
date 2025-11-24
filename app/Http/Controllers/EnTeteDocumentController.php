@@ -69,31 +69,36 @@ class EnTeteDocumentController extends Controller
 
 public function create(Request $request)
 {
+    // Type du document (par défaut : devis)
     $type = $request->get('type', 'devis');
 
-    // Récupération de l’ID de la société depuis la table "parametres"
+    // Société sélectionnée dans les paramètres
     $parametre = Parametre::first();
-    $idSociete = $parametre ? $parametre->derniere_societe : null;
+    $idSociete = $parametre?->derniere_societe;
 
     if (!$idSociete) {
         return back()->withErrors('Aucune société sélectionnée dans les paramètres.');
     }
 
-    // Récupération des clients et produits liés à cette société
+    // Clients + produits liés à cette société
     $clients = Client::where('id_societe', $idSociete)->get();
     $produits = Produit::where('id_societe', $idSociete)->get();
 
-    // Choix de la vue selon le type de document
+    // Sélection de la vue selon le type
     $view = match ($type) {
-        'facture' => 'factures.create',
-        'avoir'   => 'avoirs.create',
+        'facture' => 'facture.create',
+        'avoir'   => 'avoir.create',
         default   => 'devis.create',
     };
-    
 
-    return view('devis.create', ['type'=>'devis', 'clients' => $clients, 'produits' => $produits, 'parametre' => $parametre]);
-
+    return view($view, [
+        'type'      => $type,
+        'clients'   => $clients,
+        'produits'  => $produits,
+        'parametre' => $parametre,
+    ]);
 }
+
 
  public function store(Request $request)
 {
@@ -201,28 +206,100 @@ public function create(Request $request)
     /**
      * Mise à jour d’un document
      */
-    public function update(Request $request, $id)
-    {
-        $document = EnTeteDocument::findOrFail($id);
+   public function update(Request $request, $id)
+{
+    $document = EnTeteDocument::with('lignes')->findOrFail($id);
 
-        $validated = $request->validate([
-            'date_document' => 'date',
-            'total_ht'      => 'numeric|min:0',
-            'total_tva'     => 'numeric|min:0',
-            'total_ttc'     => 'numeric|min:0',
-            'client_nom'    => 'nullable|string|max:255',
-            'logo'          => 'nullable|string',
-            'adresse'       => 'nullable|string',
-            'telephone'     => 'nullable|string|max:20',
-            'email'         => 'nullable|email',
-        ]);
+    // Validation de l'en-tête + lignes
+    $validated = $request->validate([
+        'date_document' => 'required|date',
+        'total_ht'      => 'required|numeric|min:0',
+        'total_tva'     => 'required|numeric|min:0',
+        'total_ttc'     => 'required|numeric|min:0',
+        'client_nom'    => 'nullable|string|max:255',
+        'logo'          => 'nullable|string',
+        'adresse'       => 'nullable|string',
+        'telephone'     => 'nullable|string|max:20',
+        'email'         => 'nullable|email',
 
-        $document->update($validated);
+        // Validation des lignes
+        'lignes' => 'sometimes|array',
+        'lignes.*.id' => 'nullable|exists:ligne_documents,id', // id des lignes existantes
+        'lignes.*.produit_code' => 'required|string|exists:produits,code_produit',
+        'lignes.*.description'  => 'nullable|string',
+        'lignes.*.quantite'     => 'required|numeric|min:1',
+        'lignes.*.prix_unitaire_ht' => 'required|numeric|min:0',
+        'lignes.*.taux_tva'         => 'required|numeric|min:0',
+        'lignes.*.total_ttc'        => 'required|numeric|min:0',
+    ]);
 
-        return redirect()
-            ->route('documents.index', ['type' => $document->type_document])
-            ->with('success', ucfirst($document->type_document) . ' mis à jour avec succès.');
+    // Mettre à jour l'en-tête
+    $document->update([
+        'date_document' => $validated['date_document'],
+        'total_ht'      => $validated['total_ht'],
+        'total_tva'     => $validated['total_tva'],
+        'total_ttc'     => $validated['total_ttc'],
+        'client_nom'    => $validated['client_nom'] ?? $document->client_nom,
+        'logo'          => $validated['logo'] ?? $document->logo,
+        'adresse'       => $validated['adresse'] ?? $document->adresse,
+        'telephone'     => $validated['telephone'] ?? $document->telephone,
+        'email'         => $validated['email'] ?? $document->email,
+    ]);
+
+    // Traiter les lignes
+    $ligneIdsFormulaire = [];
+
+    if (!empty($validated['lignes'])) {
+        foreach ($validated['lignes'] as $ligneData) {
+            $produit = Produit::where('code_produit', $ligneData['produit_code'])->first();
+
+            if (isset($ligneData['id'])) {
+                // Mise à jour d'une ligne existante
+                $ligne = LigneDocument::find($ligneData['id']);
+                if ($ligne) {
+                    $ligne->update([
+                        'produit_id'       => $produit->id,
+                        'description'      => $ligneData['description'] ?? '',
+                        'quantite'         => $ligneData['quantite'],
+                        'prix_unitaire_ht' => $ligneData['prix_unitaire_ht'],
+                        'taux_tva'         => $ligneData['taux_tva'],
+                        'total_ttc'        => $ligneData['total_ttc'],
+                    ]);
+                    $ligneIdsFormulaire[] = $ligne->id;
+                }
+            } else {
+                // Nouvelle ligne
+                $nouvelleLigne = LigneDocument::create([
+                    'document_id'      => $document->id,
+                    'produit_id'       => $produit->id,
+                    'description'      => $ligneData['description'] ?? '',
+                    'quantite'         => $ligneData['quantite'],
+                    'prix_unitaire_ht' => $ligneData['prix_unitaire_ht'],
+                    'taux_tva'         => $ligneData['taux_tva'],
+                    'total_ttc'        => $ligneData['total_ttc'],
+                ]);
+                $ligneIdsFormulaire[] = $nouvelleLigne->id;
+            }
+        }
     }
+
+    // Supprimer les lignes retirées du formulaire
+    $document->lignes()->whereNotIn('id', $ligneIdsFormulaire)->delete();
+
+    $typeReverseMap = [
+    'F' => 'facture',
+    'D' => 'devis',
+    'A' => 'avoir',
+    ];
+
+    $typeTexte = $typeReverseMap[$document->type_document] ?? 'devis';
+
+    return redirect()
+        ->route('documents.index', ['type' => $typeTexte])
+        ->with('success', ucfirst($typeTexte) . ' mis à jour avec succès.');
+
+}
+
 
     /**
      * Suppression d’un document

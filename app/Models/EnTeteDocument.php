@@ -25,6 +25,11 @@ class EnTeteDocument extends Model
         'statut',
 
     ];
+    protected $casts = [
+    'total_ht'  => 'float',
+    'total_tva' => 'float',
+    'total_ttc' => 'float',
+    ];
     public function societe()
     {
         return $this->belongsTo(Societe::class);

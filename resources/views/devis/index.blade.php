@@ -14,8 +14,8 @@
             <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr>
                     <th class="px-6 py-3 border-b text-center dark:text-gray-100"></th>
-                    <th class="px-6 py-3 border-b text-center dark:text-gray-100">Code Devis</th>
-                    <th class="px-6 py-3 border-b text-center dark:text-gray-100">Type</th>
+                    <th class="px-6 py-3 border-b text-center dark:text-gray-100">Code Devis </th>
+                    <!-- <th class="px-6 py-3 border-b text-center dark:text-gray-100">Type</th> -->
                     <th class="px-6 py-3 border-b text-center dark:text-gray-100">Date</th>
                     <th class="px-6 py-3 border-b text-center dark:text-gray-100">Client</th>
                     <th class="px-6 py-3 border-b text-end dark:text-gray-100">Total TTC (€)</th>
@@ -33,7 +33,7 @@
                         />
                     </td>
                     <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $document->code_document }}</td>
-                    <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ ucfirst($document->type_document) }}</td>
+                    <!-- <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ ucfirst($document->type_document) }}</td> -->
                     <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $document->date_document }}</td>
                     <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">{{ $document->client_nom }}</td>
                     <td class="px-6 py-4 border-b text-end border-gray-300 dark:border-gray-700">{{ number_format($document->total_ttc, 2, ',', ' ') }}</td>

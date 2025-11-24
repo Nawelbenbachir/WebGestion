@@ -87,7 +87,8 @@
                             <td>
                                 <input type="number" name="lignes[{{ $i }}][prix_unitaire_ht]" step="0.01" readonly
                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-1 prix"
-                                       value="{{ old("lignes.$i.prix_unitaire_ht", $ligne->prix_ht) }}">
+                                       value="{{ old("lignes.$i.prix_unitaire_ht", $ligne->prix_unitaire_ht) }}"
+
                             </td>
                             <td>
                                 <input type="number" name="lignes[{{ $i }}][taux_tva]" step="0.1" readonly

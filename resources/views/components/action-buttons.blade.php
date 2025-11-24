@@ -1,6 +1,6 @@
 @props([
     'editUrl' => null,
-    'deleteRoute',
+     'deleteRoute' => null,   {{--  optionnel --}}
     'deleteLabel' => 'cet élément'  {{-- valeur par défaut --}}
 ])
 
