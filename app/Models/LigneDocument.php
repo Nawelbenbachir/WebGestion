@@ -22,4 +22,8 @@ class LigneDocument extends Model
     {
         return $this->belongsTo(EnTeteDocument::class, 'document_id');
     }
+    public function produit()
+    {
+        return $this->belongsTo(Produit::class, 'produit_id');
+    }
 }

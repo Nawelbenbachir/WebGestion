@@ -16,30 +16,35 @@ class EnTeteDocumentController extends Controller
      * Affiche la liste des documents (filtrés par type)
      */
     public function index(Request $request)
-    {
-        $typeMap = [
+{
+    $typeMap = [
         'facture' => 'F',
         'devis'   => 'D',
         'avoir'   => 'A',
-        ];
+    ];
 
-        $type = $request->get('type', 'devis');
-        $typeCode = $typeMap[$type] ?? 'D'; // D par défaut
+    $type = $request->get('type', 'devis');
+    $typeCode = $typeMap[$type] ?? 'D'; // D par défaut
 
-        $documents = EnTeteDocument::with(['societe', 'client'])
-            ->where('type_document', $typeCode)
-            ->get();
+    // Récupération de l’ID de la société depuis la table "parametres"
+    $parametre = Parametre::first();
+    $idSociete = $parametre ? $parametre->derniere_societe : null;
 
-        // Vue dynamique selon le type
-        $view = match ($type) {
-            'facture' => 'facture.index',
-            'avoir'   => 'avoir.index',
-            default   => 'devis.index',
-        };
+    $documents = EnTeteDocument::with(['societe', 'client'])
+        ->where('type_document', $typeCode)
+        ->when($idSociete, fn($q) => $q->where('societe_id', $idSociete))
+        ->get();
 
-        return view($view, compact('documents'));
+    // Vue dynamique selon le type
+    $view = match ($type) {
+        'facture' => 'facture.index',
+        'avoir'   => 'avoir.index',
+        default   => 'devis.index',
+    };
 
- }
+    return view($view, compact('documents'));
+}
+
 
     /**
      * Affiche un document précis selon son type
@@ -84,14 +89,11 @@ public function create(Request $request)
         'avoir'   => 'avoirs.create',
         default   => 'devis.create',
     };
+    
 
-     return view($view, compact('type', 'clients', 'produits', 'parametre'));
+    return view('devis.create', ['type'=>'devis', 'clients' => $clients, 'produits' => $produits, 'parametre' => $parametre]);
+
 }
-
-
-
-
-
 
  public function store(Request $request)
 {
@@ -106,7 +108,8 @@ public function create(Request $request)
         'total_ttc'     => 'required|numeric|min:0',
         'client_code'   => 'required|string|exists:clients,code_cli',
         'lignes'        => 'required|array|min:1',
-        'lignes.*.produit_code'      => 'required|string',
+        'lignes.*.produit_code'      => 'required|string|exists:produits,code_produit',
+        'lignes.*.description'       => 'nullable|string',
         'lignes.*.quantite'          => 'required|numeric|min:1',
         'lignes.*.prix_unitaire_ht'  => 'required|numeric|min:0',
         'lignes.*.taux_tva'          => 'required|numeric|min:0',
@@ -143,9 +146,12 @@ public function create(Request $request)
 
     //  Créer les lignes
     foreach ($validated['lignes'] as $ligne) {
+       // Trouver le produit à partir du code
+        $produit = Produit::where('code_produit', $ligne['produit_code'])->firstOrFail();
+
         LigneDocument::create([
-            'document_id'   => $document->id, // Associer à l'en-tête
-            'produit_code'  => $ligne['produit_code'],
+            'document_id'      => $document->id,
+            'produit_id'       => $produit->id,   
             'description'   => $ligne['description'] ?? '',
             'quantite'      => $ligne['quantite'],
             'prix_unitaire_ht'       => $ligne['prix_unitaire_ht'],
@@ -153,13 +159,10 @@ public function create(Request $request)
             'total_ttc'     => $ligne['total_ttc'],
         ]);
     }
-   
-
-   
-    // //  Redirection
-    // return redirect()
-    //     ->route('documents.index', ['type' => $validated['type_document']])
-       // ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
+    //  Redirection
+    return redirect()
+        ->route('documents.index', ['type' => $validated['type_document']])
+       ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
 }
 
     /**
@@ -167,7 +170,7 @@ public function create(Request $request)
      */
     public function edit($id)
     {
-        $document = EnTeteDocument::findOrFail($id);
+        $document = EnTeteDocument::with('lignes.produit')->findOrFail($id);
 
         // Récupère l'ID de la société du document
         $idSociete = $document->societe_id;
@@ -177,7 +180,7 @@ public function create(Request $request)
 
         // Récupère les produits de la société
         $produits = Produit::where('id_societe', $idSociete)->get();
-        $document = EnTeteDocument::findOrFail($id);
+        //$document = EnTeteDocument::findOrFail($id);
 
             $view = match ($document->type_document) {
                 'facture' => 'factures.edit',

@@ -11,7 +11,7 @@
             <div class="flex gap-3">
                 <x-primary-button
                     type="button"
-                    onclick="openModal('{{ route($createRoute) }}')"
+                    onclick="openModal('{{ route($createRoute) }}{{ request('type') ? '?type=' . request('type') : '' }}')"
                     class="bg-blue-600 hover:bg-blue-700 text-white">
                     {{ $createLabel }}
                 </x-primary-button>
