@@ -146,7 +146,7 @@ function submitCurrentForm() {
     .then(data => {
         if(data.success){
             alert('Enregistré avec succès !');
-            closeCreateModal();
+            closeModal();
             if(document.getElementById('documents-table-container')){
                 refreshDocumentsTable();
             }

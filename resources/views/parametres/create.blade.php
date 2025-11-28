@@ -1,8 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
-<div class="container mt-4">
-    <h2>Créer une nouvelle société</h2>
 
     <form action="{{ route('societes.store') }}" method="POST">
         @csrf
@@ -50,4 +46,4 @@
         <a href="{{ route('societes.index') }}" class="btn btn-secondary">Annuler</a>
     </form>
 </div>
-@endsection
+

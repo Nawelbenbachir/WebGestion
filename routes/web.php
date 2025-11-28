@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('login');
 });
-Route::resource('user', UserController::class);
+Route::resource('user', UserController::class)->except([
+    'show'
+]);
 
 Route::resource('clients', ClientController::class)->except(['show']);
 
@@ -24,6 +26,7 @@ Route::resource('societes', SocieteController::class);
 Route::post('/societe/update-selection', [SocieteController::class, 'updateSelection'])
     ->name('societe.update')
     ->middleware('auth');
+    
 Route::resource('documents',EnTeteDocumentController::class);
 
 

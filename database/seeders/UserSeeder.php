@@ -17,6 +17,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'password' => Hash::make('123456789'),
+            'role' => 'admin',
         ]);
 
         //générateur de fausses données

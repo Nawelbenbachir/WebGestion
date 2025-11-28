@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <div class="container mt-4">
     <h2>Détails de la société</h2>
 
@@ -20,4 +18,4 @@
 
     <a href="{{ route('societes.index') }}" class="btn btn-secondary mt-3">Retour</a>
 </div>
-@endsection
+

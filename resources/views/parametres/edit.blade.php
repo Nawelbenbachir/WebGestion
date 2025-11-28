@@ -1,49 +1,122 @@
-@extends('layouts.app')
+<form method="POST" action="{{ route('societes.update', $societe->id) }}">
+    @csrf
+    @method('PUT')
 
-@section('content')
-<div class="container mt-4">
-    <h2>Modifier la société : {{ $societe->nom_societe }}</h2>
+    {{-- Informations générales --}}
+    <div class="bg-white dark:bg-gray-900 shadow-md rounded-lg p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-    <form action="{{ route('societes.update', $societe->id) }}" method="POST">
-        @csrf
-        @method('PUT')
+            {{-- Code société --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Code</label>
+                <input type="text" name="code_societe"
+                       value="{{ old('code_societe', $societe->code_societe) }}"
+                       required class="form-input" >
+            </div>
 
-        <div class="mb-3">
-            <label for="nom_societe" class="form-label">Nom *</label>
-            <input type="text" name="nom_societe" class="form-control" value="{{ old('nom_societe', $societe->nom_societe) }}" required>
+            {{-- Nom société --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Nom *</label>
+                <input type="text" name="nom_societe"
+                       value="{{ old('nom_societe', $societe->nom_societe) }}"
+                       required class="form-input">
+            </div>
+
+            {{-- Email --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Email *</label>
+                <input type="email" name="email"
+                       value="{{ old('email', $societe->email) }}"
+                       required class="form-input">
+            </div>
+
+            {{-- Téléphone --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Téléphone</label>
+                <input type="text" name="telephone"
+                       value="{{ old('telephone', $societe->telephone) }}"
+                       class="form-input">
+            </div>
+
+           
+
+            {{-- Siret --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">SIRET</label>
+                <input type="text" name="siret"
+                       value="{{ old('siret', $societe->siret) }}"
+                       class="form-input">
+            </div>
+
+            {{-- Adresse 1 --}}
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Adresse</label>
+                <input type="text" name="adresse1"
+                       value="{{ old('adresse1', $societe->adresse1) }}"
+                       class="form-input">
+            </div>
+
+            {{-- Adresse 2 --}}
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Adresse 2</label>
+                <input type="text" name="adresse2"
+                       value="{{ old('adresse2', $societe->adresse2) }}"
+                       class="form-input">
+            </div>
+
+            {{-- Complément --}}
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Complément</label>
+                <input type="text" name="complement_adresse"
+                       value="{{ old('complement_adresse', $societe->complement_adresse) }}"
+                       class="form-input">
+            </div>
+
+            {{-- Code Postal --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Code Postal</label>
+                <input type="text" name="code_postal"
+                       value="{{ old('code_postal', $societe->code_postal) }}"
+                       class="form-input">
+            </div>
+
+            {{-- Ville --}}
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">Ville</label>
+                <input type="text" name="ville"
+                       value="{{ old('ville', $societe->ville) }}"
+                       class="form-input">
+            </div>
+
+            {{-- IBAN --}}
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">IBAN</label>
+                <input type="text" name="iban" maxlength="34"
+                       value="{{ old('iban', $societe->iban) }}"
+                       placeholder="FR76..."
+                       class="form-input">
+            </div>
+
+            {{-- SWIFT --}}
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 dark:text-gray-300 font-medium mb-1">SWIFT / BIC</label>
+                <input type="text" name="swift" maxlength="11"
+                       value="{{ old('swift', $societe->swift) }}"
+                       placeholder="BNPAFRPP"
+                       class="form-input">
+            </div>
+
         </div>
-
-        <div class="mb-3">
-            <label for="email" class="form-label">Email *</label>
-            <input type="email" name="email" class="form-control" value="{{ old('email', $societe->email) }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="ville" class="form-label">Ville</label>
-            <input type="text" name="ville" class="form-control" value="{{ old('ville', $societe->ville) }}">
-        </div>
-
-        <div class="mb-3">
-            <label for="pays" class="form-label">Pays</label>
-            <input type="text" name="pays" class="form-control" value="{{ old('pays', $societe->pays) }}">
-        </div>
-        <div class="mb-3">
-        <label for="iban" class="form-label">IBAN</label>
-        <input type="text" name="iban" id="iban"
-            class="form-control @error('iban') is-invalid @enderror"
-            value="{{ old('iban', $societe->iban) }}" maxlength="34" placeholder="FR76..." >
-        @error('iban') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
-    <div class="mb-3">
-        <label for="swift" class="form-label">SWIFT / BIC</label>
-        <input type="text" name="swift" id="swift"
-            class="form-control @error('swift') is-invalid @enderror"
-            value="{{ old('swift', $societe->swift) }}" maxlength="11" placeholder="BNPAFRPP" >
-        @error('swift') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    {{-- Boutons --}}
+    <div class="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <x-primary-button type="submit">Mettre à jour</x-primary-button>
+
+        <button type="button" onclick="closeModal()"
+                class="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-400 dark:hover:bg-gray-500">
+             Retour
+        </button>
     </div>
-        <button type="submit" class="btn btn-primary">Mettre à jour</button>
-        <a href="{{ route('societes.index') }}" class="btn btn-secondary">Retour</a>
-    </form>
-</div>
-@endsection
+
+</form>

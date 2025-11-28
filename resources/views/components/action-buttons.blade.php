@@ -14,7 +14,7 @@
     <!-- Formulaire suppression -->
     <form method="POST"
           action="{{ $deleteRoute }}"
-          onsubmit="return confirm('Supprimer {{ $deleteLabel }} ?')"
+         onsubmit="return confirm('Supprimer {{ addslashes($deleteLabel) }} ?')"
           class="m-0 p-0">
         @csrf
         @method('DELETE')
