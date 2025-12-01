@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Http\Response;
 use App\Models\Parametre;
+use Illuminate\Support\Facades\Auth;
 
 class SocieteController extends Controller
 {

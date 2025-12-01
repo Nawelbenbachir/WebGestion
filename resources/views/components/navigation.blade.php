@@ -148,7 +148,8 @@
                 </div>
                 
                 
-                <div class="flex space-x-4 me-6"> 
+            <div class="flex space-x-4 me-6"> 
+                @if(Auth::user()->hasParametresAccess())
                     <x-nav-link :href="route('parametres.index')" :active="request()->routeIs('parametres.index')">
                         <div class="flex items-center space-x-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -158,8 +159,8 @@
                             <span>Paramètres</span>
                         </div>
                     </x-nav-link>
-
-                </div>
+                @endif
+            </div>
 
                 {{-- Dropdown Utilisateur --}}
                 <x-dropdown align="right" width="48">
