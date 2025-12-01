@@ -23,6 +23,8 @@ class Societe extends Model
         'swift',
         'tva',
         'logo',
+        'proprietaire_id',
+        
     ];
         public function documents()
     {

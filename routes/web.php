@@ -10,6 +10,8 @@ use App\Http\Controllers\LigneDocumentController;
 use App\Http\Controllers\ReglementController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Providers\RouteServiceProvider;
+
 
 Route::get('/', function () {
     return redirect()->route('login');

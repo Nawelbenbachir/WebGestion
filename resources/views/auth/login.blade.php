@@ -24,18 +24,6 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Choix de la société -->
-    <div class="mt-4">
-        <select id="societe_id" name="societe_id" required>
-            <option value="">-- Sélectionnez une société --</option>
-            @foreach (\App\Models\Societe::all() as $societe)
-                <option value="{{ $societe->id }}"
-                    {{ $societeDefaut == $societe->id ? 'selected' : '' }}>
-                    {{ $societe->nom_societe }}
-                </option>
-            @endforeach
-        </select>
-    </div>
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">

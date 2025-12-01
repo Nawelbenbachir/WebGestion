@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('logo')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
+            
         });
     }
 

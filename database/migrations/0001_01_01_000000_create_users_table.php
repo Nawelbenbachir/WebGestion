@@ -18,6 +18,13 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->default('user'); // Rôle de l'utilisateur
+            
+            // Colonne pour l'ID de la société principale
+            $table->unsignedBigInteger('societe_id')->nullable(); 
+            
+            // Colonne pour l'ID de la dernière société active (nullable)
+            //$table->unsignedBigInteger('last_active_societe_id')->nullable(); 
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -43,8 +50,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

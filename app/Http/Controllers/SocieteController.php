@@ -121,19 +121,40 @@ public function update(Request $request, Societe $societe)
     // Comportement par défaut si ce n'est pas une requête AJAX
     return redirect()->route('parametres.index')->with('success', 'Société mise à jour avec succès.');
 }
+
+    /**
+     * Met à jour la société de travail actuelle dans la session.
+     */
     public function updateSelection(Request $request)
-    {
-        $request->validate([
-            'societe_id' => 'required|exists:societes,id',
-        ]);
+{
+    // 1. Validation de base : Le champ doit exister et l'ID de société doit être valide.
+    $request->validate([
+        'societe_id' => 'required|exists:societes,id',
+    ]);
 
-        $societeId = $request->input('societe_id');
+    $societeId = $request->input('societe_id');
+    $user = Auth::user();
 
-        // Mettre à jour ou créer la ligne Parametre pour stocker la dernière société
-        Parametre::updateOrCreate([], ['derniere_societe' => $societeId]);
+    //  Contrôle d'accès : Vérifier si l'utilisateur est propriétaire OU collaborateur de cette société.
+    //le sélecteur ne propose que les sociétés accessibles, mais on double la sécurité ici.
+    $isOwner = $user->ownedSocietes()->where('id', $societeId)->exists();
+    $isCollaborator = $user->societes()->where('societe_id', $societeId)->exists();
 
-        return redirect()->back();
+    if (!$isOwner && !$isCollaborator) {
+        // Si l'utilisateur n'a aucun lien avec cette société, on refuse l'opération.
+        return back()->with('error', 'Accès non autorisé à cette société.');
     }
+
+    //  Persistance de la session et de la préférence 
+    
+    // Définir le contexte de travail dans la session de l'utilisateur
+    session(['current_societe_id' => $societeId]);
+
+    // Mettre à jour la préférence dans la table users
+    $user->update(['last_active_societe_id' => $societeId]);
+
+    return back()->with('success', 'Société de travail mise à jour.');
+}
     /**
      * Supprime une société.
      */
