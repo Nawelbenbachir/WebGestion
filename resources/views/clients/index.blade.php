@@ -1,4 +1,7 @@
 <x-layouts.app>
+    <x-slot name="navigation">
+        <x-navigation></x-navigation>
+    </x-slot>
     <x-layouts.table createRoute="clients.create" createLabel="Ajouter un client">
 
         <table id="clients-table" class="min-w-full w-full border border-gray-200">

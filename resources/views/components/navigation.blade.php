@@ -101,9 +101,9 @@
                             <x-slot name="trigger">
                                 <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                                     <div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block me-1 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block me-1 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
+                                        </svg> -->
                                         {{ $availableSocietes->firstWhere('id', $currentSocieteId)->nom_societe ?? 'Sélectionner Société' }}
                                     </div>
                                     <div class="ms-1">
@@ -159,14 +159,6 @@
                         </div>
                     </x-nav-link>
 
-                    <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
-                        <div class="flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-500 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span>Utilisateurs</span>
-                        </div>
-                    </x-nav-link>
                 </div>
 
                 {{-- Dropdown Utilisateur --}}
@@ -182,11 +174,11 @@
                         </button>
                     </x-slot>
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">Profile</x-dropdown-link>
+                        <!-- <x-dropdown-link :href="route('profile.edit')">Profil</x-dropdown-link> -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                                Log Out
+                                Se déconnecter 
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -222,9 +214,9 @@
                                     onclick="event.preventDefault(); this.closest('form').submit();"
                                     class="flex justify-between items-center {{ $currentSocieteId == $societe->id ? 'bg-gray-100 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-semibold' : '' }}">
                                     <div class="flex items-center space-x-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $currentSocieteId == $societe->id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $currentSocieteId == $societe->id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
+                                        </svg> -->
                                         <span>{{ $societe->nom_societe }}</span>
                                     </div>
                                     @if($currentSocieteId == $societe->id)
@@ -325,14 +317,7 @@
                     </div>
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
-                    <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-500 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>Utilisateurs</span>
-                    </div>
-                </x-responsive-nav-link>
+                
             @else
                 <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">Log in</x-responsive-nav-link>
                 @if (Route::has('register'))
@@ -350,7 +335,7 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
-                    <x-responsive-nav-link :href="route('profile.edit')">
+                    <!-- <x-responsive-nav-link :href="route('profile.edit')"> -->
                         <div class="flex items-center space-x-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -369,7 +354,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
-                                <span>Log Out</span>
+                                <span>Se déconnecter </span>
                             </div>
                         </x-responsive-nav-link>
                     </form>

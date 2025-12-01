@@ -1,4 +1,7 @@
 <x-layouts.app>
+    <x-slot name="navigation">
+        <x-navigation></x-navigation>
+    </x-slot>
     <x-layouts.table createRoute="produits.create" createLabel="Ajouter un produit">
 
         <table id="produits-table" class="min-w-full w-full border border-gray-200">

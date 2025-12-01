@@ -1,4 +1,8 @@
 <x-layouts.app>
+
+<x-slot name="navigation">
+        <x-navigation></x-navigation>
+    </x-slot>
 <x-layouts.table createRoute="documents.create" createLabel="Ajouter une facture">
 
     @if(session('success'))

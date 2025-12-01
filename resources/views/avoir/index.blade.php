@@ -1,4 +1,7 @@
 <x-layouts.app>
+    <x-slot name="navigation">
+        <x-navigation></x-navigation>
+    </x-slot>
 <x-layouts.table createRoute="documents.create" createLabel="Ajouter un avoir">
 
     @if(session('success'))
