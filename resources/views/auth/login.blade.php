@@ -1,4 +1,8 @@
 <x-layouts.guest>
+     
+        <x-navigation></x-navigation>
+    
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

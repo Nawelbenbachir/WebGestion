@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Providers\RouteServiceProvider; 
+use App\Models\Societe;
+use App\Models\User;
+
 
 class AuthenticatedSessionController extends Controller
 {
