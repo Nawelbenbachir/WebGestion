@@ -186,9 +186,9 @@
                 </x-dropdown>
                 @else
                     <div class="flex space-x-4">
-                        <x-nav-link :href="route('login')" :active="request()->routeIs('login')">Log in</x-nav-link>
+                        <x-nav-link :href="route('login')" :active="request()->routeIs('login')">Se connecter</x-nav-link>
                         @if (Route::has('register'))
-                            <x-nav-link :href="route('register')" :active="request()->routeIs('register')">Register</x-nav-link>
+                            <x-nav-link :href="route('register')" :active="request()->routeIs('register')">S'inscrire</x-nav-link>
                         @endif
                     </div>
                 @endauth
@@ -320,9 +320,9 @@
 
                 
             @else
-                <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">Log in</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">Se connecter</x-responsive-nav-link>
                 @if (Route::has('register'))
-                    <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">Register</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">S'inscrire</x-responsive-nav-link>
                 @endif
             @endauth
         </div>

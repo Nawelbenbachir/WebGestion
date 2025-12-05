@@ -9,8 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Providers\RouteServiceProvider; 
-use App\Models\Societe;
-use App\Models\User;
+
 
 
 class AuthenticatedSessionController extends Controller
@@ -83,7 +82,7 @@ class AuthenticatedSessionController extends Controller
         // l'utilisateur est redirigé vers le dashboard, mais sans session active. 
         // Le View Composer/Middleware de la navbar forcera la sélection manuelle.
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return redirect()->intended('/dashboard'); // OU '/home', selon votre application
     }
     
     /**
