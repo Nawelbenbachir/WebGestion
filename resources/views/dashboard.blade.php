@@ -220,16 +220,16 @@
                                         {{ $invoice->client->nom ?? 'N/A' }} 
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
-                                        {{ $invoice->date_document->format('d/m/Y') }}
+                                        {{ date('d/m/Y', strtotime($invoice->date_document)) }}
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300 text-right font-semibold">
-                                        {{ format_currency($invoice->total_ttc) }}
+                                        {{ number_format($invoice->total_ttc ?? 0, 2, ',', ' ') }}
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap text-sm">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                             @if($invoice->statut == 'paye') bg-green-800 text-green-200
                                             @elseif($invoice->statut == 'impaye') bg-red-800 text-red-200
-                                            @else bg-yellow-800 text-yellow-200
+                                            @else bg-yellow-800 text-gray-400
                                             @endif">
                                             {{ Str::ucfirst($invoice->statut) }}
                                         </span>

@@ -86,9 +86,8 @@ class EnTeteDocumentController extends Controller
         }
 
         // Clients + produits liés à cette société active
-        // Assurez-vous que les clés étrangères dans Client et Produit sont 'societe_id'
-        $clients = Client::where('societe_id', $societeId)->get();
-        $produits = Produit::where('societe_id', $societeId)->get();
+        $clients = Client::where('id_societe', $societeId)->get();
+        $produits = Produit::where('id_societe', $societeId)->get();
 
         // Sélection de la vue selon le type
         $view = match ($type) {
@@ -116,7 +115,6 @@ class EnTeteDocumentController extends Controller
              return back()->withErrors('Erreur de contexte de société. Réessayez après avoir sélectionné une société.');
         }
 
-        //  On n'a pas besoin de valider 'societe_id' dans le formulaire si on l'injecte depuis la session
         $validated = $request->validate([
             'code_document' => 'required|string|max:50|unique:en_tete_documents,code_document',
             'type_document' => 'required|in:facture,devis,avoir',
@@ -126,7 +124,7 @@ class EnTeteDocumentController extends Controller
             'total_ttc'     => 'required|numeric|min:0',
             'client_code'   => 'required|string|exists:clients,code_cli',
             'lignes'        => 'required|array|min:1',
-            'lignes.*.produit_code'     => 'required|string', // Validation plus faible ici, le filtre est clé
+            'lignes.*.produit_code'     => 'required|string', 
             'lignes.*.description'      => 'nullable|string',
             'lignes.*.quantite'         => 'required|numeric|min:1',
             'lignes.*.prix_unitaire_ht' => 'required|numeric|min:0',
@@ -145,7 +143,7 @@ class EnTeteDocumentController extends Controller
 
         // SÉCURITÉ : Récupérer le client et s'assurer qu'il appartient à la société active
         $client = Client::where('code_cli', $validated['client_code'])
-                        ->where('societe_id', $societeId)
+                        ->where('id_societe', $societeId)
                         ->firstOrFail();
 
         // Créer le document avec l'ID de la société de la session
@@ -170,7 +168,7 @@ class EnTeteDocumentController extends Controller
         foreach ($validated['lignes'] as $ligne) {
             // SÉCURITÉ : Récupérer le produit et s'assurer qu'il appartient à la société active
             $produit = Produit::where('code_produit', $ligne['produit_code'])
-                              ->where('societe_id', $societeId)
+                              ->where('id_societe', $societeId)
                               ->firstOrFail();
 
             LigneDocument::create([
@@ -186,8 +184,8 @@ class EnTeteDocumentController extends Controller
         
         // Redirection
         return redirect()
-            ->route('documents.index', ['type' => $validated['type_document']])
-            ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
+            ->route('documents.index', ['type' => $validated['type_document']]);
+            // ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
     }
 
     /**
@@ -205,8 +203,8 @@ class EnTeteDocumentController extends Controller
         $idSociete = $document->societe_id;
 
         //  Filtrage des clients et produits par la société active (pour les listes déroulantes de la vue)
-        $clients = Client::where('societe_id', $idSociete)->get();
-        $produits = Produit::where('societe_id', $idSociete)->get();
+        $clients = Client::where('id_societe', $idSociete)->get();
+        $produits = Produit::where('id_societe', $idSociete)->get();
 
         $view = match ($document->type_document) {
             'F' => 'factures.edit',
@@ -275,7 +273,7 @@ class EnTeteDocumentController extends Controller
             foreach ($validated['lignes'] as $ligneData) {
                 //  SÉCURITÉ : Trouver le produit en filtrant par société
                 $produit = Produit::where('code_produit', $ligneData['produit_code'])
-                                  ->where('societe_id', $societeId)
+                                  ->where('id_societe', $societeId)
                                   ->firstOrFail(); // Échoue si le produit n'appartient pas à la société
 
                 if (isset($ligneData['id'])) {
@@ -318,8 +316,8 @@ class EnTeteDocumentController extends Controller
         $typeTexte = $typeReverseMap[$document->type_document] ?? 'devis';
 
         return redirect()
-            ->route('documents.index', ['type' => $typeTexte])
-            ->with('success', ucfirst($typeTexte) . ' mis à jour avec succès.');
+            ->route('documents.index', ['type' => $typeTexte]);
+            // ->with('success', ucfirst($typeTexte) . ' mis à jour avec succès.');
     }
 
     /**
@@ -343,7 +341,7 @@ class EnTeteDocumentController extends Controller
         $typeTexte = $typeReverseMap[$type] ?? 'devis';
 
         return redirect()
-            ->route('documents.index', ['type' => $typeTexte])
-            ->with('success', ucfirst($typeTexte) . ' supprimé avec succès.');
+            ->route('documents.index', ['type' => $typeTexte]);
+            // ->with('success', ucfirst($typeTexte) . ' supprimé avec succès.');
     }
 }
