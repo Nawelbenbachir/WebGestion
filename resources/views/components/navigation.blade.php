@@ -49,7 +49,7 @@
                                     <span>Devis</span>
                                 </div>
                             </x-nav-link>
-                            
+
                             <x-nav-link :href="route('documents.index', ['type' => 'facture'])" :active="request()->fullUrlIs('*type=facture*')">
                                 <div class="flex items-center space-x-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +134,7 @@
                                 @endforeach
                                 
                                 <div class="border-t border-gray-100 dark:border-gray-600"></div>
-                                <x-dropdown-link :href="route('societes.create')" class="text-sm font-medium text-blue-500 hover:text-blue-700">
+                                <x-dropdown-link :href="route('societes.create', ['vueseule' => true])" class="text-sm font-medium text-blue-500 hover:text-blue-700">
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         Créer une nouvelle Société
@@ -143,7 +143,7 @@
                             </x-slot>
                         </x-dropdown>
                     @elseif(Auth::check() && $availableSocietes->isEmpty())
-                        <a href="{{ route('societes.create') }}" class="text-sm font-medium text-red-500 hover:text-red-700">
+                        <a href="{{ route('societes.create', ['vueseule' => true]) }}"  class="text-sm font-medium text-red-500 hover:text-red-700">
                             Créer votre première Société
                         </a>
                     @endif
