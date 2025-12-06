@@ -14,6 +14,7 @@ class EnTeteDocument extends Model
         'total_ht',
         'total_tva',
         'total_ttc',
+        'solde',
         'client_id',
         'client_nom',
         'logo',

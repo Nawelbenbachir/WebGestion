@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View; 
 use App\Models\Societe;
 use App\Models\User;
-
 use App\View\Composers\SocieteComposer; 
+use App\View\Composers\DashboardComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,5 +43,6 @@ class AppServiceProvider extends ServiceProvider
         //     }
         // });
           View::composer('components.navigation', SocieteComposer::class);
+          View::composer('dashboard', DashboardComposer::class);
     }
 }

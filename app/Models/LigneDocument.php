@@ -25,5 +25,11 @@ class LigneDocument extends Model
     public function produit()
     {
         return $this->belongsTo(Produit::class, 'produit_id');
+
+    }
+    public function reglements()
+    {
+    
+        return $this->hasMany(Reglement::class, 'document_id'); 
     }
 }

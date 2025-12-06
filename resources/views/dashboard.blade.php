@@ -9,13 +9,39 @@
 </x-slot>
 
 <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        
+    <div class=" mx-auto sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-5">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Chiffre d'Affaires (Mois)</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                    {{ number_format($monthly_ca ?? 0, 2, ',', ' ') }} </p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-5">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Devis en attente</p>
+                <p class="text-3xl font-bold text-amber-500 mt-1">
+                    {{ $pending_quotes_count }} </p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-5">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Impayés</p>
+                <p class="text-3xl font-bold text-red-500 mt-1">
+                    {{ number_format($unpaid_total ?? 0, 2, ',', ' ') }} </p>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-5">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Nouveaux Clients (Mois)</p>
+                <p class="text-3xl font-bold  text-gray-500 dark:text-gray-400 mt-1">
+                    {{ $new_clients_count }} </p>
+            </div>
+
+        </div>
         <!-- Grille des Raccourcis (Shortcuts Grid) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
 
            
-             <a href="{{ route('clients.index') }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+             <a href="{{ route('clients.index') }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -33,7 +59,7 @@
             </a>
 
            
-            <a href="{{ route('produits.index') }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+            <a href="{{ route('produits.index') }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -51,7 +77,7 @@
             </a>
             
             
-            <a href="{{ route('documents.index', ['type' => 'facture']) }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+            <a href="{{ route('documents.index', ['type' => 'facture']) }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                    
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -69,7 +95,7 @@
             </a>
 
             
-             <a href="{{ route('documents.index', ['type' => 'devis']) }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+             <a href="{{ route('documents.index', ['type' => 'devis']) }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -87,7 +113,7 @@
             </a>
 
             
-            <a href="{{ route('documents.index', ['type' => 'avoir']) }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+            <a href="{{ route('documents.index', ['type' => 'avoir']) }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -105,7 +131,7 @@
             </a>
             
             
-            <a href="{{ route('reglements.index') }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+            <a href="{{ route('reglements.index') }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -143,7 +169,7 @@
            
             {{-- Raccourci Paramètres --}}
     @if(Auth::user()->hasParametresAccess())
-        <a href="{{ route('parametres.index') }}" class="block p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
+        <a href="{{ route('parametres.index') }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
             <div class="flex items-center justify-between">
                 
                 <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -161,6 +187,72 @@
             </p>
         </a>
     @endif
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+        
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Dernières Factures Créées
+        </h3>
+        
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Code</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Client</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Montant TTC</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            {{-- Boucle sur les factures injectées par le View Composer --}}
+                            @forelse ($latestInvoices as $invoice)
+                                <tr class="hover:bg-gray-700 transition duration-150">
+                                    
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
+                                        <a href="{{ route('documents.show', $invoice->id) }}" class="text-indigo-400 hover:text-indigo-300">
+                                            {{ $invoice->code_document }}
+                                        </a>
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
+                                        {{ $invoice->client->nom ?? 'N/A' }} 
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
+                                        {{ $invoice->date_document->format('d/m/Y') }}
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300 text-right font-semibold">
+                                        {{ format_currency($invoice->total_ttc) }}
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            @if($invoice->statut == 'paye') bg-green-800 text-green-200
+                                            @elseif($invoice->statut == 'impaye') bg-red-800 text-red-200
+                                            @else bg-yellow-800 text-yellow-200
+                                            @endif">
+                                            {{ Str::ucfirst($invoice->statut) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-4 text-center text-sm text-gray-400">
+                                        Aucune facture récente trouvée.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                    Alertes et Rappels
+                </h3>
+                </div>
+
         </div>
        
         
