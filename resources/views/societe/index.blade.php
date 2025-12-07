@@ -1,6 +1,4 @@
-<x-layouts.app>
-<x-layouts.table createRoute="parametres.create" createLabel="Ajouter une société">
-
+<x-layouts.table createRoute="societes.create" createLabel="Ajouter une société" hideModal="true">
     <table id="parametres-table" class="min-w-full w-full border border-gray-200 dark:border-gray-700">
 
         <thead class="bg-gray-100 dark:bg-gray-700">
@@ -46,6 +44,5 @@
             @endforeach
         </tbody>
     </table>
-    </x-layouts.table>
+</x-layouts.table>
 
-</x-layouts.app>

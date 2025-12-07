@@ -1,10 +1,8 @@
-<x-layouts.app>
-    <x-layouts.table createRoute="user.create" createLabel="Ajouter un utilisateur">
-
-
+<x-layouts.table createRoute="user.create" createLabel="Ajouter un utilisateur" hideModal="true">
         @if($users->isEmpty())
             <div class="alert alert-info p-6 text-gray-900 dark:text-gray-100">Aucun utilisateur enregistré pour le moment.</div>
         @else
+        <div>
             <table id="users-table" class="min-w-full w-full border border-gray-200">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                     <tr>
@@ -41,8 +39,7 @@
                     @endforeach
                 </tbody>
             </table>
-
+        </div>
         @endif
 
-    </x-layouts.table>
-</x-layouts.app>
+</x-layouts.table>

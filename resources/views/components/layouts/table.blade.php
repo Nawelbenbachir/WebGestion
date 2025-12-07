@@ -1,6 +1,7 @@
 @props([
     'createRoute' => null,
     'createLabel' => 'Ajouter',
+    'hideModal' => false,
 ])
 
 <div class="w-full p-6">
@@ -16,14 +17,6 @@
                     {{ $createLabel }}
                 </x-primary-button>
 
-                <!-- {{-- Bouton Supprimer --}}
-                <form id="delete-form" method="POST" action="#" class="hidden" onsubmit="return confirm('Supprimer cet élément ?')">
-                    @csrf
-                    @method('DELETE')
-                    <x-danger-button type="submit" class="bg-red-600 hover:bg-red-700 text-white">
-                        Supprimer
-                    </x-danger-button>
-                </form> -->
             </div>
         @endif
     </div>
@@ -33,6 +26,7 @@
         {{ $slot }}
     </div>
 
+    @if (!$hideModal)
    {{-- Modal unique pour create/edit --}}
 <div id="modal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-5xl relative flex flex-col max-h-[90vh]">
@@ -243,3 +237,4 @@ function initDevisForm(container) {
 }
 </script>
 @endpush
+@endif

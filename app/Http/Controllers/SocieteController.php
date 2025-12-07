@@ -83,14 +83,8 @@ class SocieteController extends Controller
 public function update(Request $request, Societe $societe)
 {
     // Récupérer l'ID de la société si elle n'est pas déjà bindée
-    // Votre code actuel utilise Model Binding, mais si la route est '/societes/{id}', Laravel trouvera la bonne.
-    // Assurez-vous que votre route utilise le nom 'societe' ou ajustez la signature de la méthode.
     // Dans votre cas, la route semble être 'parametres' d'après la vue index,
-    // mais la méthode 'edit' du controller Societe utilise l'ID en paramètre.
-    // L'exemple ci-dessous suppose que l'objet $societe est correctement résolu.
     
-    // Si la route est 'societes.update' et utilise l'ID, le binding devrait fonctionner.
-    // Exemple d'appel : route('societes.update', $societe->id) avec la méthode PUT/PATCH.
     
     $validated = $request->validate([
         'code_societe' => 'required|string|max:255|unique:societes,code_societe,' . $societe->id, // Ajouter l'exception pour l'unique sur le code
@@ -128,7 +122,7 @@ public function update(Request $request, Societe $societe)
      */
     public function updateSelection(Request $request)
 {
-    // 1. Validation de base : Le champ doit exister et l'ID de société doit être valide.
+    //  Validation de base : Le champ doit exister et l'ID de société doit être valide.
     $request->validate([
         'societe_id' => 'required|exists:societes,id',
     ]);
@@ -153,6 +147,11 @@ public function update(Request $request, Societe $societe)
 
     // Mettre à jour la préférence dans la table users
     $user->update(['last_active_societe_id' => $societeId]);
+
+    //  Vérification des droits d'accès aux paramètres pour la société sélectionnée
+    if (!$user->hasParametresAccess()) {
+        return redirect()->route('dashboard')->with('error', 'Vous n\'avez plus les droits d\'accès aux paramètres pour la société sélectionnée.');
+    }
 
     return back()->with('success', 'Société de travail mise à jour.');
 }

@@ -25,5 +25,6 @@
 
     <!-- Stack pour les scripts -->
     @stack('scripts') 
+    
 </body>
 </html>

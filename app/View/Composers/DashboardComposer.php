@@ -44,13 +44,13 @@ class DashboardComposer
         // Devis en attente 
         $pending_quotes_count = EnTeteDocument::where('societe_id', $currentSocieteId)
                                     ->where('type_document', 'D')
-                                     ->where('statut', 'envoye')
+                                     ->whereIn('statut',['brouillon', 'envoye'])
                                      ->count();
 
         // Total des Factures pas encore payées
         $unpaid_total = EnTeteDocument::where('societe_id', $currentSocieteId)
                                 ->where('type_document', 'F')
-                               ->where('statut', 'envoye')
+                               ->whereIn('statut',['brouillon', 'envoye'])
                                ->sum('solde');
 
         //  Nouveaux Clients (Mois) 
