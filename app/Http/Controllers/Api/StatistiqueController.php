@@ -7,6 +7,7 @@ use App\Http\Resources\StatistiqueResource;
 use Illuminate\Http\Request;
 use App\Models\LigneDocument;
 use Illuminate\Support\Facades\DB;
+use App\Models\Produit;
 
 
 class StatistiqueController extends Controller
@@ -50,7 +51,7 @@ class StatistiqueController extends Controller
     {
         //
     }
-        public function ventesParProduitGlobal(int $idProduit)
+    public function ventesParProduitGlobal(int $idProduit)
     {
     // Récupère les stats pour le produit, toutes périodes confondues
        $stats = LigneDocument::select(
@@ -68,15 +69,19 @@ class StatistiqueController extends Controller
             ->where('en_tete_documents.type_document', 'F')
             ->whereIn('en_tete_documents.statut', ['envoye', 'paye']) 
             ->first();
-            
+            $product = Produit::find($idProduit);
             if ($stats) {
             $stats->id_produit = $idProduit;
+            $stats->code_produit = $product ? $product->code_produit : null;
+            $stats->description_produit = $product ? $product->description : null;
             $stats->annee = null;
             $stats->mois = null;
         } else {
             $stats = (object) [
                 'total_quantite' => null,
                 'id_produit' => $idProduit,
+                'code_produit' => $product ? $product->code_produit : null,
+                'description_produit' => $product ? $product->description : null,
                 'annee' => null,
                 'mois' => null,
             ];
@@ -107,10 +112,12 @@ class StatistiqueController extends Controller
             ->where('en_tete_documents.type_document', 'F')
             ->whereIn('en_tete_documents.statut', ['envoye', 'paye']) 
             ->first();
-
+            
         if ($stats) {
             // Attacher les paramètres de la route à l'objet de statistiques
             $stats->id_produit = null; // C'est une stat globale
+            $stats->code_produit = null;
+            $stats->description_produit = null;
             $stats->annee = $annee;
             $stats->mois = $mois;
         } else {
@@ -118,8 +125,12 @@ class StatistiqueController extends Controller
              $stats = (object) [
                  'total_quantite' => null, // Indique à la Resource que c'est vide
                  'id_produit' => null,
+                 'code_produit' => null,
+                 'description_produit' => null,
                  'annee' => $annee,
                  'mois' => $mois,
+
+                
              ];
         }
 
@@ -151,6 +162,7 @@ class StatistiqueController extends Controller
             ->where('en_tete_documents.type_document', 'F')
             ->whereIn('en_tete_documents.statut', ['envoye', 'paye']) 
             ->first();
+            $product = Produit::find($idProduit);
 
         //  Préparation pour la Resource
         if ($stats) {
@@ -158,6 +170,8 @@ class StatistiqueController extends Controller
             $stats->id_produit = $idProduit;
             $stats->annee = $annee;
             $stats->mois = $mois;
+            $stats->code_produit = $product ? $product->code_produit : null;
+            $stats->description_produit = $product ? $product->description : null;
         } else {
              // Crée un objet vide (stdClass) si la requête ne retourne rien, 
              // en attachant les paramètres pour que la Resource puisse les retourner avec des totaux à zéro.
@@ -166,6 +180,8 @@ class StatistiqueController extends Controller
                  'id_produit' => $idProduit,
                  'annee' => $annee,
                  'mois' => $mois,
+                 'code_produit' => $product ? $product->code_produit : null,
+                 'description_produit' => $product ? $product->description : null,
              ];
         }
 

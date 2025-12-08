@@ -18,6 +18,8 @@ class StatistiqueResource extends JsonResource
         if (is_null($this->total_quantite)) {
             return [
                 'id_produit' => $this->id_produit ?? null,
+                'code_produit' => $this->code_produit ?? null,
+                'description_produit' => $this->description_produit ?? null,
                 'mois' => $this->mois ?? null,
                 'annee' => $this->annee ?? null,
                 'total_ht' => 0.00,
@@ -29,6 +31,8 @@ class StatistiqueResource extends JsonResource
 
         return [
             'id_produit' => $this->id_produit ?? null,
+            'code_produit' => $this->code_produit ?? null,
+            'description_produit' => $this->description_produit ?? null,
             'mois' => $this->mois ?? null,
             'annee' => $this->annee ?? null,
             
