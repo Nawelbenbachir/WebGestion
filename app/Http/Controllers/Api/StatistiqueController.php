@@ -173,8 +173,6 @@ class StatistiqueController extends Controller
             $stats->code_produit = $product ? $product->code_produit : null;
             $stats->description_produit = $product ? $product->description : null;
         } else {
-             // Crée un objet vide (stdClass) si la requête ne retourne rien, 
-             // en attachant les paramètres pour que la Resource puisse les retourner avec des totaux à zéro.
              $stats = (object) [
                  'total_quantite' => null, // Indique à la Resource que c'est vide
                  'id_produit' => $idProduit,
