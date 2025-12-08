@@ -83,7 +83,7 @@ class User extends Authenticatable
             //  Vérifier si l'utilisateur est admin dans la table pivot (societe_user)
             $isAdminInSociete = $this->societes()
                                     ->where('societe_id', $societeId)
-                                    ->wherePivot('role_societe', 'admin') // Assurez-vous que 'role_societe' est le nom de la colonne de rôle dans la pivot
+                                    ->wherePivot('role_societe', 'admin') 
                                     ->exists();
 
             return $isAdminInSociete;

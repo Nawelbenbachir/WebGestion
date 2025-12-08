@@ -2,7 +2,7 @@
         @if($users->isEmpty())
             <div class="alert alert-info p-6 text-gray-900 dark:text-gray-100">Aucun utilisateur enregistré pour le moment.</div>
         @else
-        <div>
+        
             <table id="users-table" class="min-w-full w-full border border-gray-200">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                     <tr>
@@ -16,7 +16,7 @@
                 <tbody class="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                     @foreach ($users as $user)
                         
-                        <tr data-id="{{ $user->id }}" data-route="users" class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900">
+                        <tr data-id="{{ $user->id }}" data-route="user" class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900">
                             
                             <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">
                                 <x-action-buttons 
@@ -39,7 +39,7 @@
                     @endforeach
                 </tbody>
             </table>
-        </div>
-        @endif
+        
+        @endif 
 
 </x-layouts.table>

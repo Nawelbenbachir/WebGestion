@@ -27,6 +27,7 @@ class DashboardComposer
                 'pending_quotes_count' => 0,
                 'unpaid_total' => 0,
                 'new_clients_count' => 0,
+                'latestInvoices' => collect(),
             ]);
             return;
         }

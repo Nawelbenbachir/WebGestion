@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
         UserSeeder::class,
         SocieteSeeder::class, 
         ClientSeeder::class, 
-        ProduitSeeder::class
+        ProduitSeeder::class,
+        DocumentSeeder::class
         ]);
 
          // Récupérer les entités fraîchement créées

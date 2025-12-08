@@ -32,7 +32,7 @@
                                 </div>
                             </x-nav-link>
 
-                            <x-nav-link :href="route('produits.index')" :active="request()->routeIs('products.index')">
+                            <x-nav-link :href="route('produits.index')" :active="request()->routeIs('produits.index')">
                                 <div class="flex items-center space-x-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -265,7 +265,7 @@
                     </div>
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('produits.index')" :active="request()->routeIs('products.index')">
+                <x-responsive-nav-link :href="route('produits.index')" :active="request()->routeIs('produits.index')">
                     <div class="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />

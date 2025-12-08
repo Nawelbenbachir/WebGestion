@@ -9,6 +9,7 @@ use Illuminate\View\View;
 use Illuminate\Http\Response;
 use App\Models\Parametre;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SocieteController extends Controller
 {
@@ -34,6 +35,7 @@ class SocieteController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
         $validated = $request->validate([
             'code_societe' => 'required|string|max:255|unique:societes,code_societe',
             'nom_societe' => 'required|string|max:255',
@@ -51,10 +53,35 @@ class SocieteController extends Controller
             'tva' => 'nullable|string|max:20',
             'logo' => 'nullable|string|max:255',
         ]);
+        // Utilisation d'une transaction pour garantir la cohérence des données
+    DB::transaction(function () use ($validated, $user)  {
+        
+        //  Création de la Société en tant que Propriétaire
+        $societe = Societe::create(array_merge(
+            $request->$validated, 
+            [
+                'proprietaire_id' => $user->id,
+            ]
+        ));
 
-        Societe::create($validated);
+        $societe->users()->attach($user->id, ['role_societe' => 'admin']);
 
-        return redirect()->route('parametres.index')->with('success', 'Société créée avec succès.');
+        // Mise à jour de l'utilisateur: Définir cette nouvelle société comme la dernière société active
+        $user->forceFill([
+            'last_active_societe_id' => $societe->id,
+        ])->save();
+        
+       
+
+        //  Mise à jour de la Session
+        session(['current_societe_id' => $societe->id]);
+    });
+
+    //  Redirection
+    return redirect()->route('dashboard')->with('success', 'Votre société a été créée avec succès et est maintenant active.');
+        // Societe::create($validated);
+
+        // return redirect()->route('parametres.index')->with('success', 'Société créée avec succès.');
     }
 
     /**
@@ -83,7 +110,7 @@ class SocieteController extends Controller
 public function update(Request $request, Societe $societe)
 {
     // Récupérer l'ID de la société si elle n'est pas déjà bindée
-    // Dans votre cas, la route semble être 'parametres' d'après la vue index,
+    
     
     
     $validated = $request->validate([
