@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\StatistiqueController; 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\AuthController;
 
 
     Route::get('/user', function (Request $request) {
