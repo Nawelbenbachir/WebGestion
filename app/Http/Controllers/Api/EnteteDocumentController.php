@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class EnteteDocumentController extends Controller
 {
-    /**
-     * Liste de TOUS les documents de la société (Vue Index Mobile)
-     */
+  
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -25,27 +23,53 @@ class EnteteDocumentController extends Controller
                      ?? $user?->current_societe_id;
 
         if (!$societeId) {
-            return response()->json(['message' => 'Société non spécifiée.'], 400);
+            return response()->json([
+                'error' => 'Aucune société spécifiée',
+                'message' => 'Veuillez fournir un societe_id (URL), un X-Societe-Id (Header) ou être rattaché à une société.'
+            ], 400);
         }
 
         // On prépare la requête de base
         $query = EnTeteDocument::with(['client', 'societe'])
             ->where('societe_id', $societeId);
 
-        // FILTRE OPTIONNEL : 
-        // Si vous tapez ?type=facture, on filtre. 
-        // Sinon (si vide), on récupère tout sans distinction.
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->get('client_id'));
+        }
+
+        // Recherche par numéro de document ou nom du client
+        if ($search = $request->get('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('code_document', 'like', "%{$search}%")
+                  ->orWhereHas('client', function($queryClient) use ($search) {
+                      $queryClient->where('nom', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
         $typeMap = ['facture' => 'F', 'devis' => 'D', 'avoir' => 'A'];
         $typeParam = $request->get('type');
         
         if ($typeParam && isset($typeMap[$typeParam])) {
             $query->where('type_document', $typeMap[$typeParam]);
         }
+        //  Calcul des totaux de la sélection (avant pagination)
+        $totalTTC = (float) $query->sum('total_ttc');
+        $count = $query->count();
 
-        // On récupère tout, trié par date
-        $documents = $query->orderBy('date_document', 'desc')->get();
+        //  Pagination (par défaut 15 par page)
+        $perPage = $request->get('per_page', 15);
+        $documents = $query->orderBy('date_document', 'desc')->paginate($perPage);
 
-        return EnteteDocumentResource::collection($documents);
+       
+        //  Retour avec métadonnées personnalisées
+        return EnteteDocumentResource::collection($documents)
+            ->additional([
+                'meta_stats' => [
+                    'total_selection_ttc' => $totalTTC,
+                    'nombre_documents' => $count,
+                ]
+            ]);
     }
 
     /**
