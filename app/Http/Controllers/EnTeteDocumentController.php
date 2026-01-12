@@ -10,6 +10,7 @@ use App\Models\LigneDocument;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EnTeteDocumentController extends Controller
 {
@@ -187,8 +188,8 @@ class EnTeteDocumentController extends Controller
         
         // Redirection
         return redirect()
-            ->route('documents.index', ['type' => $validated['type_document']]);
-            // ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
+            ->route('documents.index', ['type' => $validated['type_document']])
+            ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
     }
 
     /**
@@ -363,72 +364,93 @@ class EnTeteDocumentController extends Controller
             // ->with('success', ucfirst($typeTexte) . ' supprimé avec succès.');
     }
 
-  public function transformToInvoice($id)
-{
-    // 1. Récupération de la société en session
-    $societeId = session('current_societe_id');
-    
-    if (!$societeId) {
-        return back()->with('error', "Session expirée ou société non sélectionnée.");
-    }
+   public function transformToInvoice($id)
+    {
+        // 1. Log de début pour vérifier que la route appelle bien la fonction
+        Log::info("Début de transformation du devis ID: $id");
 
-    // 2. Recherche du document avec gestion d'erreur spécifique
-    // On cherche d'abord le document sans les filtres pour vérifier s'il existe du tout
-    $documentBase = EnTeteDocument::find($id);
-
-    if (!$documentBase) {
-        return back()->with('error', "Le document ID #$id n'existe pas dans la base de données.");
-    }
-
-    // Vérification manuelle des conditions pour éviter la 404 brutale de findOrFail
-    if ($documentBase->societe_id != $societeId) {
-        return back()->with('error', "Ce document n'appartient pas à la société active.");
-    }
- 
-    
-    if ($documentBase->type_document !== 'devis' && $documentBase->type !== 'devis') {
-        return back()->with('error', "Le document n'est pas un devis (Type actuel : " . ($documentBase->type_document ?? $documentBase->type) . ").");
-    }
-
-    // 3. Rechargement avec les lignes pour la transformation
-    $devis = $documentBase->load('lignes');
-
-    // 4. Vérifier si déjà transformé
-    $existingInvoice = EnTeteDocument::where('devis_id', $devis->id)->first();
-    if ($existingInvoice) {
-        return back()->with('error', 'Ce devis a déjà été transformé en facture (' . $existingInvoice->code_document . ').');
-    }
-
-    try {
-        DB::beginTransaction();
-
-        // 5. Créer la facture (duplication)
-        $facture = $devis->replicate(['created_at', 'updated_at']);
+        // 2. Récupération de la société en session
+        $societeId = session('current_societe_id');
         
-        // Harmonisation des colonnes : on remplit les deux au cas où
-        $facture->type = 'facture';
-        $facture->type_document = 'facture'; 
-        
-        $facture->code_document = 'FAC-' . now()->format('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
-        $facture->devis_id = $devis->id;
-        $facture->save();
-
-        // 6. Dupliquer les lignes
-        foreach ($devis->lignes as $ligne) {
-            $nouvelleLigne = $ligne->replicate(['created_at', 'updated_at']);
-            $nouvelleLigne->document_id = $facture->id;
-            $nouvelleLigne->save();
+        if (!$societeId) {
+            Log::warning("Transformation avortée : Pas de société en session.");
+            return back()->with('error', "Session expirée ou société non sélectionnée.");
         }
 
-        DB::commit();
+        // 3. Recherche du document
+        $documentBase = EnTeteDocument::find($id);
 
-        return redirect()->route('documents.index')
-                         ->with('success', 'Le devis ' . $devis->code_document . ' a été transformé en facture ' . $facture->code_document);
+        if (!$documentBase) {
+            Log::error("Transformation avortée : Document ID $id introuvable.");
+            return back()->with('error', "Le document n'existe pas dans la base de données.");
+        }
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error("Erreur transformation devis ID $id : " . $e->getMessage());
-        return back()->with('error', 'Erreur technique : ' . $e->getMessage());
+        // Vérification de sécurité (Appartenance)
+        if ($documentBase->societe_id != $societeId) {
+            Log::error("Transformation avortée : Sécurité - Le document $id n'appartient pas à la société $societeId.");
+            return back()->with('error', "Accès non autorisé à ce document.");
+        }
+
+        // Vérification du type (Souple)
+        $currentType = strtolower($documentBase->type_document ?? $documentBase->type ?? '');
+        if ($currentType !== 'd') {
+            Log::warning("Transformation avortée : Le document $id est de type '$currentType' et non 'd'.");
+            return back()->with('error', "Ce document n'est pas un devis transformable.");
+        }
+
+        // 4. Vérifier si déjà transformé
+        $existingInvoice = EnTeteDocument::where('devis_id', $devis->id ?? $id)->first();
+        if ($existingInvoice) {
+            Log::info("Transformation avortée : Facture déjà existante pour le devis $id : " . $existingInvoice->code_document);
+            return back()->with('error', 'Ce devis a déjà été transformé en facture (' . $existingInvoice->code_document . ').');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // 5. Chargement des lignes
+            $devis = $documentBase->load('lignes');
+            Log::info("Nombre de lignes à dupliquer pour le devis $id : " . $devis->lignes->count());
+
+            // 6. Créer la facture (duplication)
+            // On exclut les clés primaires et les timestamps
+            $facture = $devis->replicate(['id', 'created_at', 'updated_at']);
+            
+            // On force les valeurs de la facture
+            $facture->fill([
+                'type_document' => 'F',
+                'devis_id' => $devis->id,
+                // On génère un code unique (à adapter selon votre logique de numérotation)
+                'code_document' => 'FAC-' . now()->format('Ymd') . '-' . strtoupper(substr(uniqid(), -4))
+            ]);
+
+            $facture->save();
+            Log::info("En-tête facture créée avec succès. Nouvel ID: " . $facture->id);
+
+            // 7. Dupliquer les lignes
+            if ($devis->lignes->isEmpty()) {
+                Log::warning("Le devis $id n'a aucune ligne à copier.");
+            }
+
+            foreach ($devis->lignes as $ligne) {
+                $nouvelleLigne = $ligne->replicate(['id', 'created_at', 'updated_at']);
+                $nouvelleLigne->document_id = $facture->id; // Liaison à la nouvelle facture
+                $nouvelleLigne->save();
+            }
+
+            DB::commit();
+            Log::info("Transformation réussie pour le devis $id vers facture " . $facture->code_document);
+
+            return redirect()->route('documents.index')
+                             ->with('success', "Le devis {$devis->code_document} a été transformé en facture {$facture->code_document}");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("EXCEPTION lors de la transformation du devis $id : " . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return back()->with('error', 'Erreur technique lors de la transformation : ' . $e->getMessage());
+        }
     }
-}
 }
