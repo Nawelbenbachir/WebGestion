@@ -101,8 +101,23 @@
                                        value="{{ old("lignes.$i.total_ttc", $ligne->total_ttc) }}">
                             </td>
                             <td class="text-center flex justify-center gap-1">
-                                <button type="button" class="text-white rounded px-2 py-1 addRowBelow">➕</button>
-                                <button type="button" class="text-white rounded px-2 py-1 removeRow">🗑️</button>
+                                {{-- Bouton Ajouter --}}
+                                <button type="button" 
+                                        class="addRowBelow p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-md transition-all group"
+                                        title="Ajouter en dessous">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </button>
+                                
+                                {{-- Bouton Supprimer --}}
+                                <button type="button" 
+                                        class="removeRow p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-md transition-all group"
+                                        title="Supprimer la ligne">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </td>
                         </tr>
                     @endforeach

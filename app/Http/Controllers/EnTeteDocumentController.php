@@ -64,7 +64,7 @@ class EnTeteDocumentController extends Controller
             ->findOrFail($id);
 
         $view = match ($document->type_document) {
-            'F' => 'factures.show',
+            'F' => 'facture.show',
             'A' => 'avoirs.show',
             default => 'devis.show',
         };
@@ -110,7 +110,9 @@ class EnTeteDocumentController extends Controller
      */
     public function store(Request $request)
     {
+        
         $societeId = session('current_societe_id');
+  
 
         if (!$societeId) {
              return back()->withErrors('Erreur de contexte de société. Réessayez après avoir sélectionné une société.');
@@ -208,7 +210,7 @@ class EnTeteDocumentController extends Controller
         $produits = Produit::where('id_societe', $idSociete)->get();
 
         $view = match ($document->type_document) {
-            'F' => 'factures.edit',
+            'F' => 'facture.edit',
             'A' => 'avoirs.edit',
             default => 'devis.edit',
         };
@@ -223,7 +225,7 @@ class EnTeteDocumentController extends Controller
     /**
      * Mise à jour d’un document
      */
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
         $societeId = session('current_societe_id');
 
@@ -243,8 +245,8 @@ class EnTeteDocumentController extends Controller
             'adresse'       => 'nullable|string',
             'telephone'     => 'nullable|string|max:20',
             'email'         => 'nullable|email',
-            'lignes' => 'sometimes|array',
-            'lignes.*.id' => 'nullable|exists:ligne_documents,id',
+            'lignes'        => 'sometimes|array',
+            'lignes.*.id'   => 'nullable|exists:ligne_documents,id',
             'lignes.*.produit_code' => 'required|string',
             'lignes.*.description'  => 'nullable|string',
             'lignes.*.quantite'     => 'required|numeric|min:1',
@@ -253,72 +255,87 @@ class EnTeteDocumentController extends Controller
             'lignes.*.total_ttc'        => 'required|numeric|min:0',
         ]);
 
-        // Mise à jour de l'en-tête
-        $document->update([
-            'date_document' => $validated['date_document'],
-            'total_ht'      => $validated['total_ht'],
-            'total_tva'     => $validated['total_tva'],
-            'total_ttc'     => $validated['total_ttc'],
-            'solde'         => $validated['total_ttc'], 
-            'client_nom'    => $validated['client_nom'] ?? $document->client_nom,
-            'logo'          => $validated['logo'] ?? $document->logo,
-            'adresse'       => $validated['adresse'] ?? $document->adresse,
-            'telephone'     => $validated['telephone'] ?? $document->telephone,
-            'email'         => $validated['email'] ?? $document->email,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Traiter les lignes
-        $ligneIdsFormulaire = [];
+            // Mise à jour de l'en-tête
+            $document->update([
+                'date_document' => $validated['date_document'],
+                'total_ht'      => $validated['total_ht'],
+                'total_tva'     => $validated['total_tva'],
+                'total_ttc'     => $validated['total_ttc'],
+                'solde'         => $validated['total_ttc'], 
+                'client_nom'    => $validated['client_nom'] ?? $document->client_nom,
+                'logo'          => $validated['logo'] ?? $document->logo,
+                'adresse'       => $validated['adresse'] ?? $document->adresse,
+                'telephone'     => $validated['telephone'] ?? $document->telephone,
+                'email'         => $validated['email'] ?? $document->email,
+            ]);
 
-        if (!empty($validated['lignes'])) {
-            foreach ($validated['lignes'] as $ligneData) {
-                //  SÉCURITÉ : Trouver le produit en filtrant par société
-                $produit = Produit::where('code_produit', $ligneData['produit_code'])
-                                  ->where('id_societe', $societeId)
-                                  ->firstOrFail(); // Échoue si le produit n'appartient pas à la société
+            // Traiter les lignes
+            $ligneIdsFormulaire = [];
 
-                if (isset($ligneData['id'])) {
-                    $ligne = LigneDocument::find($ligneData['id']);
-                    if ($ligne) {
-                        $ligne->update([
-                            'produit_id'       => $produit->id, 
+            if (!empty($validated['lignes'])) {
+                foreach ($validated['lignes'] as $ligneData) {
+                    // SÉCURITÉ : Trouver le produit en filtrant par société
+                    $produit = Produit::where('code_produit', $ligneData['produit_code'])
+                                      ->where('id_societe', $societeId)
+                                      ->firstOrFail();
+
+                    if (isset($ligneData['id']) && !empty($ligneData['id'])) {
+                        $ligne = LigneDocument::find($ligneData['id']);
+                        if ($ligne) {
+                            $ligne->update([
+                                'produit_id'       => $produit->id, 
+                                'description'      => $ligneData['description'] ?? '',
+                                'quantite'         => $ligneData['quantite'],
+                                'prix_unitaire_ht' => $ligneData['prix_unitaire_ht'],
+                                'taux_tva'         => $ligneData['taux_tva'],
+                                'total_ttc'        => $ligneData['total_ttc'],
+                            ]);
+                            $ligneIdsFormulaire[] = $ligne->id;
+                        }
+                    } else {
+                        $nouvelleLigne = LigneDocument::create([
+                            'document_id'      => $document->id,
+                            'produit_id'       => $produit->id,
                             'description'      => $ligneData['description'] ?? '',
                             'quantite'         => $ligneData['quantite'],
                             'prix_unitaire_ht' => $ligneData['prix_unitaire_ht'],
                             'taux_tva'         => $ligneData['taux_tva'],
                             'total_ttc'        => $ligneData['total_ttc'],
                         ]);
-                        $ligneIdsFormulaire[] = $ligne->id;
+                        $ligneIdsFormulaire[] = $nouvelleLigne->id;
                     }
-                } else {
-                    $nouvelleLigne = LigneDocument::create([
-                        'document_id'      => $document->id,
-                        'produit_id'       => $produit->id,
-                        'description'      => $ligneData['description'] ?? '',
-                        'quantite'         => $ligneData['quantite'],
-                        'prix_unitaire_ht' => $ligneData['prix_unitaire_ht'],
-                        'taux_tva'         => $ligneData['taux_tva'],
-                        'total_ttc'        => $ligneData['total_ttc'],
-                    ]);
-                    $ligneIdsFormulaire[] = $nouvelleLigne->id;
                 }
             }
+
+            // Supprimer les lignes retirées du formulaire
+            $document->lignes()->whereNotIn('id', $ligneIdsFormulaire)->delete();
+
+            DB::commit();
+
+            // Mapping pour la redirection vers l'index filtré
+            $typeReverseMap = [
+                'F' => 'facture',
+                'D' => 'devis',
+                'A' => 'avoir',
+            ];
+
+            $typeTexte = $typeReverseMap[$document->type_document] ?? 'devis';
+
+            // Redirection forcée vers l'index avec le paramètre de type
+            return redirect()
+                ->route('documents.index', ['type' => $typeTexte])
+                ->with('success', ucfirst($typeTexte) . ' mis à jour avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', "Une erreur est survenue : " . $e->getMessage());
         }
-
-        // Supprimer les lignes retirées du formulaire
-        $document->lignes()->whereNotIn('id', $ligneIdsFormulaire)->delete();
-
-        $typeReverseMap = [
-            'F' => 'facture',
-            'D' => 'devis',
-            'A' => 'avoir',
-        ];
-
-        $typeTexte = $typeReverseMap[$document->type_document] ?? 'devis';
-
-        return redirect()
-            ->route('documents.index', ['type' => $typeTexte]);
-            // ->with('success', ucfirst($typeTexte) . ' mis à jour avec succès.');
     }
 
     /**
@@ -367,9 +384,8 @@ class EnTeteDocumentController extends Controller
     if ($documentBase->societe_id != $societeId) {
         return back()->with('error', "Ce document n'appartient pas à la société active.");
     }
-
-    // IMPORTANT : Vérifiez bien si votre colonne s'appelle 'type_document' ou 'type' 
-    // car plus bas vous utilisez $facture->type = 'facture'
+ 
+    
     if ($documentBase->type_document !== 'devis' && $documentBase->type !== 'devis') {
         return back()->with('error', "Le document n'est pas un devis (Type actuel : " . ($documentBase->type_document ?? $documentBase->type) . ").");
     }

@@ -24,6 +24,8 @@ return new class extends Migration
             $table->date('date_document')->nullable();
             $table->unsignedBigInteger('devis_id')->nullable();
             $table->foreign('devis_id')->references('id')->on('en_tete_documents')->onDelete('cascade');
+            $table->unsignedBigInteger('facture_id')->nullable();
+            $table->foreign('facture_id')->references('id')->on('en_tete_documents')->onDelete('cascade');
 
             $table->decimal('total_ht', 10, 2)->nullable();
             $table->decimal('total_tva', 10, 2)->nullable();
