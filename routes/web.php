@@ -31,8 +31,8 @@ Route::middleware('auth')->group(function () {
     // --- Routes Spécifiques (À placer AVANT les resources pour éviter les 404/conflits) ---
     
     // Action de transformation de document
-    Route::post('/documents/{id}/transform', [EnTeteDocumentController::class, 'transformToInvoice'])
-        ->name('documents.transform');
+    Route::post('/documents/{id}/transformF', [EnTeteDocumentController::class, 'transformerEnFacture'])->name('documents.transform');
+    Route::post('/documents/{id}/transformA', [EnTeteDocumentController::class, 'transformerEnAvoir'])->name('documents.transformToAvoir');
 
     // Mise à jour de la société sélectionnée
     Route::post('/societe/update-selection', [SocieteController::class, 'updateSelection'])

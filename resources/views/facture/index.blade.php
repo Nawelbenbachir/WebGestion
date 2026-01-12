@@ -44,7 +44,7 @@
                                     
                                     {{-- Transformer en Avoir --}}
                                     @if(!$hasAvoir)
-                                        <form action="{{ route('documents.transform', $document->id) }}" method="POST" class="inline">
+                                        <form action="{{ route('documents.transformToAvoir', $document->id) }}" method="POST" class="inline">
                                             @csrf
                                             <button type="submit" 
                                                     onclick="event.stopPropagation(); return confirm('Générer un avoir pour cette facture ?');"

@@ -76,7 +76,6 @@
                 </p>
             </a>
             
-            
             <a href="{{ route('documents.index', ['type' => 'facture']) }}" class="block px-5 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02]">
                 <div class="flex items-center justify-between">
                    

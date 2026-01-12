@@ -58,7 +58,7 @@
                                     </span>
                                 @endif
 
-                                {{-- Édition (Crayon) : Utilise le data-edit-url que votre script table écoute déjà --}}
+                                {{-- Édition : Utilise le data-edit-url que votre script table écoute déjà --}}
                                 <button type="button"
                                         data-edit-url="{{ route('documents.edit', $document->id) }}"
                                         onclick="event.stopPropagation();"
