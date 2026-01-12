@@ -30,59 +30,55 @@ class SocieteController extends Controller
         return view('parametres.create');
     }
 
-    /**
-     * Enregistre une nouvelle société.
-     */
     public function store(Request $request)
     {
         $user = Auth::user();
+
         $validated = $request->validate([
-            'code_societe' => 'required|string|max:255|unique:societes,code_societe',
-            'nom_societe' => 'required|string|max:255',
-            'email' => 'required|email|unique:societes,email',
-            'siret' => 'nullable|string|max:14',
-            'telephone' => 'nullable|string|max:20',
-            'adresse1' => 'nullable|string|max:255',
-            'adresse2' => 'nullable|string|max:255',
+            'code_societe'       => 'required|string|max:255|unique:societes,code_societe',
+            'nom_societe'        => 'required|string|max:255',
+            'email'              => 'required|email|unique:societes,email',
+            'siret'              => 'nullable|string|max:14',
+            'telephone'          => 'nullable|string|max:20',
+            'adresse1'           => 'nullable|string|max:255',
+            'adresse2'           => 'nullable|string|max:255',
             'complement_adresse' => 'nullable|string|max:255',
-            'code_postal' => 'nullable|string|max:10',
-            'ville' => 'nullable|string|max:255',
-            'pays' => 'nullable|string|max:255',
-            'iban' => 'nullable|string|max:34',
-            'swift' => 'nullable|string|max:11',
-            'tva' => 'nullable|string|max:20',
-            'logo' => 'nullable|string|max:255',
+            'code_postal'        => 'nullable|string|max:10',
+            'ville'              => 'nullable|string|max:255',
+            'pays'               => 'nullable|string|max:255',
+            'iban'               => 'nullable|string|max:34',
+            'swift'              => 'nullable|string|max:11',
+            'tva'                => 'nullable|string|max:20',
+            'logo'               => 'nullable|string|max:255',
         ]);
-        // Utilisation d'une transaction pour garantir la cohérence des données
-    DB::transaction(function () use ($validated, $user)  {
-        
-        //  Création de la Société en tant que Propriétaire
-        $societe = Societe::create(array_merge(
-            $request->$validated, 
-            [
+
+        // On utilise la transaction et on récupère la société créée
+        $societe = DB::transaction(function () use ($validated, $user) {
+            
+            // 1. Création de la Société
+            $newSociete = Societe::create(array_merge($validated, [
                 'proprietaire_id' => $user->id,
-            ]
-        ));
+            ]));
 
-        $societe->users()->attach($user->id, ['role_societe' => 'admin']);
+            // 2. Attachement du rôle admin dans la table pivot
+            $newSociete->users()->attach($user->id, ['role_societe' => 'admin']);
 
-        // Mise à jour de l'utilisateur: Définir cette nouvelle société comme la dernière société active
-        $user->forceFill([
-            'last_active_societe_id' => $societe->id,
-        ])->save();
-        
-       
+            // 3. Mise à jour de l'utilisateur (BDD)
+            $user->forceFill([
+                'last_active_societe_id' => $newSociete->id,
+            ])->save();
 
-        //  Mise à jour de la Session
+            return $newSociete;
+        });
+
+        // 4. Mise à jour de la Session (UNIQUEMENT si la transaction a réussi)
         session(['current_societe_id' => $societe->id]);
-    });
 
-    //  Redirection
-    return redirect()->route('dashboard')->with('success', 'Votre société a été créée avec succès et est maintenant active.');
-        // Societe::create($validated);
-
-        // return redirect()->route('parametres.index')->with('success', 'Société créée avec succès.');
+        // 5. Redirection
+        return redirect()->route('dashboard')
+            ->with('success', 'Votre société a été créée avec succès et est maintenant active.');
     }
+
 
     /**
      * Affiche les détails d’une société.

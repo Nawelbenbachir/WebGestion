@@ -9,6 +9,7 @@ use App\Models\Produit;
 use App\Models\LigneDocument;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EnTeteDocumentController extends Controller
 {
@@ -141,7 +142,7 @@ class EnTeteDocumentController extends Controller
 
         $typeDocument = $typeMap[$validated['type_document']] ?? null;
 
-        // SÉCURITÉ : Récupérer le client et s'assurer qu'il appartient à la société active
+        // Récupérer le client et s'assurer qu'il appartient à la société active
         $client = Client::where('code_cli', $validated['client_code'])
                         ->where('id_societe', $societeId)
                         ->firstOrFail();
@@ -195,7 +196,7 @@ class EnTeteDocumentController extends Controller
     {
         $societeId = session('current_societe_id');
         
-        // SÉCURITÉ : Récupérer le document en filtrant par la société active
+        //  Récupérer le document en filtrant par la société active
         $document = EnTeteDocument::with('lignes.produit')
             ->where('societe_id', $societeId)
             ->findOrFail($id);
@@ -344,4 +345,74 @@ class EnTeteDocumentController extends Controller
             ->route('documents.index', ['type' => $typeTexte]);
             // ->with('success', ucfirst($typeTexte) . ' supprimé avec succès.');
     }
+
+  public function transformToInvoice($id)
+{
+    // 1. Récupération de la société en session
+    $societeId = session('current_societe_id');
+    
+    if (!$societeId) {
+        return back()->with('error', "Session expirée ou société non sélectionnée.");
+    }
+
+    // 2. Recherche du document avec gestion d'erreur spécifique
+    // On cherche d'abord le document sans les filtres pour vérifier s'il existe du tout
+    $documentBase = EnTeteDocument::find($id);
+
+    if (!$documentBase) {
+        return back()->with('error', "Le document ID #$id n'existe pas dans la base de données.");
+    }
+
+    // Vérification manuelle des conditions pour éviter la 404 brutale de findOrFail
+    if ($documentBase->societe_id != $societeId) {
+        return back()->with('error', "Ce document n'appartient pas à la société active.");
+    }
+
+    // IMPORTANT : Vérifiez bien si votre colonne s'appelle 'type_document' ou 'type' 
+    // car plus bas vous utilisez $facture->type = 'facture'
+    if ($documentBase->type_document !== 'devis' && $documentBase->type !== 'devis') {
+        return back()->with('error', "Le document n'est pas un devis (Type actuel : " . ($documentBase->type_document ?? $documentBase->type) . ").");
+    }
+
+    // 3. Rechargement avec les lignes pour la transformation
+    $devis = $documentBase->load('lignes');
+
+    // 4. Vérifier si déjà transformé
+    $existingInvoice = EnTeteDocument::where('devis_id', $devis->id)->first();
+    if ($existingInvoice) {
+        return back()->with('error', 'Ce devis a déjà été transformé en facture (' . $existingInvoice->code_document . ').');
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // 5. Créer la facture (duplication)
+        $facture = $devis->replicate(['created_at', 'updated_at']);
+        
+        // Harmonisation des colonnes : on remplit les deux au cas où
+        $facture->type = 'facture';
+        $facture->type_document = 'facture'; 
+        
+        $facture->code_document = 'FAC-' . now()->format('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        $facture->devis_id = $devis->id;
+        $facture->save();
+
+        // 6. Dupliquer les lignes
+        foreach ($devis->lignes as $ligne) {
+            $nouvelleLigne = $ligne->replicate(['created_at', 'updated_at']);
+            $nouvelleLigne->document_id = $facture->id;
+            $nouvelleLigne->save();
+        }
+
+        DB::commit();
+
+        return redirect()->route('documents.index')
+                         ->with('success', 'Le devis ' . $devis->code_document . ' a été transformé en facture ' . $facture->code_document);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error("Erreur transformation devis ID $id : " . $e->getMessage());
+        return back()->with('error', 'Erreur technique : ' . $e->getMessage());
+    }
+}
 }

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('societe_id')->constrained()->onDelete('cascade');
             $table->string('role_societe')->default('user'); 
             $table->primary(['user_id', 'societe_id']);
+            $table->timestamps();
         });
 
         //  Ajout de la préférence utilisateur (dernière société active)

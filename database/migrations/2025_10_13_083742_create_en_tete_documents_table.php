@@ -22,8 +22,9 @@ return new class extends Migration
             $table->string('code_document')->unique();
             $table->enum('type_document', ['F', 'D', 'A'])->nullable();
             $table->date('date_document')->nullable();
-            
-            
+            $table->unsignedBigInteger('devis_id')->nullable();
+            $table->foreign('devis_id')->references('id')->on('en_tete_documents')->onDelete('cascade');
+
             $table->decimal('total_ht', 10, 2)->nullable();
             $table->decimal('total_tva', 10, 2)->nullable();
             $table->decimal('total_ttc', 10, 2)->nullable();
