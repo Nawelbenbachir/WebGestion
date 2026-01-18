@@ -50,6 +50,7 @@ class SocieteController extends Controller
             'swift'              => 'nullable|string|max:11',
             'tva'                => 'nullable|string|max:20',
             'logo'               => 'nullable|string|max:255',
+            'format_numero_document' => 'nullable|string|max:50',
         ]);
 
         // On utilise la transaction et on récupère la société créée
@@ -125,6 +126,7 @@ public function update(Request $request, Societe $societe)
         'swift' => 'nullable|string|max:11',
         'tva' => 'nullable|string|max:20',
         'logo' => 'nullable|string|max:255',
+        'format_numero_document' => 'nullable|string|max:50',
     ]);
 
     // La mise à jour est exécutée ici

@@ -26,6 +26,7 @@ class Societe extends Model
         'tva',
         'logo',
         'proprietaire_id',
+        'format_numero_document',
         
     ];
         public function documents()

@@ -59,6 +59,10 @@
                 value="{{ old('iban') }}" maxlength="34" placeholder="FR76..." >
             @error('iban') <div class="text-sm text-red-500 mt-1">{{ $message }}</div> @enderror
         </div>
+        <select name="format_numero_document">
+            <option value="simple">Annuel (Ex: F-2024-001)</option>
+            <option value="mensuel">Mensuel (Ex: F-2024-05-001)</option>
+        </select>
         
     </div> 
 

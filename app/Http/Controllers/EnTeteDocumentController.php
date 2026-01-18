@@ -40,6 +40,8 @@ class EnTeteDocumentController extends Controller
         $documents = EnTeteDocument::with(['societe', 'client'])
             ->where('type_document', $typeCode)
             ->where('societe_id', $societeId)
+            ->orderBy('date_document', 'desc')
+            ->orderBy('code_document','desc')
             ->get();
 
         // Vue dynamique selon le type
@@ -48,7 +50,7 @@ class EnTeteDocumentController extends Controller
             'avoir'   => 'avoir.index',
             default   => 'devis.index',
         };
-
+        
         return view($view, compact('documents'));
     }
 
@@ -111,16 +113,14 @@ class EnTeteDocumentController extends Controller
      */
     public function store(Request $request)
     {
-        
         $societeId = session('current_societe_id');
-  
 
         if (!$societeId) {
-             return back()->withErrors('Erreur de contexte de société. Réessayez après avoir sélectionné une société.');
+            return back()->withErrors('Erreur de contexte de société. Réessayez après avoir sélectionné une société.');
         }
 
+        // 1. Validation (Notez que code_document n'est plus requis ici car on le génère)
         $validated = $request->validate([
-            'code_document' => 'required|string|max:50|unique:en_tete_documents,code_document',
             'type_document' => 'required|in:facture,devis,avoir',
             'date_document' => 'required|date',
             'total_ht'      => 'required|numeric|min:0',
@@ -130,67 +130,79 @@ class EnTeteDocumentController extends Controller
             'lignes'        => 'required|array|min:1',
             'lignes.*.produit_code'     => 'required|string', 
             'lignes.*.description'      => 'nullable|string',
-            'lignes.*.quantite'         => 'required|numeric|min:1',
+            'lignes.*.quantite'         => 'required|numeric|min:0.01',
             'lignes.*.prix_unitaire_ht' => 'required|numeric|min:0',
             'lignes.*.taux_tva'         => 'required|numeric|min:0',
             'lignes.*.total_ttc'        => 'required|numeric|min:0',
             'statut'                    => 'nullable|string',
         ]);
-        
+
+        // 2. Mapping du type pour la génération et le stockage
         $typeMap = [
             'facture' => 'F',
             'devis'   => 'D',
             'avoir'   => 'A',
         ];
+        $typeCode = $typeMap[$validated['type_document']];
 
-        $typeDocument = $typeMap[$validated['type_document']] ?? null;
+        //  Début de la transaction pour garantir l'intégrité des données
+        try {
+            return DB::transaction(function () use ($validated, $societeId, $typeCode) {
+                
+                // Génération du numéro de document
+                $numeroDocument = $this->genererNumeroDocument($typeCode, $societeId);
 
-        // Récupérer le client et s'assurer qu'il appartient à la société active
-        $client = Client::where('code_cli', $validated['client_code'])
-                        ->where('id_societe', $societeId)
-                        ->firstOrFail();
+                // Récupération sécurisée du client
+                $client = Client::where('code_cli', $validated['client_code'])
+                                ->where('id_societe', $societeId)
+                                ->firstOrFail();
 
-        // Créer le document avec l'ID de la société de la session
-        $document = EnTeteDocument::create([
-            'societe_id'    => $societeId, 
-            'code_document' => $validated['code_document'],
-            'type_document' => $typeDocument,
-            'date_document' => $validated['date_document'],
-            'total_ht'      => $validated['total_ht'],
-            'total_tva'     => $validated['total_tva'],
-            'total_ttc'     => $validated['total_ttc'],
-            'solde'         => $validated['total_ttc'], 
-            'client_id'     => $client->id,
-            'client_nom'    => $client->societe,
-            'adresse'       => $client->adresse ?? null,
-            'telephone'     => $client->telephone ?? null,
-            'email'         => $client->email ?? null,
-            'statut'        => $validated['statut'] ?? 'brouillon',
-        ]);
+                // Création de l'en-tête
+                $document = EnTeteDocument::create([
+                    'societe_id'    => $societeId, 
+                    'code_document' => $numeroDocument,
+                    'type_document' => $typeCode,
+                    'date_document' => $validated['date_document'],
+                    'total_ht'      => $validated['total_ht'],
+                    'total_tva'     => $validated['total_tva'],
+                    'total_ttc'     => $validated['total_ttc'],
+                    'solde'         => $validated['total_ttc'], 
+                    'client_id'     => $client->id,
+                    'client_nom'    => $client->societe,
+                    'adresse'       => $client->adresse,
+                    'telephone'     => $client->telephone,
+                    'email'         => $client->email,
+                    'statut'        => $validated['statut'] ?? 'brouillon',
+                ]);
 
-        // Créer les lignes
-        foreach ($validated['lignes'] as $ligne) {
-            // SÉCURITÉ : Récupérer le produit et s'assurer qu'il appartient à la société active
-            $produit = Produit::where('code_produit', $ligne['produit_code'])
-                              ->where('id_societe', $societeId)
-                              ->firstOrFail();
+                // Création des lignes de détail
+                foreach ($validated['lignes'] as $ligne) {
+                    $produit = Produit::where('code_produit', $ligne['produit_code'])
+                                      ->where('id_societe', $societeId)
+                                      ->firstOrFail();
 
-            LigneDocument::create([
-                'document_id'      => $document->id,
-                'produit_id'       => $produit->id,
-                'description'      => $ligne['description'] ?? '',
-                'quantite'         => $ligne['quantite'],
-                'prix_unitaire_ht' => $ligne['prix_unitaire_ht'],
-                'taux_tva'         => $ligne['taux_tva'],
-                'total_ttc'        => $ligne['total_ttc'],
-            ]);
+                    LigneDocument::create([
+                        'document_id'      => $document->id,
+                        'produit_id'       => $produit->id,
+                        'description'      => $ligne['description'] ?? '',
+                        'quantite'         => $ligne['quantite'],
+                        'prix_unitaire_ht' => $ligne['prix_unitaire_ht'],
+                        'taux_tva'         => $ligne['taux_tva'],
+                        'total_ttc'        => $ligne['total_ttc'],
+                    ]);
+                }
+
+                return redirect()
+                    ->route('documents.index', ['type' => $validated['type_document']])
+                    ->with('success', ucfirst($validated['type_document']) . " $numeroDocument créé avec succès.");
+            });
+
+        } catch (\Exception $e) {
+            Log::error("Erreur lors de la création du document : " . $e->getMessage());
+            return back()->withInput()->withErrors("Erreur lors de l'enregistrement : " . $e->getMessage());
         }
-        
-        // Redirection
-        return redirect()
-            ->route('documents.index', ['type' => $validated['type_document']])
-            ->with('success', ucfirst($validated['type_document']) . ' créé avec succès.');
     }
+
 
     /**
      * Formulaire d’édition
@@ -380,59 +392,103 @@ class EnTeteDocumentController extends Controller
         return $this->dupliquerDocument($id, 'A', 'L\'avoir a été généré à partir de la facture.');
     }
 
-    /**
-     * Méthode PRIVÉE générique pour éviter la répétition de code
-     */
-     private function dupliquerDocument($id, $nouveauType, $messageSucces)
+     private function genererNumeroDocument($type, $societeId)
+    {
+        //  Récupérer le format depuis la table parametres
+        // On cherche directement dans la table parametres liée à la société
+        $formatChoisi = DB::table('societes')
+            ->where('id', $societeId)
+            ->value('format_numero_document') ?? 'simple';
+
+        $prefix = match($type) {
+            'F' => 'F',
+            'A' => 'A',
+            'D' => 'D',
+            default => 'DOC'
+        };
+
+        $annee = now()->format('Y');
+        $mois = now()->format('m');
+
+        //  Construction de la base de recherche
+        $baseCode = ($formatChoisi === 'mensuel') 
+            ? "{$prefix}-{$annee}-{$mois}-" 
+            : "{$prefix}-{$annee}-";
+
+        //  Recherche du dernier numéro spécifique à CETTE société
+        // Important : on filtre par societe_id pour que les compteurs soient étanches
+        $dernierDoc = EnTeteDocument::where('societe_id', $societeId)
+            ->where('code_document', 'LIKE', $baseCode . '%')
+            ->orderBy('code_document', 'desc')
+            ->first();
+
+        $compteur = 1;
+
+        if ($dernierDoc) {
+            // Extraction du dernier segment (le numéro)
+            $parties = explode('-', $dernierDoc->code_document);
+            $dernierNombre = end($parties);
+            if (is_numeric($dernierNombre)) {
+                $compteur = (int)$dernierNombre + 1;
+            }
+        }
+
+        // Formatage final (ex: F-2024-001 ou F-2024-05-001)
+        return $baseCode . str_pad($compteur, 3, '0', STR_PAD_LEFT);
+    }
+
+    private function dupliquerDocument($id, $nouveauType, $messageSucces)
     {
         try {
-            // Utilisation d'une transaction pour garantir l'intégrité
-            $resultat = DB::transaction(function () use ($id, $nouveauType) {
+            return DB::transaction(function () use ($id, $nouveauType, $messageSucces) {
                 
-                // 1. Vérifier si le document source existe vraiment
                 $original = EnTeteDocument::find($id);
                 if (!$original) {
-                    throw new \Exception("Document source introuvable (ID: $id)");
+                    throw new \Exception("Document source introuvable.");
                 }
 
-                // 2. Duplication
+                // Vérification si la transformation a déjà eu lieu
+                if ($nouveauType == 'F') {
+                    $exist = EnTeteDocument::where('devis_id', $original->id)->first();
+                    if ($exist) throw new \Exception("Une facture ({$exist->code_document}) existe déjà pour ce devis.");
+                } elseif ($nouveauType == 'A') {
+                    $exist = EnTeteDocument::where('facture_id', $original->id)->first();
+                    if ($exist) throw new \Exception("Un avoir ({$exist->code_document}) existe déjà pour cette facture.");
+                }
+                $societeId = session('current_societe_id');
                 $nouveauDoc = $original->replicate();
                 $nouveauDoc->type_document = $nouveauType;
                 $nouveauDoc->date_document = now();
+                $nouveauDoc->statut = 'brouillon';
                 
-                // Vérifiez si votre DB accepte NULL pour le code_document
-                // Si vous avez un trigger SQL ou un Observer, c'est ici qu'il agit
-                $nouveauDoc->code_document = "TEMP-" . uniqid(); 
+                // Appel de la nouvelle logique de numérotation
+                $nouveauDoc->code_document = $this->genererNumeroDocument($nouveauType, $societeId);
+
+                // Liaisons
+                if ($nouveauType == 'F') {
+                    $nouveauDoc->devis_id = $original->id;
+                } elseif ($nouveauType == 'A') {
+                    $nouveauDoc->facture_id = $original->id;
+                }
 
                 if (!$nouveauDoc->save()) {
-                    throw new \Exception("Échec de la sauvegarde de l'en-tête");
+                    throw new \Exception("Erreur lors de la création de l'en-tête.");
                 }
 
-                // 3. Duplication des lignes
-               
+                // Duplication des lignes
                 $lignes = LigneDocument::where('document_id', $original->id)->get();
-                
-                if ($lignes->isEmpty()) {
-                    Log::warning("Le document $id n'a pas de lignes à copier.");
-                }
-
                 foreach ($lignes as $ligne) {
                     $nouvelleLigne = $ligne->replicate();
                     $nouvelleLigne->document_id = $nouveauDoc->id;
                     $nouvelleLigne->save();
                 }
 
-                return $nouveauDoc;
+                return redirect()->route('documents.index')->with('success', $messageSucces);
             });
 
-            return redirect()->route('documents.index')->with('success', $messageSucces);
-
         } catch (\Exception $e) {
-            // CRITIQUE : Loggez l'erreur pour la voir dans storage/logs/laravel.log
-            Log::error("Erreur duplication document : " . $e->getMessage());
-            
-            // Retournez avec l'erreur réelle pour comprendre le problème
-            return redirect()->back()->with('error', 'Erreur technique : ' . $e->getMessage());
+            Log::error("Erreur duplication : " . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 }
