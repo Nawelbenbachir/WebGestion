@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class EnTeteDocumentController extends Controller
 {
@@ -418,14 +420,17 @@ class EnTeteDocumentController extends Controller
             ? "{$prefix}-{$annee}-{$mois}-" 
             : "{$prefix}-{$annee}-";
 
-        //  Recherche du dernier numéro spécifique à CETTE société
-        // Important : on filtre par societe_id pour que les compteurs soient étanches
+        $nbTiretsAttendus = ($formatChoisi === 'mensuel') ? 3 : 2;
+
         $dernierDoc = EnTeteDocument::where('societe_id', $societeId)
             ->where('code_document', 'LIKE', $baseCode . '%')
+            // On s'assure que le format correspond (filtrage par nombre de tirets)
+            ->whereRaw("(LENGTH(code_document) - LENGTH(REPLACE(code_document, '-', ''))) = ?", [$nbTiretsAttendus])
+            ->orderByRaw('LENGTH(code_document) DESC')
             ->orderBy('code_document', 'desc')
             ->first();
 
-        $compteur = 1;
+            $compteur = 1;
 
         if ($dernierDoc) {
             // Extraction du dernier segment (le numéro)
@@ -494,4 +499,21 @@ class EnTeteDocumentController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+    public function downloadPdf($id)
+{
+    $document = EnTeteDocument::with(['lignes.produit', 'client', 'societe'])->findOrFail($id);
+
+    // On prépare les données pour la vue PDF
+    $data = [
+        'document' => $document,
+        'societe'  => $document->societe,
+        'client'   => $document->client,
+    ];
+
+    // On charge une vue spécifique pour le design du PDF
+    $pdf = Pdf::loadView('pdf.facture', $data);
+
+    // On force le téléchargement avec le nom de la facture
+    return $pdf->download('facture_' . $document->code_document . '.pdf');
+}
 }

@@ -22,18 +22,15 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->middleware(['verified'])->name('dashboard');
 
-    // --- ROUTES DOCUMENTS (Priorité Haute) ---
-
     // La route index générique qui gère ?type=facture
     Route::get('documents', [EnTeteDocumentController::class, 'index'])->name('documents.index');
 
-    // Groupes spécifiques pour Factures, Devis, Avoirs
-    // Attention : J'utilise EnTeteDocumentController partout pour la cohérence
     Route::prefix('factures')->group(function () {
         Route::get('/', [EnTeteDocumentController::class, 'index'])->defaults('type', 'facture')->name('factures.index');
         Route::get('/create', [EnTeteDocumentController::class, 'create'])->defaults('type', 'facture')->name('factures.create');
         Route::get('factures/{id}/destroy', [EnTeteDocumentController::class, 'destroy'])->name('factures.destroy');
         Route::get('/factures/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('facture.edit');
+        Route::get('/factures/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('facture.pdf');
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'facture')->name('factures.show');
     });
 
