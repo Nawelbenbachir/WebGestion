@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\EnTeteDocument;
 use Carbon\Carbon;
 use App\Models\Reglement;
+use App\Models\Produit;
 
 class DashboardComposer
 {
@@ -64,7 +65,25 @@ class DashboardComposer
                                     ->orderBy('created_at', 'desc')
                                     ->limit(5) // Limite l'affichage à 5 lignes
                                     ->get();
+        //Récupération du nombre de produits 
 
+        $products_count= Produit::where('id_societe', $currentSocieteId)
+                            ->count();
+        $devis_count=EnTeteDocument::where('societe_id', $currentSocieteId)
+                                    ->where('type_document', 'D')
+                                    ->count();
+        $factures_count= EnTeteDocument::where('societe_id', $currentSocieteId)
+                                    ->where('type_document', 'F')
+                                    ->count();
+        $avoirs_count= EnTeteDocument::where('societe_id', $currentSocieteId)
+                                    ->where('type_document', 'A')
+                                    ->count();
+        $clients_count= Client::where('id_societe', $currentSocieteId)
+                            ->count();
+        $reglements_count= Reglement::whereHas('document', function ($query) use ($currentSocieteId) {
+                                    $query->where('societe_id', $currentSocieteId);
+                                })
+                                ->count();
         // On transmet les variables à la vue
         $view->with([
             'monthly_ca' => $monthly_ca,
@@ -72,6 +91,12 @@ class DashboardComposer
             'unpaid_total' => $unpaid_total,
             'new_clients_count' => $new_clients_count,
             'latestInvoices' => $latestInvoices,
+            'products_count'=>$products_count,
+            'devis_count'=>$devis_count,
+            'factures_count'=>$factures_count,
+            'avoirs_count'=>$avoirs_count,
+            'clients_count'=>$clients_count,
+            'reglements_count'=>$reglements_count,
         ]);
     }
 }

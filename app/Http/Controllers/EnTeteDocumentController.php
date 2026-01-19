@@ -17,41 +17,44 @@ class EnTeteDocumentController extends Controller
     /**
      * Affiche la liste des documents (filtrés par type et par société active).
      */
-    public function index(Request $request)
+   public function index(Request $request, $type = null)
     {
-        //  Récupération de la société active à partir de la session
+        // 1. Récupération de la société active
         $societeId = session('current_societe_id');
 
-        // Sécurité : Vérifie si le contexte de travail est défini
         if (!$societeId) {
-            return redirect()->route('dashboard')->with('error', 'Veuillez sélectionner une société de travail pour afficher les documents.');
+            return redirect()->route('dashboard')
+                ->with('error', 'Veuillez sélectionner une société de travail pour afficher les documents.');
         }
 
+        // 2. Détermination du type (Priorité au paramètre de route, sinon fallback sur query string)
+        $type = $type ?? $request->get('type', 'devis');
+
+        // 3. Mapping des codes pour la base de données
         $typeMap = [
             'facture' => 'F',
             'devis'   => 'D',
             'avoir'   => 'A',
         ];
 
-        $type = $request->get('type', 'devis');
         $typeCode = $typeMap[$type] ?? 'D';
 
-        // Filtrage essentiel : Seulement les documents de la société active
+        // 4. Récupération filtrée des documents
         $documents = EnTeteDocument::with(['societe', 'client'])
             ->where('type_document', $typeCode)
             ->where('societe_id', $societeId)
             ->orderBy('date_document', 'desc')
-            ->orderBy('code_document','desc')
+            ->orderBy('code_document', 'desc')
             ->get();
 
-        // Vue dynamique selon le type
+        // 5. Sélection de la vue dynamique
         $view = match ($type) {
             'facture' => 'facture.index',
             'avoir'   => 'avoir.index',
-            default   => 'devis.index',
+            default   => 'devis.index', // Par défaut pour 'devis' ou autre
         };
         
-        return view($view, compact('documents'));
+        return view($view, compact('documents', 'type'));
     }
 
     /**

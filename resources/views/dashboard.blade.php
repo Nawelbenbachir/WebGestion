@@ -45,7 +45,7 @@
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Clients
+                        Clients ({{ $clients_count }})
                     </span>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +63,7 @@
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Produits
+                        Produits ({{ $products_count }})
                     </span>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,7 +80,7 @@
                 <div class="flex items-center justify-between">
                    
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Factures
+                        Factures ({{ $factures_count }})
                     </span>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +98,7 @@
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Devis
+                        Devis ({{ $devis_count }})
                     </span>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-500 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,7 +116,7 @@
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Avoirs
+                        Avoirs ({{ $avoirs_count }})
                     </span>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-500 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +134,7 @@
                 <div class="flex items-center justify-between">
                     
                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        Règlements
+                        Règlements ({{ $reglements_count }})
                     </span>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
