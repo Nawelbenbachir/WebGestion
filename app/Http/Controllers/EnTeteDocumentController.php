@@ -85,32 +85,38 @@ class EnTeteDocumentController extends Controller
      */
     public function create(Request $request)
     {
-        $type = $request->get('type', 'devis');
 
-        // Récupération de l'ID de la société active
-        $societeId = session('current_societe_id');
+    $type = $request->get('type', 'devis');
+    $societeId = session('current_societe_id');
 
-        if (!$societeId) {
-            return back()->withErrors('Aucune société sélectionnée. Veuillez choisir votre société de travail.');
-        }
+    if (!$societeId) {
+        return back()->withErrors('Aucune société sélectionnée.');
+    }
 
-        // Clients + produits liés à cette société active
-        $clients = Client::where('id_societe', $societeId)->get();
-        $produits = Produit::where('id_societe', $societeId)->get();
+    // Mapping pour obtenir le code (F, D, A)
+    $typeMap = ['facture' => 'F', 'devis' => 'D', 'avoir' => 'A'];
+    $typeCode = $typeMap[$type] ?? 'D';
 
-        // Sélection de la vue selon le type
-        $view = match ($type) {
-            'facture' => 'facture.create',
-            'avoir'   => 'avoir.create',
-            default   => 'devis.create',
-        };
+    // GÉNÉRATION DU NUMÉRO ICI
+    $prochainNumero = $this->genererNumeroDocument($typeCode, $societeId);
 
-        return view($view, [
-            'type'      => $type,
-            'clients'   => $clients,
-            'produits'  => $produits,
-            'societeId' => $societeId,
-        ]);
+    $clients = Client::where('id_societe', $societeId)->get();
+    $produits = Produit::where('id_societe', $societeId)->get();
+
+    $view = match ($type) {
+        'facture' => 'facture.create',
+        'avoir'   => 'avoir.create',
+        default   => 'devis.create',
+    };
+
+    return view($view, [
+        'type'           => $type,
+        'clients'        => $clients,
+        'produits'       => $produits,
+        'societeId'      => $societeId,
+        'prochainNumero' => $prochainNumero, // On l'envoie à la vue
+    ]);
+
     }
 
     /**
@@ -126,6 +132,7 @@ class EnTeteDocumentController extends Controller
 
         // 1. Validation (Notez que code_document n'est plus requis ici car on le génère)
         $validated = $request->validate([
+            'code_document' => 'required|string|unique:en_tete_documents,code_document',
             'type_document' => 'required|in:facture,devis,avoir',
             'date_document' => 'required|date',
             'total_ht'      => 'required|numeric|min:0',
@@ -154,8 +161,7 @@ class EnTeteDocumentController extends Controller
         try {
             return DB::transaction(function () use ($validated, $societeId, $typeCode) {
                 
-                // Génération du numéro de document
-                $numeroDocument = $this->genererNumeroDocument($typeCode, $societeId);
+                
 
                 // Récupération sécurisée du client
                 $client = Client::where('code_cli', $validated['client_code'])
@@ -165,7 +171,7 @@ class EnTeteDocumentController extends Controller
                 // Création de l'en-tête
                 $document = EnTeteDocument::create([
                     'societe_id'    => $societeId, 
-                    'code_document' => $numeroDocument,
+                   'code_document' => $validated['code_document'],
                     'type_document' => $typeCode,
                     'date_document' => $validated['date_document'],
                     'total_ht'      => $validated['total_ht'],
@@ -245,9 +251,10 @@ class EnTeteDocumentController extends Controller
      */
    public function update(Request $request, $id)
     {
+       
         $societeId = session('current_societe_id');
 
-        // SÉCURITÉ : Récupérer le document en filtrant par la société active
+        //  Récupérer le document en filtrant par la société active
         $document = EnTeteDocument::with('lignes')
             ->where('societe_id', $societeId)
             ->findOrFail($id);
@@ -255,14 +262,14 @@ class EnTeteDocumentController extends Controller
         // Validation de l'en-tête + lignes
         $validated = $request->validate([
             'date_document' => 'required|date',
+            'date_validite' => 'nullable|date',
+            'date_echeance' => 'nullable|date',
+            'statut'        => 'required|string|in:brouillon,envoye,paye',
+            'client_id'    => 'required|exists:clients,id',
             'total_ht'      => 'required|numeric|min:0',
             'total_tva'     => 'required|numeric|min:0',
             'total_ttc'     => 'required|numeric|min:0',
-            'client_nom'    => 'nullable|string|max:255',
-            'logo'          => 'nullable|string',
-            'adresse'       => 'nullable|string',
-            'telephone'     => 'nullable|string|max:20',
-            'email'         => 'nullable|email',
+            'commentaire'=> 'nullable|string',
             'lignes'        => 'sometimes|array',
             'lignes.*.id'   => 'nullable|exists:ligne_documents,id',
             'lignes.*.produit_code' => 'required|string',
@@ -272,22 +279,24 @@ class EnTeteDocumentController extends Controller
             'lignes.*.taux_tva'         => 'required|numeric|min:0',
             'lignes.*.total_ttc'        => 'required|numeric|min:0',
         ]);
-
+        
+        
+    
         try {
             DB::beginTransaction();
 
             // Mise à jour de l'en-tête
             $document->update([
                 'date_document' => $validated['date_document'],
+                'date_validite' => $validated['date_validite'] ?? null,
+                'date_echeance' => $validated['date_echeance'] ?? null,
+                'statut'        => $validated['statut'],
+                'client_id'     => $validated['client_id'],
                 'total_ht'      => $validated['total_ht'],
                 'total_tva'     => $validated['total_tva'],
                 'total_ttc'     => $validated['total_ttc'],
                 'solde'         => $validated['total_ttc'], 
-                'client_nom'    => $validated['client_nom'] ?? $document->client_nom,
-                'logo'          => $validated['logo'] ?? $document->logo,
-                'adresse'       => $validated['adresse'] ?? $document->adresse,
-                'telephone'     => $validated['telephone'] ?? $document->telephone,
-                'email'         => $validated['email'] ?? $document->email,
+                'commentaire'=> $validated['commentaire'] ?? null,
             ]);
 
             // Traiter les lignes
@@ -349,10 +358,12 @@ class EnTeteDocumentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', "Une erreur est survenue : " . $e->getMessage());
+            // Ceci va stopper la redirection et afficher l'erreur précise (ex: colonne manquante)
+    dd([
+        'Message' => $e->getMessage(),
+        'Fichier' => $e->getFile(),
+        'Ligne' => $e->getLine()
+    ]);
         }
     }
 

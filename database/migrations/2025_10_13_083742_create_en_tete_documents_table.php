@@ -36,11 +36,13 @@ return new class extends Migration
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
 
             $table->string('client_nom')->nullable();
-            $table->string('logo')->nullable();
             $table->string('adresse')->nullable();
+            $table->string('code_postal')->nullable();
+            $table->string('ville')->nullable();
             $table->string('telephone')->nullable();
             $table->string('email')->nullable();
             $table->date('date_echeance')->nullable();
+            $table->date('date_validite')->nullable();
             $table->text('commentaire')->nullable();
             $table->enum('statut', ['brouillon', 'envoye', 'paye'])->default('brouillon');
         });

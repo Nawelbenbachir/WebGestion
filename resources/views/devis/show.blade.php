@@ -1,6 +1,8 @@
-@extends('layouts.app')
+<x-layouts.app>
+    <x-slot name="navigation">
+        <x-navigation></x-navigation>
+    </x-slot>
 
-@section('content')
 <div class="container mt-4">
     <h2 class="mb-4">📄 Détails du document n° {{ $document->code_document }}</h2>
 
@@ -83,4 +85,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-layouts.app>

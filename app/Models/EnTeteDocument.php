@@ -18,12 +18,8 @@ class EnTeteDocument extends Model
         'total_ttc',
         'solde',
         'client_id',
-        'client_nom',
-        'logo',
-        'adresse',
-        'telephone',
-        'email',
         'date_echeance',
+        'date_validite',
         'commentaire',
         'statut',
 

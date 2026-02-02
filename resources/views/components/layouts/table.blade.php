@@ -83,10 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
             openModal(url);
         });
     });
+    
+    
 });
 
 function openModal(url) {
     const content = document.getElementById('modal-content');
+    // Affichage du loader
     content.innerHTML = '<div class="flex justify-center p-12"><svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
     
     document.getElementById('modal').classList.remove('hidden');
@@ -101,6 +104,7 @@ function openModal(url) {
             const container = document.getElementById('modal-content');
             container.innerHTML = html;
             
+            // Stylisation automatique des inputs injectés
             container.querySelectorAll('input:not([type="checkbox"]), select, textarea').forEach(el => {
                 el.classList.add(
                     'w-full','rounded-md','border-gray-300','dark:border-gray-600',
@@ -109,10 +113,32 @@ function openModal(url) {
                 );
             });
 
+            // --- GESTION DU CHANGEMENT DE CLIENT ---
+            const clientSelect = container.querySelector('#client_id');
+            if (clientSelect) {
+                clientSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption && selectedOption.value !== "") {
+                        const setVal = (id, val) => {
+                            const el = container.querySelector(`#${id}`);
+                            if(el) el.value = val || '';
+                        };
+
+                        setVal('adresse1', selectedOption.dataset.adresse1);
+                        setVal('adresse2', selectedOption.dataset.adresse2);
+                        setVal('code_postal', selectedOption.dataset.cp);
+                        setVal('ville', selectedOption.dataset.ville);
+                        setVal('telephone', selectedOption.dataset.tel);
+                        setVal('email', selectedOption.dataset.email);
+                    }
+                });
+            }
+
+            // Initialisation spécifique aux formulaires de devis/factures
             if (container.querySelector('#lignesTable')) {
                 initDevisForm(container);
             }
-        })
+        }) 
         .catch(err => {
             console.error('Erreur :', err);
             closeModal();
@@ -215,6 +241,8 @@ function initDevisForm(container) {
         }
     });
 }
+
+        
 </script>
 @endpush
 @endif

@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Client;
+
 
 class ClientFactory extends Factory
 {
@@ -22,9 +24,9 @@ class ClientFactory extends Factory
             
             'email' => $this->faker->unique()->safeEmail(),
             'telephone' => $this->faker->phoneNumber(),
-            'adresse1' => $this->faker->address(),
-            'adresse2' => $this->faker->address(),
-            'complement_adresse' => $this->faker->word(),
+            'adresse1'           => $this->faker->streetAddress(), 
+            'adresse2'           => $this->faker->secondaryAddress(), 
+            'complement_adresse' => 'Bâtiment ' . $this->faker->randomLetter(),
             'ville' => $this->faker->city(),
             'code_postal' => $this->faker->postcode(),
             'pays' => 'France',
