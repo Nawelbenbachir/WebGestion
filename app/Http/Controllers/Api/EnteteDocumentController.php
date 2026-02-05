@@ -28,6 +28,8 @@ class EnteteDocumentController extends Controller
                 'message' => 'Veuillez fournir un societe_id (URL), un X-Societe-Id (Header) ou être rattaché à une société.'
             ], 400);
         }
+        //tester l'api sans sanctum
+        // $societeId = $request->get('societe_id') ?? 1;
 
         // On prépare la requête de base
         $query = EnTeteDocument::with(['client', 'societe'])
@@ -77,9 +79,16 @@ class EnteteDocumentController extends Controller
      */
     public function show(string $id)
     {
+        $user = Auth::user();
+    
+        // On récupère le document  s'il appartient à la société de l'utilisateur
         $document = EnTeteDocument::with(['client', 'societe', 'lignes'])
+            ->where('societe_id', $user->current_societe_id) 
             ->findOrFail($id);
-
+            
+        //tester api sans sanctum 
+        // $document = EnTeteDocument::with(['client', 'societe', 'lignes'])->findOrFail($id);
+        
         return new EnteteDocumentResource($document);
     }
 }

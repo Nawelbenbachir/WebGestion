@@ -77,12 +77,9 @@ class AuthenticatedSessionController extends Controller
             }
         }
         
-        //  Redirection finale
-        // Si $targetSocieteId n'est pas trouvé (Cas: plusieurs sociétés sans préférence), 
-        // l'utilisateur est redirigé vers le dashboard, mais sans session active. 
-        // Le View Composer/Middleware de la navbar forcera la sélection manuelle.
+       
 
-        return redirect()->intended('/dashboard'); 
+        return redirect()->intended('/tableau-de-bord'); 
     }
     
     /**
