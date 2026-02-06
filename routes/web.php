@@ -30,7 +30,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [EnTeteDocumentController::class, 'create'])->defaults('type', 'facture')->name('factures.create');
         Route::get('factures/{id}/destroy', [EnTeteDocumentController::class, 'destroy'])->name('factures.destroy');
         Route::get('/factures/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('facture.edit');
-        Route::get('/factures/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('facture.pdf');
+        Route::get('/factures/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('documents.pdf');
+        
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'facture')->name('factures.show');
     });
 
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [EnTeteDocumentController::class, 'create'])->defaults('type', 'devis')->name('devis.create');
         Route::get('devis/{id}/destroy', [EnTeteDocumentController::class, 'destroy'])->name('devis.destroy');
         Route::get('/devis/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('devis.edit');
+        Route::get('/devis/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('documents.pdf');
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'devis')->name('devis.show');
     });
 
@@ -47,6 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [EnTeteDocumentController::class, 'create'])->defaults('type', 'avoir')->name('avoirs.create');
         Route::get('avoirs/{id}/destroy', [EnTeteDocumentController::class, 'destroy'])->name('avoirs.destroy');
         Route::get('/avoirs/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('avoirs.edit');
+        Route::get('/avoirs/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('documents.pdf');
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'avoir')->name('avoirs.show');
     }); 
 

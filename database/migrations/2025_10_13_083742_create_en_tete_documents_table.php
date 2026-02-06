@@ -19,7 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('societe_id');
             $table->foreign('societe_id')->references('id')->on('societes')->onDelete('cascade');
 
-            $table->string('code_document')->unique();
+            $table->string('code_document');
+            $table->unique(['societe_id', 'code_document']);
             $table->enum('type_document', ['F', 'D', 'A'])->nullable();
             $table->date('date_document')->nullable();
             $table->unsignedBigInteger('devis_id')->nullable();

@@ -1,17 +1,19 @@
 <form id="devis-create-form" action="{{ route('documents.store') }}" method="POST" class="text-sm">
     @csrf
 
-    {{-- Hidden Fields --}}
+ 
     <input type="hidden" name="societe_id" value="{{ $parametre->derniere_societe ?? '' }}">
-    <input type="hidden" name="type_document" value="{{ $type ?? 'devis' }}">
-    <input type="hidden" name="code_document" value="{{ 'DOC' . strtoupper(uniqid()) }}">
+    <input type="hidden" id="type_document" name="type_document" value="{{ $type ?? 'devis' }}">
+    <input type="hidden" name="code_document" value="{{ $prochainNumero ?? '' }}">
+
+     <input type="hidden" id="total_ht" name="total_ht" value="0">
     <input type="hidden" id="total_ht" name="total_ht" value="0">
     <input type="hidden" id="total_tva" name="total_tva" value="0">
     <input type="hidden" id="total_ttc" name="total_ttc" value="0">
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-gray-50 dark:bg-gray-900 p-3 rounded-t-lg border-b dark:border-gray-700">
         
-        {{-- COLONNE GAUCHE : CLIENT (col-span 5) --}}
+     
         <div class="md:col-span-5 space-y-2 border-r dark:border-gray-700 pr-4">
             <h3 class="font-bold text-blue-600 dark:text-blue-400 uppercase text-xs">Informations Client</h3>
             
@@ -36,21 +38,21 @@
             <div>
                 <label class="block text-xs font-medium dark:text-gray-300">Adresse</label>
                 <input type="text" name="adresse1" id="adresse1" value="{{ old('adresse1') }}" placeholder="Rue..."
-                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 mb-1">
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 mb-1" readonly>
                 <input type="text" name="adresse2" id="adresse2" value="{{ old('adresse2') }}" placeholder="Appt, étage..."
-                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1" readonly>
             </div>
 
             <div class="grid grid-cols-3 gap-1">
                 <div class="col-span-1">
                     <label class="block text-xs font-medium">CP</label>
                     <input type="text" name="code_postal" id="code_postal" value="{{ old('code_postal') }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1" readonly>
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-medium">Ville</label>
                     <input type="text" name="ville" id="ville" value="{{ old('ville') }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1" readonly>
                 </div>
             </div>
 
@@ -58,17 +60,17 @@
                 <div>
                     <label class="block text-xs font-medium">Téléphone</label>
                     <input type="text" name="telephone" id="telephone" value="{{ old('telephone') }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1" readonly>
                 </div>
                 <div>
                     <label class="block text-xs font-medium">Email</label>
                     <input type="email" name="email" id="email" value="{{ old('email') }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1" readonly>
                 </div>
             </div>
         </div>
 
-        {{-- COLONNE DROITE : DOCUMENT (col-span 7) --}}
+       
         <div class="md:col-span-7 space-y-2">
             <h3 class="font-bold text-emerald-600 dark:text-emerald-400 uppercase text-xs">Détails du Document</h3>
             
@@ -96,7 +98,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium">Échéance / Validité</label>
-                    <input type="date" name="date_echeance" value="{{ old('date_echeance', date('Y-m-d', strtotime('+30 days'))) }}"
+                    <input type="date" name="date_validite" value="{{ old('date_validite', date('Y-m-d', strtotime('+30 days'))) }}"
                            class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1">
                 </div>
             </div>

@@ -42,13 +42,13 @@
                             <td class="px-6 py-4 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center space-x-2">
                                     {{-- Bouton PDF --}}
-                                    <a href="{{ route('facture.pdf', $document->id) }}" 
+                                    <a href="{{ route('documents.pdf', $document->id) }}" 
                                     target="_blank"
                                     onclick="event.stopPropagation();"
                                     class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                     title="Télécharger PDF">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 15L12 19L8 15M12 19V5" />
                                         </svg>
                                     </a>
 
@@ -58,11 +58,12 @@
                                             @csrf
                                             <button type="submit" 
                                                     onclick="event.stopPropagation(); return confirm('Générer un avoir pour cette facture ?');"
-                                                    class="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-all"
+                                                    class="p-2 text-gray-400 hover:text-amber-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                                     title="Transformer en avoir">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 15L12 19L8 15M12 19V5" />
-                                                </svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                
                                             </button>
                                         </form>
                                     @else
@@ -95,7 +96,7 @@
                             </td>
 
                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $document->client_nom }}
+                                {{ $document->client->societe}}
                             </td>
 
                             <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">

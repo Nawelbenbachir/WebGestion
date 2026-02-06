@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Facture {{ $document->code_document }}</title>
+    <title>{{ $libelleType }} {{ $document->code_document }}</title>
     <style>
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
@@ -31,16 +31,28 @@
             background: #fafafa;
             min-width: 250px;
         }
-        .doc-details {
+        .doc-details-table {
+            width: 100%;
             margin-bottom: 30px;
             border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
         }
         .doc-title {
             font-size: 22px;
             font-weight: bold;
             text-transform: uppercase;
+            display: inline-block;
+            width: 70%; 
         }
+
+        .doc-date {
+            display: inline-block;
+            width: 29%; 
+            text-align: right;
+            font-size: 14px;
+            vertical-align: bottom; 
+        }
+
         table.items {
             width: 100%;
             border-collapse: collapse;
@@ -110,29 +122,37 @@
                 </td>
                 <td class="client-info">
                     <div class="client-box">
-                        <small>Facturé à :</small><br>
-                        <strong>{{ $document->client_nom }}</strong><br>
-                        {{ $client->adresse1 ?? 'Adresse client non renseignée' }}<br>
-                        {{ $client->code_postal }} {{ $client->ville }}
+                         
+                        <small>
+                           @if($libelleType === 'Avoir') Avoir pour: 
+                            @elseif($libelleType === 'Facture') Facturé à :
+                            @else Devis pour :
+                            @endif
+                        </small><br>
+                        <strong>{{ $document->client->societe }}</strong><br>
+                        {{ $document->client->adresse1 ?? 'Adresse client non renseignée' }}<br>
+                        {{ $document->client->code_postal }} {{ $document->client->ville }}
                     </div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <div class="doc-details">
-        <table>
-            <tr>
-                <td class="doc-title">
-                    Facture n° {{ $document->code_document }}
-                    
-                </td>
-                <td class="invoice-date">
-                    Date : {{ \Carbon\Carbon::parse($document->date_document)->format('d/m/Y') }}
-                </td>
-            </tr>
-        </table>
-    </div>
+    <table class="doc-details-table">
+    <tr>
+        <td class="doc-title">
+            {{ $libelleType }} n° {{ $document->code_document }}
+        </td>
+        <td class="doc-date">
+            <strong>Date :</strong> {{ \Carbon\Carbon::parse($document->date_document)->format('d/m/Y') }}<br>
+            @if($document->type_document === 'F')
+                <span style="color: #d9480f;"><strong>Échéance :</strong> {{ \Carbon\Carbon::parse($document->date_echeance)->format('d/m/Y') }}</span>
+            @elseif($document->type_document === 'D')
+                <span><strong>Validité :</strong> {{ \Carbon\Carbon::parse($document->date_validite)->format('d/m/Y') }}</span>
+            @endif
+        </td>
+    </tr>
+    </table>
 
     <table class="items">
         <thead>
@@ -172,8 +192,8 @@
                 <td class="value">{{ number_format($document->total_tva, 2, ',', ' ') }} €</td>
             </tr>
             <tr class="grand-total">
-                <td class="label">TOTAL TTC</td>
-                <td class="value"><strong>{{ number_format($document->total_ttc, 2, ',', ' ') }} €</strong></td>
+                <td class="label" style="color: {{ $document->type_document === 'A' ? 'red' : 'black' }}">TOTAL TTC</td>
+                <td class="value" style="color: {{ $document->type_document === 'A' ? 'red' : 'black' }}"><strong>{{ number_format($document->total_ttc, 2, ',', ' ') }} €</strong></td>
             </tr>
         </table>
     </div>

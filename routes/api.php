@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\EnteteDocumentController;
     
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-//plus de sanctum car redirige automatiquement vers page login
+    //plus de sanctum car redirige automatiquement vers page login
 
         Route::get('/stat-vente/produit/{id}', [StatistiqueController::class, 'ventesParProduitGlobal'])->middleware('auth:sanctum');
         Route::get('/stat-vente/periode/{annee}/{mois}', [StatistiqueController::class, 'ventesParPeriodeGlobal'])->middleware('auth:sanctum');

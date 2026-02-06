@@ -3,7 +3,7 @@
         <x-navigation></x-navigation>
     </x-slot>
 
-    {{-- MODIFICATION 1 : createRoute pointant vers devis.create --}}
+    
     <x-layouts.table createRoute="devis.create" createLabel="Nouveau Devis">
         
         @if(session('success'))
@@ -33,14 +33,23 @@
                             $isTransformed = \App\Models\EnTeteDocument::where('devis_id', $document->id)->exists(); 
                         @endphp
                         
-                        {{-- MODIFICATION 2 : data-route="devis" pour que le JS utilise /devis/ID --}}
+                       
                         <tr data-id="{{ $document->id }}" 
                             data-route="devis"
                             class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
                             
                             <td class="px-6 py-4 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center space-x-2">
-                                    
+                                    {{-- Bouton PDF --}}
+                                    <a href="{{ route('documents.pdf', $document->id) }}" 
+                                    target="_blank"
+                                    onclick="event.stopPropagation();"
+                                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                    title="Télécharger PDF">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 15L12 19L8 15M12 19V5" />
+                                        </svg>
+                                    </a>
                                     @if(!$isTransformed)
                                         <form action="{{ route('documents.transform', $document->id) }}" method="POST" class="inline">
                                             @csrf
@@ -59,7 +68,7 @@
                                         </span>
                                     @endif
 
-                                    {{-- MODIFICATION 3 : devis.edit au lieu de documents.edit --}}
+                                 
                                     <button type="button"
                                             data-edit-url="{{ route('devis.edit', $document->id) }}"
                                             onclick="event.stopPropagation();"
@@ -69,7 +78,6 @@
                                         </svg>
                                     </button>
 
-                                    {{-- MODIFICATION 4 : devis.destroy au lieu de documents.destroy --}}
                                     <form action="{{ route('devis.destroy', $document->id) }}" method="POST" class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" 
@@ -86,7 +94,7 @@
                                 {{ $document->code_document }}
                             </td>
                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $document->client_nom }}
+                                {{ $document->client->societe}}
                             </td>
                             <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {{ number_format($document->total_ttc, 2, ',', ' ') }} €

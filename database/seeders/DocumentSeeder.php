@@ -32,9 +32,20 @@ class DocumentSeeder extends Seeder
                 continue;
             }
 
-            $types = ['F', 'D', 'A'];
+            $types = ['F', 'D'];
 
             foreach ($types as $type) {
+                $dernierDoc = EnTeteDocument::where('societe_id', $societe->id)
+                    ->where('type_document', $type)
+                    ->where('code_document', 'LIKE', "$type-" . Carbon::now()->format('Y') . "-%")
+                    ->orderByRaw('CAST(SUBSTRING_INDEX(code_document, "-", -1) AS UNSIGNED) DESC')
+                    ->first();
+
+                $sequence = 1;
+                if ($dernierDoc) {
+                    $parties = explode('-', $dernierDoc->code_document);
+                    $sequence = (int)end($parties) + 1;
+                }
                 for ($i = 1; $i <= 3; $i++) {
                     $client = Client::where('id_societe', $societe->id)
                                     ->inRandomOrder()
@@ -44,16 +55,21 @@ class DocumentSeeder extends Seeder
                         $this->command->error("Aucun client pour la société {$societe->id}.");
                         continue;
                     }
+                    $currentSequence = $sequence;
 
-                    DB::transaction(function () use ($societe, $type, $client, $produitsDeLaSociete) {
-                        $annee = Carbon::now()->format('Y');
-                        $dernierCompte = EnTeteDocument::where('societe_id', $societe->id)
-                            ->where('type_document', $type)
-                            ->whereYear('date_document', $annee)
-                            ->count();
-
-                        $sequence = $dernierCompte + 1;
-                        $codeDocument = sprintf('%s-%s-%02d-%04d', $type, $annee, $societe->id, $sequence);
+                    DB::transaction(function () use ($societe, $type, $client, $produitsDeLaSociete, $currentSequence) {
+                    $annee = Carbon::now()->format('Y');
+                    $mois = Carbon::now()->format('m');
+                    
+                    
+                    $format = $societe->format_numero_document ?? 'simple';
+                    
+                    if ($format === 'mensuel') {
+                        $codeDocument = sprintf('%s-%s-%s-%03d', $type, $annee, $mois, $currentSequence);
+                    } else {
+                        $codeDocument = sprintf('%s-%s-%03d', $type, $annee, $currentSequence);
+                    }
+                   
 
                         // 1. Création de l'en-tête
                         $document = EnTeteDocument::create([
@@ -109,7 +125,9 @@ class DocumentSeeder extends Seeder
                             'solde'     => round($totalHTGlobal + $totalTVAGlobal, 2),
                         ]);
                     });
+                     $sequence ++; // Incrémente la séquence pour le prochain document de ce type/société
                 }
+               
             }
         }
 

@@ -8,6 +8,7 @@
     <input type="hidden" id="total_ht" name="total_ht" value="{{ $document->total_ht }}">
     <input type="hidden" id="total_tva" name="total_tva" value="{{ $document->total_tva }}">
     <input type="hidden" id="total_ttc" name="total_ttc" value="{{ $document->total_ttc }}">
+    <input type="hidden" id="type_document" name="type_document" value="{{ $type ?? 'devis' }}">
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-gray-50 dark:bg-gray-900 p-3 rounded-t-lg border-b dark:border-gray-700">
         
@@ -37,21 +38,21 @@
             <div>
                 <label class="block text-xs font-medium dark:text-gray-300">Adresse</label>
                 <input type="text" name="adresse1" id="adresse1" value="{{ old('adresse1', $document->client->adresse1) }}" placeholder="Rue..."
-                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 mb-1">
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 mb-1" readonly>
                 <input type="text" name="adresse2" id="adresse2" value="{{ old('adresse2', $document->client->adresse2) }}" placeholder="Appt, étage..."
-                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1" readonly >
             </div>
 
             <div class="grid grid-cols-3 gap-1">
                 <div class="col-span-1">
                     <label class="block text-xs font-medium">CP</label>
                     <input type="text" name="code_postal" id="code_postal" value="{{ old('code_postal', $document->client->code_postal) }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1"  readonly>
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-medium">Ville</label>
                     <input type="text" name="ville" id="ville" value="{{ old('ville', $document->client->ville) }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1"  readonly>
                 </div>
             </div>
 
@@ -59,7 +60,7 @@
                 <div>
                     <label class="block text-xs font-medium">Téléphone</label>
                     <input type="text" name="telephone" id="telephone" value="{{ old('telephone', $document->telephone) }}"
-                           class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1">
+                           class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1" readonly>
                 </div>
                 <div>
                     <label class="block text-xs font-medium">Email</label>
@@ -77,7 +78,7 @@
                 <div>
                     <label class="block text-xs font-medium">N° de Document</label>
                     <input type="text" value="{{ $document->code_document }}" readonly
-                           class="w-full rounded border-gray-200 bg-gray-100 dark:bg-gray-700 px-2 py-1 font-mono">
+                           class="w-full rounded border-gray-200 bg-gray-100 dark:bg-gray-700 px-2 py-1 font-mono"  readonly>
                 </div>
                 <div>
                     <label class="block text-xs font-medium">Statut</label>
@@ -97,7 +98,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium">Échéance / Validité</label>
-                    <input type="date" name="date_echeance" value="{{ old('date_echeance', $document->date_echeance) }}"
+                    <input type="date" name="date_echeance" value="{{ old('date_validite', $document->date_validité) }}"
                            class="w-full rounded border-gray-300 dark:bg-gray-800 px-2 py-1">
                 </div>
             </div>

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use Illuminate\Validation\Rule;
 
 class EnTeteDocumentController extends Controller
 {
@@ -97,7 +97,7 @@ class EnTeteDocumentController extends Controller
     $typeMap = ['facture' => 'F', 'devis' => 'D', 'avoir' => 'A'];
     $typeCode = $typeMap[$type] ?? 'D';
 
-    // GÉNÉRATION DU NUMÉRO ICI
+    
     $prochainNumero = $this->genererNumeroDocument($typeCode, $societeId);
 
     $clients = Client::where('id_societe', $societeId)->get();
@@ -114,7 +114,7 @@ class EnTeteDocumentController extends Controller
         'clients'        => $clients,
         'produits'       => $produits,
         'societeId'      => $societeId,
-        'prochainNumero' => $prochainNumero, // On l'envoie à la vue
+        'prochainNumero' => $prochainNumero, 
     ]);
 
     }
@@ -125,31 +125,38 @@ class EnTeteDocumentController extends Controller
     public function store(Request $request)
     {
         $societeId = session('current_societe_id');
-
+        
         if (!$societeId) {
             return back()->withErrors('Erreur de contexte de société. Réessayez après avoir sélectionné une société.');
         }
 
-        // 1. Validation (Notez que code_document n'est plus requis ici car on le génère)
         $validated = $request->validate([
-            'code_document' => 'required|string|unique:en_tete_documents,code_document',
+            'code_document' => [
+                'required',
+                'string',
+                Rule::unique('en_tete_documents')->where(fn ($query) => $query->where('societe_id', $societeId))
+            ], 
+            
             'type_document' => 'required|in:facture,devis,avoir',
             'date_document' => 'required|date',
-            'total_ht'      => 'required|numeric|min:0',
-            'total_tva'     => 'required|numeric|min:0',
-            'total_ttc'     => 'required|numeric|min:0',
-            'client_code'   => 'required|string|exists:clients,code_cli',
+            'date_validite' => 'nullable|date',
+            'date_echeance' => 'nullable|date',
+            'total_ht'      => 'required|numeric',
+            'total_tva'     => 'required|numeric',
+            'total_ttc'     => 'required|numeric',
+            'client_id' => 'required|integer|exists:clients,id',
             'lignes'        => 'required|array|min:1',
             'lignes.*.produit_code'     => 'required|string', 
             'lignes.*.description'      => 'nullable|string',
             'lignes.*.quantite'         => 'required|numeric|min:0.01',
-            'lignes.*.prix_unitaire_ht' => 'required|numeric|min:0',
-            'lignes.*.taux_tva'         => 'required|numeric|min:0',
-            'lignes.*.total_ttc'        => 'required|numeric|min:0',
+            'lignes.*.prix_unitaire_ht' => 'required|numeric',
+            'lignes.*.taux_tva'         => 'required|numeric',
+            'lignes.*.total_ttc'        => 'required|numeric',
             'statut'                    => 'nullable|string',
         ]);
+       
 
-        // 2. Mapping du type pour la génération et le stockage
+        // Mapping du type pour la génération et le stockage
         $typeMap = [
             'facture' => 'F',
             'devis'   => 'D',
@@ -161,17 +168,17 @@ class EnTeteDocumentController extends Controller
         try {
             return DB::transaction(function () use ($validated, $societeId, $typeCode) {
                 
-                
-
                 // Récupération sécurisée du client
-                $client = Client::where('code_cli', $validated['client_code'])
-                                ->where('id_societe', $societeId)
-                                ->firstOrFail();
+                $client = Client::where('id', $validated['client_id'])
+                    ->where('id_societe', $societeId)
+                    ->firstOrFail();
 
                 // Création de l'en-tête
                 $document = EnTeteDocument::create([
                     'societe_id'    => $societeId, 
                    'code_document' => $validated['code_document'],
+                   'date_validite' => $validated['date_validite']?? null,
+                   'date_echeance' => $validated['date_echeance']?? null,
                     'type_document' => $typeCode,
                     'date_document' => $validated['date_document'],
                     'total_ht'      => $validated['total_ht'],
@@ -180,7 +187,7 @@ class EnTeteDocumentController extends Controller
                     'solde'         => $validated['total_ttc'], 
                     'client_id'     => $client->id,
                     'client_nom'    => $client->societe,
-                    'adresse'       => $client->adresse,
+                    'adresse'       => $client->adresse1,
                     'telephone'     => $client->telephone,
                     'email'         => $client->email,
                     'statut'        => $validated['statut'] ?? 'brouillon',
@@ -205,10 +212,11 @@ class EnTeteDocumentController extends Controller
 
                 return redirect()
                     ->route('documents.index', ['type' => $validated['type_document']])
-                    ->with('success', ucfirst($validated['type_document']) . " $numeroDocument créé avec succès.");
+                    ->with('success', ucfirst($validated['type_document']) . " " . $validated['code_document'] . " créé avec succès.");
             });
 
         } catch (\Exception $e) {
+         
             Log::error("Erreur lors de la création du document : " . $e->getMessage());
             return back()->withInput()->withErrors("Erreur lors de l'enregistrement : " . $e->getMessage());
         }
@@ -235,7 +243,7 @@ class EnTeteDocumentController extends Controller
 
         $view = match ($document->type_document) {
             'F' => 'facture.edit',
-            'A' => 'avoirs.edit',
+            'A' => 'avoir.edit',
             default => 'devis.edit',
         };
         
@@ -266,18 +274,18 @@ class EnTeteDocumentController extends Controller
             'date_echeance' => 'nullable|date',
             'statut'        => 'required|string|in:brouillon,envoye,paye',
             'client_id'    => 'required|exists:clients,id',
-            'total_ht'      => 'required|numeric|min:0',
-            'total_tva'     => 'required|numeric|min:0',
-            'total_ttc'     => 'required|numeric|min:0',
+            'total_ht'      => 'required|numeric',
+            'total_tva'     => 'required|numeric',
+            'total_ttc'     => 'required|numeric',
             'commentaire'=> 'nullable|string',
             'lignes'        => 'sometimes|array',
             'lignes.*.id'   => 'nullable|exists:ligne_documents,id',
             'lignes.*.produit_code' => 'required|string',
             'lignes.*.description'  => 'nullable|string',
-            'lignes.*.quantite'     => 'required|numeric|min:1',
-            'lignes.*.prix_unitaire_ht' => 'required|numeric|min:0',
-            'lignes.*.taux_tva'         => 'required|numeric|min:0',
-            'lignes.*.total_ttc'        => 'required|numeric|min:0',
+            'lignes.*.quantite'     => 'required|numeric|min:0.01',
+            'lignes.*.prix_unitaire_ht' => 'required|numeric',
+            'lignes.*.taux_tva'         => 'required|numeric',
+            'lignes.*.total_ttc'        => 'required|numeric',
         ]);
         
         
@@ -465,6 +473,7 @@ class EnTeteDocumentController extends Controller
                 if (!$original) {
                     throw new \Exception("Document source introuvable.");
                 }
+                $multiplicateur = ($nouveauType === 'A') ? -1 : 1;
 
                 // Vérification si la transformation a déjà eu lieu
                 if ($nouveauType == 'F') {
@@ -479,6 +488,9 @@ class EnTeteDocumentController extends Controller
                 $nouveauDoc->type_document = $nouveauType;
                 $nouveauDoc->date_document = now();
                 $nouveauDoc->statut = 'brouillon';
+                $nouveauDoc->total_ht = $original->total_ht * $multiplicateur;
+                $nouveauDoc->total_tva = $original->total_tva * $multiplicateur;
+                $nouveauDoc->total_ttc = $original->total_ttc * $multiplicateur;
                 
                 // Appel de la nouvelle logique de numérotation
                 $nouveauDoc->code_document = $this->genererNumeroDocument($nouveauType, $societeId);
@@ -499,6 +511,8 @@ class EnTeteDocumentController extends Controller
                 foreach ($lignes as $ligne) {
                     $nouvelleLigne = $ligne->replicate();
                     $nouvelleLigne->document_id = $nouveauDoc->id;
+                    $nouvelleLigne->prix_unitaire_ht = $ligne->prix_unitaire_ht * $multiplicateur;
+                    $nouvelleLigne->total_ttc = $ligne->total_ttc * $multiplicateur;
                     $nouvelleLigne->save();
                 }
 
@@ -520,11 +534,15 @@ class EnTeteDocumentController extends Controller
         'societe'  => $document->societe,
         'client'   => $document->client,
     ];
-
+    $libelleType = match ($document->type_document) {
+        'F' => 'Facture',
+        'A' => 'Avoir',
+        'D' => 'Devis',
+    };
     // On charge une vue spécifique pour le design du PDF
-    $pdf = Pdf::loadView('pdf.facture', $data);
+    $pdf = Pdf::loadView('pdf.documents', $data + ['libelleType' => $libelleType]);
 
     // On force le téléchargement avec le nom de la facture
-    return $pdf->download('facture_' . $document->code_document . '.pdf');
+    return $pdf->download($libelleType . '_' . $document->code_document . '.pdf');
 }
 }

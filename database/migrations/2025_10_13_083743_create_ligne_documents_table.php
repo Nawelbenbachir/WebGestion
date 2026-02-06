@@ -31,7 +31,7 @@ return new class extends Migration
     $table->string('description');
     $table->decimal('prix_unitaire_ht', 10, 2);
     $table->decimal('taux_tva', 5, 2)->default(20.00);
-    $table->integer('quantite')->default(1);
+    $table->decimal('quantite', 10, 2)->default(1);
 
     // Total ttc
     $table->decimal('total_ttc', 10, 2);

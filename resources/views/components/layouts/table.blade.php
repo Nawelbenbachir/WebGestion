@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const rows = document.querySelectorAll('tr[data-id]');
 
+
     rows.forEach(row => {
         // 1. Gestion du clic simple pour la SÉLECTION visuelle
         row.addEventListener('click', (e) => {
@@ -155,10 +156,18 @@ function initDevisForm(container) {
     const datalist = container.querySelector('#produits');
     if (!tbody || !datalist) return;
 
-    // --- 1. FONCTION DE CALCUL DES TOTAUX ---
+    // --- 1. FONCTION POUR LE SIGNE (+ ou -) ---
+    // On la place ici pour qu'elle soit accessible partout dans initDevisForm
+    const getMultiplicateur = () => {
+        const typeField = container.querySelector('input[name="type_document"]');
+        return (typeField && typeField.value === 'avoir') ? -1 : 1;
+    };
+
+    // --- 2. FONCTION DE CALCUL DES TOTAUX ---
     const updateTotals = () => {
         let totalHT = 0, totalTVA = 0, totalTTC = 0;
-        
+        const m = getMultiplicateur(); 
+
         tbody.querySelectorAll('tr').forEach(row => {
             const qte = parseFloat(row.querySelector('.quantite')?.value) || 0;
             const prix = parseFloat(row.querySelector('.prix')?.value) || 0;
@@ -168,25 +177,38 @@ function initDevisForm(container) {
             const lineTVA = lineHT * (tva / 100);
             const lineTTC = lineHT + lineTVA;
 
-            if(row.querySelector('.total')) row.querySelector('.total').value = lineTTC.toFixed(2);
+            // Mise à jour du total de ligne avec le signe
+            if(row.querySelector('.total')) {
+                row.querySelector('.total').value = (lineTTC * m).toFixed(2);
+            }
             
             totalHT += lineHT;
             totalTVA += lineTVA;
             totalTTC += lineTTC;
         });
 
-        // Mise à jour des affichages (span)
-        if(container.querySelector('#display_total_ht')) container.querySelector('#display_total_ht').textContent = totalHT.toFixed(2) + ' €';
-        if(container.querySelector('#display_total_tva')) container.querySelector('#display_total_tva').textContent = totalTVA.toFixed(2) + ' €';
-        if(container.querySelector('#display_total_ttc')) container.querySelector('#display_total_ttc').textContent = totalTTC.toFixed(2) + ' €';
+        // Mise à jour des affichages visuels (spans)
+        if(container.querySelector('#display_total_ht')) 
+            container.querySelector('#display_total_ht').textContent = (totalHT * m).toFixed(2);
         
-        // Mise à jour des inputs hidden (pour l'envoi du formulaire)
-        if(container.querySelector('#total_ht')) container.querySelector('#total_ht').value = totalHT.toFixed(2);
-        if(container.querySelector('#total_tva')) container.querySelector('#total_tva').value = totalTVA.toFixed(2);
-        if(container.querySelector('#total_ttc')) container.querySelector('#total_ttc').value = totalTTC.toFixed(2);
+        if(container.querySelector('#display_total_tva')) 
+            container.querySelector('#display_total_tva').textContent = (totalTVA * m).toFixed(2);
+        
+        const displayTTC = container.querySelector('#display_total_ttc');
+        if(displayTTC) {
+            displayTTC.textContent = (totalTTC * m).toFixed(2);
+            // On applique le rouge si c'est un avoir
+            displayTTC.style.color = (m === -1) ? '#ef4444' : ''; 
+            displayTTC.classList.toggle('font-bold', m === -1);
+        }
+        
+        // Mise à jour des inputs hidden pour Laravel
+        if(container.querySelector('#total_ht')) container.querySelector('#total_ht').value = (totalHT * m).toFixed(2);
+        if(container.querySelector('#total_tva')) container.querySelector('#total_tva').value = (totalTVA * m).toFixed(2);
+        if(container.querySelector('#total_ttc')) container.querySelector('#total_ttc').value = (totalTTC * m).toFixed(2);
     };
 
-    // --- 2. GESTION DU CHOIX DE PRODUIT ---
+    // --- 3. GESTION DU CHOIX DE PRODUIT ET QUANTITÉ ---
     tbody.addEventListener('input', e => {
         if (e.target.classList.contains('produit-input')) {
             const val = e.target.value;
@@ -194,7 +216,6 @@ function initDevisForm(container) {
             const option = Array.from(datalist.options).find(opt => opt.value === val);
 
             if (option) {
-                // On remplit les champs de la ligne avec les data-attributes de l'option
                 row.querySelector('.description').value = option.dataset.designation || '';
                 row.querySelector('.prix').value = option.dataset.prix || 0;
                 row.querySelector('.tva').value = option.dataset.tva || 0;
@@ -202,44 +223,39 @@ function initDevisForm(container) {
             }
         }
         
-        // Si on change la quantité manuellement
         if (e.target.classList.contains('quantite')) {
             updateTotals();
         }
     });
 
-    // --- 3. AJOUT ET SUPPRESSION DE LIGNES ---
+    // --- 4. AJOUT ET SUPPRESSION DE LIGNES ---
     tbody.addEventListener('click', e => {
-        // Bouton Supprimer (on cherche le bouton ou le SVG à l'intérieur)
         if (e.target.closest('.removeRow')) {
             const rows = tbody.querySelectorAll('tr');
             if (rows.length > 1) {
                 e.target.closest('tr').remove();
                 updateTotals();
-            } else {
-                alert("Vous devez garder au moins une ligne.");
             }
         }
 
-        // Bouton Ajouter en dessous
         if (e.target.closest('.addRowBelow')) {
             const currentRow = e.target.closest('tr');
             const newRow = currentRow.cloneNode(true);
-            
-            // Réinitialiser les valeurs de la nouvelle ligne
             const index = tbody.querySelectorAll('tr').length;
+            
             newRow.querySelectorAll('input').forEach(input => {
-                // On vide la valeur
                 input.value = input.classList.contains('quantite') ? 1 : '';
-                // On met à jour l'index du nom (ex: lignes[0] -> lignes[1])
                 if(input.name) {
                     input.name = input.name.replace(/\[\d+\]/, `[${index}]`);
                 }
             });
-
             currentRow.after(newRow);
+            updateTotals(); // Recalculer après ajout
         }
     });
+
+    // Lancer un premier calcul au chargement (utile pour l'Edit)
+    updateTotals();
 }
 
         
