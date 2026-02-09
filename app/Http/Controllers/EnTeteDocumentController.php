@@ -464,7 +464,7 @@ class EnTeteDocumentController extends Controller
         return $baseCode . str_pad($compteur, 3, '0', STR_PAD_LEFT);
     }
 
-    private function dupliquerDocument($id, $nouveauType, $messageSucces)
+    public function dupliquerDocument($id, $nouveauType, $messageSucces="Opération réussie")
     {
         try {
             return DB::transaction(function () use ($id, $nouveauType, $messageSucces) {
@@ -516,8 +516,16 @@ class EnTeteDocumentController extends Controller
                     $nouvelleLigne->save();
                 }
 
-                return redirect()->route('documents.index')->with('success', $messageSucces);
-            });
+                // Déterminer la route de destination selon le nouveau type
+                    $routeName = match($nouveauType) {
+                        'D' => 'devis.index',
+                        'F' => 'factures.index',
+                        'A' => 'avoirs.index',
+                        default => 'documents.index',
+                    };
+
+        return redirect()->route($routeName)->with('success', $messageSucces);
+                    });
 
         } catch (\Exception $e) {
             Log::error("Erreur duplication : " . $e->getMessage());

@@ -1,48 +1,85 @@
-<x-layouts.table createRoute="societes.create" createLabel="Ajouter une société" hideModal="true">
-    <table id="parametres-table" class="min-w-full w-full border border-gray-200 dark:border-gray-700">
+<x-layouts.app>
+        @if(session('success'))
+            <div class="p-4 mb-6 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                {{ session('success') }}
+            </div>
+        @endif
 
-        <thead class="bg-gray-100 dark:bg-gray-700">
-            <tr>
-                @foreach ([
-                    '','Code', 'Siret', 'Nom', 'Téléphone', 'Email',
-                    'Adresse', 'Adresse 2', 'Complément', 'Code Postal', 'Ville', 'IBAN'
-                ] as $col)
-                    <th class="px-6 py-3 border-b border-gray-300 text-center text-gray-900 dark:text-gray-100">
-                        {{ $col }}
-                    </th>
-                @endforeach
-            </tr>
-        </thead>
+        @if($societes->isEmpty())
+            <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                <p>Aucune société enregistrée.</p>
+            </div>
+        @else
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-separate border-spacing-0">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-gray-700/50">
+                            <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase">Actions</th>
+                            <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase">Code</th>
+                            <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Nom / SIRET</th>
+                            <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Contact</th>
+                            <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Localisation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach ($societes as $societe)
+                            <tr data-id="{{ $societe->id }}" 
+                                data-route="societes"
+                                class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
+                                
+                                {{-- Actions --}}
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button type="button"
+                                                data-edit-url="{{ route('societes.edit', $societe->id) }}"
+                                                
+                                                class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2.25 2.25 0 113.182 3.182L11.818 13H8v-3.818l8.773-8.773z" />
+                                            </svg>
+                                        </button>
 
-        <tbody class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-            @foreach ($societes as $societe)
-                <tr data-id="{{ $societe->id }}" 
-                    data-route="parametres"
-                    class="cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 even:bg-gray-50 dark:even:bg-gray-900 transition">
-                    <td class="px-6 py-4 border-b text-center border-gray-300 dark:border-gray-700">
-                        <x-action-buttons 
-                            :id="$societe->id"
-                            :edit-url="route('societes.edit', $societe->id)"
-                            :delete-route="route('societes.destroy', $societe->id)"
-                            delete-label=" la société « {{ $societe->nom_societe }} »"
-                        />
+                                        <form action="{{ route('societes.destroy', $societe->id) }}" method="POST" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" 
+                                                    onclick=" return confirm('Supprimer définitivement cette société ?');"
+                                                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
 
-                    </td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->code_societe }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->siret ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ ucfirst($societe->nom_societe) }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->telephone ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->email ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->adresse1 ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->adresse2 ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->complement_adresse ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->code_postal ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-center dark:border-gray-700">{{ $societe->ville ?? '—' }}</td>
-                    <td class="px-6 py-4 border-b text-end dark:border-gray-700">{{ $societe->iban ?? '—' }}</td>
+                                {{-- Code --}}
+                                <td class="px-6 py-4 text-center font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                    {{ $societe->code_societe }}
+                                </td>
 
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</x-layouts.table>
+                                {{-- Nom & SIRET --}}
+                                <td class="px-6 py-4 text-left">
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white">{{ strtoupper($societe->nom_societe) }}</div>
+                                    <div class="text-xs text-gray-500">SIRET: {{ $societe->siret ?? '—' }}</div>
+                                </td>
 
+                                {{-- Contact --}}
+                                <td class="px-6 py-4 text-left">
+                                    <div class="text-sm text-gray-600 dark:text-gray-300">{{ $societe->email ?? '—' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $societe->telephone ?? '—' }}</div>
+                                </td>
+
+                                {{-- Localisation --}}
+                                <td class="px-6 py-4 text-left">
+                                    <div class="text-sm text-gray-600 dark:text-gray-300">{{ $societe->ville ?? '—' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $societe->code_postal ?? '—' }}</div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    
+</x-layouts.app>

@@ -10,7 +10,7 @@
                 <div class="flex border-b border-gray-200 dark:border-gray-700">
     
     {{-- Onglet Société --}}
-    <button @click="currentTab = 'societe'" 
+    <button @click="currentTab = 'societe', closeModal()" 
             :class="{ 
                 // CLASSE ACTIVE: En mode clair (bleu foncé)
                 'border-b-2 border-indigo-500 text-indigo-600 font-semibold': currentTab === 'societe', 
@@ -26,7 +26,7 @@
     </button>
     
     {{-- Onglet Utilisateurs --}}
-    <button @click="currentTab = 'utilisateur'" 
+    <button @click="currentTab = 'utilisateur', closeModal()" 
             :class="{ 
                 // CLASSE ACTIVE: En mode clair (bleu foncé)
                 'border-b-2 border-indigo-500 text-indigo-600 font-semibold': currentTab === 'utilisateur', 
@@ -43,18 +43,24 @@
 </div>
 
                 {{-- Contenu des Onglets --}}
-                <div class="p-6 lg:p-8 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    
-                    {{-- Bloc 1: Paramètres Société --}}
-                    <div x-show="currentTab === 'societe'">
-                        @include('societe.index')
-                    </div>
+<div class="p-6 lg:p-8 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+    
+    {{-- Bloc 1: Paramètres Société --}}
+    <div x-show="currentTab === 'societe'">
+        {{-- On ajoute l'attribut hideModal="true" pour que le composant n'affiche pas sa propre modal --}}
+        <x-layouts.table createRoute="societes.create" createLabel="Ajouter une société" hideModal="true">
+            @include('societe.index') 
+        </x-layouts.table>
+    </div>
 
-                    {{-- Bloc 2: Gestion des Utilisateurs --}}
-                    <div x-show="currentTab === 'utilisateur'">
-                        @include('user.index')
-                    </div>
-                </div>
+    {{-- Bloc 2: Gestion des Utilisateurs --}}
+    <div x-show="currentTab === 'utilisateur'">
+        {{-- Pareil ici : hideModal="true" --}}
+        <x-layouts.table createRoute="user.create" createLabel="Ajouter un utilisateur" hideModal="true">
+            @include('user.index')
+        </x-layouts.table>
+    </div>
+</div>
 
             </div>
         </div>
@@ -64,7 +70,9 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-5xl relative flex flex-col max-h-[90vh]">
 
         <!-- Bouton fermer -->
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 font-bold text-xl z-10">✖</button>
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
 
         <!-- Contenu dynamique -->
         <div id="modal-content" class="overflow-y-auto p-6 flex-1 space-y-4"></div>
@@ -74,88 +82,131 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
 
-    // Double-clic sur la ligne
-    document.querySelectorAll('tr[data-id]').forEach(row => {
-        row.addEventListener('dblclick', () => {
-            // URL construite dynamiquement
-            const route = row.dataset.route; // ex: 'clients', 'produits', ...
-            const id = row.dataset.id;
-            if (!route || !id) return;
-            const url = `/${route}/${id}/edit`; 
-            openModal(url);
-        });
-    });
 
-        // Clic sur le crayon
-        document.querySelectorAll('[data-edit-url]').forEach(btn => {
-            btn.addEventListener('click', e => {
-                e.stopPropagation(); // pour ne pas déclencher le dblclick
-                const url = btn.dataset.editUrl;
-                console.log('Ouverture modal pour URL :', url);
-                openModal(url); // utilise le modal du composant table
-            });
-        });
-
-    });
-
-function openModal(url) {
-    fetch(url)
-        .then(res => {
-            if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
-            return res.text();
-        })
-        .then(html => {
-            const container = document.getElementById('modal-content');
-            container.innerHTML = html;
-            // Initialiser le UX pour catégorie
-            const selectCategorie = container.querySelector('#categorie_select');
-            const inputCategorie = container.querySelector('#categorie');
-
-            if (selectCategorie && inputCategorie) {
-                function toggleCategorieInput() {
-                    inputCategorie.disabled = selectCategorie.value !== "";
-                }
-
-            // Initial
-            toggleCategorieInput();
-
-            // Quand le select change
-            selectCategorie.addEventListener('change', toggleCategorieInput);
+//  Double-clic sur les lignes (Délégation)
+document.addEventListener('dblclick', (e) => {
+    const row = e.target.closest('tr[data-id]');
+    if (row) {
+        const route = row.dataset.route;
+        const id = row.dataset.id;
+        if (route && id) {
+            openModal(`/${route}/${id}/edit`);
         }
-            // Appliquer styles
-            container.querySelectorAll('input, select, textarea').forEach(el => {
+    }
+});
+
+function closeModal() {
+    const modal = document.getElementById('modal');
+    const container = document.getElementById('modal-content');
+    
+    if (modal) modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    
+    if (container) {
+        // On attend la fin de l'animation de fermeture pour vider
+        setTimeout(() => { container.innerHTML = ''; }, 200);
+    }
+}
+
+// Fonction d'ouverture globale
+function openModal(url) {
+    const container = document.getElementById('modal-content');
+    if (!container) return;
+
+    // Loader
+    container.innerHTML = '<div class="flex justify-center p-12"><svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
+    
+    document.getElementById('modal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+
+    fetch(url)
+        .then(res => res.text())
+        .then(html => {
+            container.innerHTML = html;
+            
+            // Stylisation des inputs (copié de ton composant table pour rester cohérent)
+            container.querySelectorAll('input:not([type="checkbox"]), select, textarea').forEach(el => {
                 el.classList.add(
                     'w-full','rounded-md','border-gray-300','dark:border-gray-600',
                     'bg-white','dark:bg-gray-800','text-gray-900','dark:text-gray-100',
-                    'shadow-sm','px-2','py-1'
+                    'shadow-sm','focus:border-blue-500','focus:ring-blue-500'
                 );
             });
 
-            document.getElementById('modal').classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
+            // Focus automatique après affichage
+            setTimeout(() => {
+                const firstInput = container.querySelector('input:not([type="hidden"]), select, textarea');
+                if (firstInput) firstInput.focus();
+            }, 100);
 
-            // Si c'est un formulaire de devis, initialiser le script
-            if (container.querySelector('#lignesTable')) {
+            
+            if (container.querySelector('#lignesTable') && typeof initDevisForm === 'function') {
                 initDevisForm(container);
             }
         })
         .catch(err => {
-            console.error('Erreur de chargement du formulaire :', err);
-            alert('Erreur lors du chargement du formulaire.');
+            console.error(err);
+            closeModal();
         });
 }
 
-function closeModal() {
-    document.getElementById('modal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-}
+// Gestion des clics sur les lignes (Délégation d'événements)
+document.addEventListener('dblclick', (e) => {
+    const row = e.target.closest('tr[data-id]');
+    if (row && !e.target.closest('button, a, form')) {
+        const route = row.dataset.route;
+        const id = row.dataset.id;
+        if (route && id) openModal(`/${route}/${id}/edit`);
+    }
+});
 
+document.addEventListener('click', (e) => {
+    // A. Bouton MODIFIER (Crayon)
+    const editBtn = e.target.closest('[data-edit-url]');
+    if (editBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        openModal(editBtn.dataset.editUrl);
+        return;
+    }
+
+    // B. Bouton AJOUTER (Lien avec /create)
+    const createBtn = e.target.closest('a[href*="/create"]');
+    if (createBtn && !createBtn.hasAttribute('data-no-modal')) {
+        e.preventDefault();
+        e.stopPropagation();
+        openModal(createBtn.getAttribute('href'));
+        return;
+    }
+
+    // C. Bouton SUPPRIMER (Classe spécifique)
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (deleteBtn) {
+        if (!confirm('Voulez-vous vraiment supprimer cet élément ?')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // Sinon, on laisse le formulaire se soumettre normalement
+    }
+});
+
+// GESTION DU DOUBLE-CLIC SUR LES LIGNES
+document.addEventListener('dblclick', (e) => {
+    const row = e.target.closest('tr[data-id]');
+    // On ne déclenche pas si on double-clique sur un bouton ou un lien
+    if (row && !e.target.closest('button, a, form')) {
+        const route = row.dataset.route;
+        const id = row.dataset.id;
+        if (route && id) {
+            openModal(`/${route}/${id}/edit`);
+        }
+    }
+});
 
 //soumettre le formulaire actuellement chargé
 function submitCurrentForm() {
-    const container = document.getElementById('create-form-container');
+    const container = document.getElementById('modal-content'); 
     if(!container) return;
 
     const form = container.querySelector('form');
@@ -181,90 +232,7 @@ function submitCurrentForm() {
         }
     })
     .catch(err => { console.error(err); alert('Erreur lors de l\'enregistrement'); });
-}
 
-
-// --- Fonction d'initialisation du formulaire de devis ---
-function initDevisForm(container) {
-    const tbody = container.querySelector('#lignesTable tbody');
-    const datalist = container.querySelector('#produits');
-    if (!tbody || !datalist) return;
-
-    function updatePrixTTC(row) {
-        const qte = parseFloat(row.querySelector('.quantite').value)||0;
-        const prix = parseFloat(row.querySelector('.prix').value)||0;
-        const tva = parseFloat(row.querySelector('.tva').value)||0;
-        row.querySelector('.total').value = (prix*qte*(1+tva/100)).toFixed(2);
-    }
-
-    function resetRow(row) {
-        const input = row.querySelector('.produit-input');
-        input.value = ''; input.setAttribute('list','produits');
-        row.querySelector('.description').value = '';
-        row.querySelector('.quantite').value = 1;
-        row.querySelector('.prix').value = '';
-        row.querySelector('.tva').value = '';
-        row.querySelector('.total').value = '';
-        updatePrixTTC(row);
-    }
-
-    function updateAllNames() {
-        tbody.querySelectorAll('tr').forEach((row,i)=>{
-            row.querySelector('.produit-input').setAttribute('name',`lignes[${i}][produit_code]`);
-            row.querySelector('.description').setAttribute('name',`lignes[${i}][description]`);
-            row.querySelector('.quantite').setAttribute('name',`lignes[${i}][quantite]`);
-            row.querySelector('.prix').setAttribute('name',`lignes[${i}][prix_unitaire_ht]`);
-            row.querySelector('.tva').setAttribute('name',`lignes[${i}][taux_tva]`);
-            row.querySelector('.total').setAttribute('name',`lignes[${i}][total_ttc]`);
-        });
-        updateTotals();
-    }
-
-    function updateTotals() {
-        let totalHT=0, totalTVA=0, totalTTC=0;
-        tbody.querySelectorAll('tr').forEach(row=>{
-            const qte=parseFloat(row.querySelector('.quantite').value)||0;
-            const prix=parseFloat(row.querySelector('.prix').value)||0;
-            const tva=parseFloat(row.querySelector('.tva').value)||0;
-            const ht = qte*prix;
-            const tv = ht*tva/100;
-            totalHT+=ht; totalTVA+=tv; totalTTC+=ht+tv;
-        });
-        container.querySelector('#total_ht').value=totalHT.toFixed(2);
-        container.querySelector('#total_tva').value=totalTVA.toFixed(2);
-        container.querySelector('#total_ttc').value=totalTTC.toFixed(2);
-        container.querySelector('#display_total_ht').textContent=totalHT.toFixed(2)+' €';
-        container.querySelector('#display_total_tva').textContent=totalTVA.toFixed(2)+' €';
-        container.querySelector('#display_total_ttc').textContent=totalTTC.toFixed(2)+' €';
-    }
-
-    tbody.addEventListener('input',e=>{
-        const row=e.target.closest('tr');
-        if(e.target.classList.contains('produit-input')){
-            const code=e.target.value.trim();
-            let option=null;
-            for(let opt of datalist.options){ if(opt.value===code){option=opt; break;} }
-            if(option){
-                row.querySelector('.description').value=option.getAttribute('data-designation')||'';
-                row.querySelector('.prix').value=option.getAttribute('data-prix')||'';
-                row.querySelector('.tva').value=option.getAttribute('data-tva')||'';
-                updatePrixTTC(row); updateTotals();
-            } else resetRow(row);
-        }
-        if(e.target.classList.contains('quantite') || e.target.classList.contains('tva')){ updatePrixTTC(row); updateTotals(); }
-    });
-
-    tbody.addEventListener('click',e=>{
-        const row=e.target.closest('tr');
-        if(e.target.classList.contains('addRowBelow')){
-            const newRow=row.cloneNode(true); resetRow(newRow); row.insertAdjacentElement('afterend',newRow); updateAllNames();
-        }
-        if(e.target.classList.contains('removeRow')){
-            if(tbody.querySelectorAll('tr').length>1){ row.remove(); updateAllNames(); }
-        }
-    });
-
-    updateAllNames();
 }
 </script>
 </x-layouts.app>

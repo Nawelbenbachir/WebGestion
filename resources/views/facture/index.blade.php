@@ -73,7 +73,18 @@
                                             </svg>
                                         </span>
                                     @endif
-
+                                        {{-- Bouton Dupliquer --}}
+                                    <form action="{{ route('documents.duplicate', [$document->id, 'F']) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" 
+                                                onclick="event.stopPropagation(); return confirm('Dupliquer cette facture ?');"
+                                                class="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all"
+                                                title="Dupliquer la facture">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                                            </svg>
+                                        </button>
+                                    </form>
                                     {{-- Édition --}}
                                     <button type="button"
                                             data-edit-url="{{ route('documents.edit', $document->id) }}"

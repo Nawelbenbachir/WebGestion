@@ -24,6 +24,8 @@ Route::middleware('auth')->group(function () {
 
     // La route index générique qui gère ?type=facture
     Route::get('documents', [EnTeteDocumentController::class, 'index'])->name('documents.index');
+    Route::post('/documents/{id}/duplicate/{nouveauType}', [EnTeteDocumentController::class, 'dupliquerDocument'])
+    ->name('documents.duplicate');
 
     Route::prefix('factures')->group(function () {
         Route::get('/', [EnTeteDocumentController::class, 'index'])->defaults('type', 'facture')->name('factures.index');
@@ -31,7 +33,6 @@ Route::middleware('auth')->group(function () {
         Route::get('factures/{id}/destroy', [EnTeteDocumentController::class, 'destroy'])->name('factures.destroy');
         Route::get('/factures/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('facture.edit');
         Route::get('/factures/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('documents.pdf');
-        
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'facture')->name('factures.show');
     });
 
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/devis/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('devis.edit');
         Route::get('/devis/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('documents.pdf');
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'devis')->name('devis.show');
+       
     });
 
     Route::prefix('avoirs')->group(function () {
@@ -51,7 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/avoirs/{id}/edit', [EnTeteDocumentController::class, 'edit'])->name('avoirs.edit');
         Route::get('/avoirs/{id}/pdf', [EnTeteDocumentController::class, 'downloadPdf'])->name('documents.pdf');
         Route::get('/{id}', [EnTeteDocumentController::class, 'show'])->defaults('type', 'avoir')->name('avoirs.show');
-    }); 
+        
+        }); 
 
     // Actions de transformation
     Route::post('/documents/{id}/transformF', [EnTeteDocumentController::class, 'transformerEnFacture'])->name('documents.transform');

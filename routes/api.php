@@ -23,7 +23,9 @@ use App\Http\Controllers\Api\EnteteDocumentController;
 
 
      // On peut passer la societe_id en paramètre de requête (?societe_id=X)
-    Route::get('documents', [EnteteDocumentController::class, 'index'])->middleware('auth:sanctum');
+    Route::get('documents', [EnteteDocumentController::class, 'index']);
+    // ->middleware('auth:sanctum');
     
     // Route pour voir UN document spécifique (avec ses lignes)
-    Route::get('documents/{id}', [EnteteDocumentController::class, 'show'])->middleware('auth:sanctum');
+    Route::get('documents/{id}', [EnteteDocumentController::class, 'show']);
+    // ->middleware('auth:sanctum');

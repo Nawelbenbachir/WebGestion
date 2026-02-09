@@ -16,11 +16,24 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Pas de filtre nécessaire, on récupère tous les utilisateurs
-        $users = User::orderBy('name')->paginate(10); 
+        $user = Auth::user();
+        $userId = $user->id;
 
+        $societes = Societe::where('proprietaire_id', $userId)->get();
+        // L'admin veut voir les utilisateurs de la société active.
+        $lastActiveSocieteId = $user->last_active_societe_id;
+        if ($lastActiveSocieteId) {
+            // Utiliser la relation Many-to-Many pour récupérer les utilisateurs de la société active
+            $users = User::whereHas('societes', function ($query) use ($lastActiveSocieteId) {
+                $query->where('societe_id', $lastActiveSocieteId);
+            })->get();
+        } else {
+             // Si aucune société active n'est définie
+            $users = collect(); 
+        }
+        // Afficher les informations de la sociétés et des users 
+        return view('parametres.index', compact('societes','users'));
         
-        return view('user.index', compact('users'));
     }
 
 
@@ -49,25 +62,40 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+       
         //  Validation des données 
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|max:255|unique:users,email',
             'password'  => 'required|string|min:8|confirmed', 
             'role'      => 'nullable|string|in:admin,manager,user', 
+            
         ]);
+         $currentSocieteId = session('current_societe_id');
+         if (!$currentSocieteId) {
+        return response()->json([
+            'success' => false, 
+            'message' => 'Erreur : Aucune société active sélectionnée.'
+        ], 400);
+    }
 
         //  Création de l'utilisateur
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'] ?? 'user',
-            'password' => Hash::make($validated['password']), // Hacher le mot de passe
+            'password' => Hash::make($validated['password']), 
+            'societe_id' => $currentSocieteId, 
+            'last_active_societe_id' => $currentSocieteId,
+
         ]);
 
         //  Réponse (pour le modal AJAX)
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => ' Utilisateur ajouté avec succès.']);
+           return response()->json([
+        'success' => true,
+        'message' => 'Utilisateur créé et rattaché à la société actuelle.'
+    ]);
         }
 
         return redirect()->route('user.index')->with('success', 'Utilisateur ajouté avec succès.');
