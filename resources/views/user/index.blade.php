@@ -1,19 +1,10 @@
 <x-layouts.app>
- 
-    
-        
-        @if(session('success'))
-            <div class="p-4 mb-6 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center shadow-sm">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if($users->isEmpty())
+            @if($users->isEmpty())
             <div class="flex flex-col items-center justify-center py-12 text-gray-500">
-                <p>Aucun utilisateur enregistré pour le moment.</p>
+                <p>Aucun utilisateur enregistré.</p>
             </div>
         @else
+
             <div class="overflow-x-auto">
                 <table class="min-w-full border-separate border-spacing-0">
                     <thead>
@@ -77,9 +68,14 @@
                                 </td>
 
                                 {{-- Rôle avec Badge --}}
+                               
                                 <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' }}">
-                                        {{ ucfirst($user->role ?? 'Membre') }}
+                                    @php
+                                        // On récupère le rôle dans le pivot, sinon on affiche celui par défaut du user
+                                        $roleAffiche = $user->pivot->role_societe ?? $user->role ?? 'user';
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $roleAffiche === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' }}">
+                                        {{ ucfirst($roleAffiche) }}
                                     </span>
                                 </td>
                             </tr>

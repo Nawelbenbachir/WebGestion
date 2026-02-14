@@ -3,14 +3,32 @@
         <x-navigation></x-navigation>
     </x-slot>
 
-    <div class="py-6" x-data="{ currentTab: 'societe' }">
+    <div class="py-6"  
+        x-data="{ 
+        currentTab: (new URLSearchParams(window.location.search)).get('tab') || 
+                    (window.location.hash ? window.location.hash.replace('#', '') : 'societe') 
+     }">
         <div class="max-w-8xl mx-auto sm:px-6 lg:px-8">
+            {{-- ZONE DES MESSAGES (Placée ICI pour être toujours visible) --}}
+            @if(session('success'))
+                <div class="mb-4 p-4 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center shadow-sm">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="mb-4 p-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl flex items-center shadow-sm">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    {{ session('error') }}
+                </div>
+            @endif
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
 
                 <div class="flex border-b border-gray-200 dark:border-gray-700">
     
     {{-- Onglet Société --}}
-    <button @click="currentTab = 'societe', closeModal()" 
+    <button @click="currentTab = 'societe'; window.location.hash = 'societe'; closeModal()" 
             :class="{ 
                 // CLASSE ACTIVE: En mode clair (bleu foncé)
                 'border-b-2 border-indigo-500 text-indigo-600 font-semibold': currentTab === 'societe', 
@@ -26,7 +44,7 @@
     </button>
     
     {{-- Onglet Utilisateurs --}}
-    <button @click="currentTab = 'utilisateur', closeModal()" 
+    <button @click="currentTab = 'utilisateur'; window.location.hash = 'utilisateur'; closeModal()" 
             :class="{ 
                 // CLASSE ACTIVE: En mode clair (bleu foncé)
                 'border-b-2 border-indigo-500 text-indigo-600 font-semibold': currentTab === 'utilisateur', 
@@ -221,11 +239,9 @@ function submitCurrentForm() {
     .then(res => res.json())
     .then(data => {
         if(data.success){
-            alert('Enregistré avec succès !');
-            closeModal();
-            if(document.getElementById('documents-table-container')){
-                refreshDocumentsTable();
-            }
+           
+            window.location.reload();
+            
         } else if(data.errors){
             console.log(data.errors);
             alert('Erreur : voir console.');

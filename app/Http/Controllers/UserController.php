@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Societe;
 
 class UserController extends Controller
 {
@@ -89,7 +90,13 @@ class UserController extends Controller
             'last_active_societe_id' => $currentSocieteId,
 
         ]);
+        
+    
+        $user->societes()->attach($currentSocieteId, [
+            'role_societe' => $validated['role'] // On enregistre son rôle ici
+        ]);
 
+        
         //  Réponse (pour le modal AJAX)
         if ($request->ajax() || $request->wantsJson()) {
            return response()->json([
@@ -98,7 +105,9 @@ class UserController extends Controller
     ]);
         }
 
-        return redirect()->route('user.index')->with('success', 'Utilisateur ajouté avec succès.');
+        return redirect()->route('user.index', ['tab' => 'utilisateur'])
+                        ->with('success', 'Utilisateur créé et rattaché à la société.');
+
     }
 
     /**
@@ -131,7 +140,7 @@ class UserController extends Controller
 
         // 4. Réponse (pour le modal AJAX)
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Utilisateur mis à jour avec succès.']);
+            return response()->json(['success' => true, 'redirect' => route('user.index'),'message' => 'Utilisateur mis à jour avec succès.']);
         }
 
         return redirect()->route('user.index')->with('success', 'Utilisateur mis à jour avec succès.');
@@ -150,11 +159,10 @@ public function destroy($id)
 
     //  On ne peut pas retirer le propriétaire
     if ($user->id === $societe->proprietaire_id) {
-        return response()->json([
-            'success' => false, 
-            'message' => 'Impossible de retirer le propriétaire de la société.'
-        ], 403);
-    }
+    return redirect()
+        ->route('parametres.index', ['tab' => 'utilisateur']) // On force l'onglet
+        ->with('error', 'Action impossible : Vous ne pouvez pas retirer le propriétaire.');
+}
    
     //  On détache l'utilisateur de la société (table pivot)
     // detach() supprime uniquement la ligne dans societe_user
@@ -177,10 +185,7 @@ public function destroy($id)
         $user->update(['last_active_societe_id' => null]);
     }
 
-    return response()->json([
-        'success' => true, 
-        'message' => 'L\'utilisateur n\'a plus accès à cette société.'
-    ]);
+    return redirect()->back()->with('success', 'L\'utilisateur a été retiré avec succès.');
 }
     
 }

@@ -42,13 +42,15 @@ class AuthenticatedSessionController extends Controller
         if ($societesCount === 0) {
             //  L'utilisateur n'a aucune société liée.
             
-            // Sécurité: On déconnecte l'utilisateur pour le forcer à passer par la création
-            Auth::logout();
+           Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            
-            // Redirection vers la page de création obligatoire
-            return redirect()->route('societes.create')->with('warning', 'Veuillez créer votre première société pour accéder à l\'application.');
+
+            //  On redirige vers le LOGIN avec un message d'ERREUR
+            // Note : On utilise 'error' ou 'email' pour que le message soit visible
+            return redirect()->route('login')->withErrors([
+                'email' => 'Accès refusé : Votre compte n\'est rattaché à aucune société active. Veuillez contacter votre administrateur.',
+            ]);
         }
 
         //  L'utilisateur a au moins une société.
