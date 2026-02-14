@@ -46,10 +46,11 @@
                                         <form action="{{ route('user.destroy', $user->id) }}" method="POST" class="inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" 
-                                                    onclick=" return confirm('Supprimer définitivement cet utilisateur ?');"
+                                                    onclick=" const msg = {{ auth()->id() === $user->id }} ? 'Voulez-vous vraiment quitter cette société ?' : 'Retirer l\'accès à cet utilisateur ?';
+                                                     return confirm(msg);""
                                                     class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
                                                 </svg>
                                             </button>
                                         </form>

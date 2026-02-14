@@ -29,6 +29,13 @@ class DashboardComposer
                 'unpaid_total' => 0,
                 'new_clients_count' => 0,
                 'latestInvoices' => collect(),
+                'clients_count' => 0,     
+                'reglements_count' => 0,
+                'products_count'=>0,
+                'devis_count'=>0,
+                'factures_count'=>0,
+                'avoirs_count'=>0,
+           
             ]);
             return;
         }

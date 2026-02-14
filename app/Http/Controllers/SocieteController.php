@@ -25,9 +25,13 @@ class SocieteController extends Controller
     /**
      * Affiche le formulaire de création.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('parametres.create');
+        // On force le vueseule si l'utilisateur n'a pas encore de société
+        $isVueseule = $request->has('vueseule') || auth()->user()->societes()->count() === 0;
+    
+        return view('parametres.create', compact('isVueseule'));
+        
     }
 
     public function store(Request $request)

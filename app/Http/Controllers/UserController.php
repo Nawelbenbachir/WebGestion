@@ -140,37 +140,47 @@ class UserController extends Controller
     /**
      * Supprime un utilisateur.
      */
-    public function destroy($id)
-    {
-        $user = User::findOrFail($id);
+public function destroy($id)
+{
+    $societeId = session('current_societe_id');
+    $user = User::findOrFail($id);
+    
+    //  Récupérer la société pour vérifier qui est le propriétaire
+    $societe = Societe::findOrFail($societeId);
 
-        //  Vérifier si l'utilisateur à supprimer est l'utilisateur actuellement connecté
-        if (Auth::check() && Auth::id() === $user->id) {
-            
-            // Déconnecter l'utilisateur avant la suppression
-            Auth::logout();
+    //  On ne peut pas retirer le propriétaire
+    if ($user->id === $societe->proprietaire_id) {
+        return response()->json([
+            'success' => false, 
+            'message' => 'Impossible de retirer le propriétaire de la société.'
+        ], 403);
+    }
+   
+    //  On détache l'utilisateur de la société (table pivot)
+    // detach() supprime uniquement la ligne dans societe_user
+    $user->societes()->detach($societeId);
 
-            // Suppression 
-
-            $user->delete();
-
-            //  Invalider la session et regénérer le jeton
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
-
-            //  Redirection vers la page de connexion
-            return redirect('/login')->with('status', 'Votre compte a été supprimé.');
-        }
-
-        // Si ce n'est pas l'utilisateur connecté ou si la requête est AJAX (autre utilisateur)
-        $user->delete();
-
-        if (request()->ajax() || request()->wantsJson()) {
-            return response()->json(['success' => true, 'message' => ' Utilisateur supprimé avec succès.']);
-        }
-
-        return redirect()->route('users.index')->with('success', ' Utilisateur supprimé avec succès.');
+    if ($user->id === auth()->id()) {
+        
+        // On nettoie sa session
+        session()->forget('current_societe_id');
+        $user->update(['last_active_societe_id' => null]);
+         return response()->json([
+            'success' => true, 
+            'redirect' => route('tableau-de-bord'), 
+            'message' => 'Vous avez quitté la société avec succès.'
+        ]);
     }
 
+    //  Si c'était sa dernière société active, on remet à null
+    if ($user->last_active_societe_id == $societeId) {
+        $user->update(['last_active_societe_id' => null]);
+    }
+
+    return response()->json([
+        'success' => true, 
+        'message' => 'L\'utilisateur n\'a plus accès à cette société.'
+    ]);
+}
     
 }

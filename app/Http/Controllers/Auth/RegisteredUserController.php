@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\Parametre;
 
 class RegisteredUserController extends Controller
 {
@@ -45,6 +46,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('clients.index'));
+        return redirect(route('societes.create',['vueseule' => 1]));
     }
 }
