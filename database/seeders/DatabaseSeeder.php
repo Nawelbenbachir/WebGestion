@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
         SocieteSeeder::class, 
         ClientSeeder::class, 
         ProduitSeeder::class,
-        DocumentSeeder::class
+        DocumentSeeder::class,
+        ReglementSeeder::class,
         ]);
 
          // Récupérer les entités fraîchement créées

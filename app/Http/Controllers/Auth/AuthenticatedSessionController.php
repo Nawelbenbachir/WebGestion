@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             //  On redirige vers le LOGIN avec un message d'ERREUR
-            // Note : On utilise 'error' ou 'email' pour que le message soit visible
+         
             return redirect()->route('login')->withErrors([
                 'email' => 'Accès refusé : Votre compte n\'est rattaché à aucune société active. Veuillez contacter votre administrateur.',
             ]);

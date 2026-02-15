@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('reglements', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('societe_id')->constrained('societes')->onDelete('cascade');
+            $table->string('numero_reglement');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
             $table->unsignedBigInteger('document_id');

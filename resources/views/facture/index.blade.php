@@ -27,6 +27,7 @@
                         <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Client</th>
                         <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total TTC</th>
+                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Solde</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -112,6 +113,9 @@
 
                             <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {{ number_format($document->total_ttc, 2, ',', ' ') }} €
+                            </td>
+                            <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                {{ number_format($document->solde, 2, ',', ' ') }} €
                             </td>
                         </tr>
                     @endforeach

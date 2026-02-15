@@ -13,7 +13,10 @@ class ReglementController extends Controller
      */
     public function index()
     {
-        $reglements = Reglement::with('document')->get();
+        $societeId=session('current_societe_id');
+        $reglements = Reglement::with('document')
+        ->where('societe_id', $societeId)
+        ->get();
         return view('reglements.index', compact('reglements'));
     }
 

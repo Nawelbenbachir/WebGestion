@@ -32,7 +32,7 @@ class DocumentSeeder extends Seeder
                 continue;
             }
 
-            $types = ['F', 'D'];
+            $types = ['F', 'A'];
 
             foreach ($types as $type) {
                 $dernierDoc = EnTeteDocument::where('societe_id', $societe->id)
@@ -88,7 +88,7 @@ class DocumentSeeder extends Seeder
                             'total_ttc'     => 0,
                             'statut'        => Arr::random(['brouillon', 'envoye', 'paye']),
                         ]);
-
+                        
                         $totalHTGlobal = 0;
                         $totalTVAGlobal = 0;
 
@@ -117,12 +117,12 @@ class DocumentSeeder extends Seeder
                             $totalTVAGlobal += $ligneTVA;
                         }
 
-                        // 3. Mise à jour des totaux de l'en-tête
+                        //  Mise à jour des totaux de l'en-tête
                         $document->update([
                             'total_ht'  => round($totalHTGlobal, 2),
                             'total_tva' => round($totalTVAGlobal, 2),
                             'total_ttc' => round($totalHTGlobal + $totalTVAGlobal, 2),
-                            'solde'     => round($totalHTGlobal + $totalTVAGlobal, 2),
+                            'solde'     => ($document->statut === 'paye') ? 0 : round($totalHTGlobal + $totalTVAGlobal, 2),
                         ]);
                     });
                      $sequence ++; // Incrémente la séquence pour le prochain document de ce type/société
@@ -131,6 +131,6 @@ class DocumentSeeder extends Seeder
             }
         }
 
-        $this->command->info("Seeder terminé avec succès et données cohérentes !");
+        
     }
 }
