@@ -13,23 +13,23 @@ class EnteteDocumentController extends Controller
   
     public function index(Request $request)
     {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'Non authentifié.'], 401);
-        }
+         $user = Auth::user();
+        // if (!$user) {
+        //     return response()->json(['message' => 'Non authentifié.'], 401);
+        // }
 
-        $societeId = $request->header('X-Societe-Id') 
-                     ?? $request->get('societe_id') 
-                     ?? $user?->current_societe_id;
+        // $societeId = $request->header('X-Societe-Id') 
+        //              ?? $request->get('societe_id') 
+        //              ?? $user?->current_societe_id;
 
-        if (!$societeId) {
-            return response()->json([
-                'error' => 'Aucune société spécifiée',
-                'message' => 'Veuillez fournir un societe_id (URL), un X-Societe-Id (Header) ou être rattaché à une société.'
-            ], 400);
-        }
+        // // if (!$societeId) {
+        // //     return response()->json([
+        // //         'error' => 'Aucune société spécifiée',
+        // //         'message' => 'Veuillez fournir un societe_id (URL), un X-Societe-Id (Header) ou être rattaché à une société.'
+        // //     ], 400);
+        // // }
         //tester l'api sans sanctum
-        // $societeId = $request->get('societe_id') ?? 1;
+         $societeId = $request->get('societe_id') ?? 1;
 
         // On prépare la requête de base
         $query = EnTeteDocument::with(['client', 'societe'])
@@ -82,12 +82,12 @@ class EnteteDocumentController extends Controller
         $user = Auth::user();
     
         // On récupère le document  s'il appartient à la société de l'utilisateur
-        $document = EnTeteDocument::with(['client', 'societe', 'lignes'])
-            ->where('societe_id', $user->current_societe_id) 
-            ->findOrFail($id);
+        // $document = EnTeteDocument::with(['client', 'societe', 'lignes'])
+        //     ->where('societe_id', $user->current_societe_id) 
+        //     ->findOrFail($id);
             
         //tester api sans sanctum 
-        // $document = EnTeteDocument::with(['client', 'societe', 'lignes'])->findOrFail($id);
+         $document = EnTeteDocument::with(['client', 'societe', 'lignes'])->findOrFail($id);
         
         return new EnteteDocumentResource($document);
     }

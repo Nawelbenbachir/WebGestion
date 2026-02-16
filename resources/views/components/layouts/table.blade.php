@@ -253,7 +253,8 @@ function initDevisForm(container) {
             updateTotals(); // Recalculer après ajout
         }
     });
-
+  
+    
     // Lancer un premier calcul au chargement (utile pour l'Edit)
     updateTotals();
 }
