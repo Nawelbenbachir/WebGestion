@@ -17,6 +17,9 @@ class EnteteDocumentResource extends JsonResource
             'type' => $this->type_document, // "D", "F", "A"
             'numero' => $this->code_document ?? $this->numero_document,
             'date' => $this->date_document,
+            'date_echeance'=>$this->date_echeance,
+            'date_validite'=>$this->date_validite,
+            'solde'=>$this->solde,
             'total_ht' => $this->total_ht,
             'total_ttc' => $this->total_ttc,
             

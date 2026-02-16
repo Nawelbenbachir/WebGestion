@@ -59,19 +59,14 @@ class EnteteDocumentController extends Controller
         $totalTTC = (float) $query->sum('total_ttc');
         $count = $query->count();
 
-        //  Pagination (par défaut 15 par page)
-        $perPage = $request->get('per_page', 15);
-        $documents = $query->orderBy('date_document', 'desc')->paginate($perPage);
+        
+        
+        $documents = $query->orderBy('date_document', 'desc')->get()        ;
 
        
         //  Retour avec métadonnées personnalisées
         return EnteteDocumentResource::collection($documents)
-            ->additional([
-                'meta_stats' => [
-                    'total_selection_ttc' => $totalTTC,
-                    'nombre_documents' => $count,
-                ]
-            ]);
+            ->resolve();
     }
 
     /**

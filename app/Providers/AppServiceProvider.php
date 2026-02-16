@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View; 
 use App\Models\Societe;
 use App\Models\User;
+use Illuminate\Http\Resources\Json\JsonResource;
 use App\View\Composers\SocieteComposer; 
 use App\View\Composers\DashboardComposer;
 
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
         //         $view->with('currentSocieteId', null);
         //     }
         // });
+          JsonResource::withoutWrapping();
           View::composer('components.navigation', SocieteComposer::class);
           View::composer('dashboard', DashboardComposer::class);
     }
