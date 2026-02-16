@@ -35,8 +35,7 @@ class EnteteDocumentResource extends JsonResource
                 'nom' => $this->societe->nom ?? 'Société inconnue',
             ],
 
-            // Les lignes d'articles ne s'affichent QUE dans la vue détail (show)
-            // car elles sont chargées via with(['lignes']) uniquement dans show()
+            
             'lignes' => $this->whenLoaded('lignes'),
         ];
     }
