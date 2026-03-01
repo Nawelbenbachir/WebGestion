@@ -24,7 +24,7 @@ class DocumentSeeder extends Seeder
         }
 
         foreach ($societes as $societe) {
-            // Récupérer les produits de CETTE société pour les utiliser dans les lignes
+            
             $produitsDeLaSociete = Produit::where('id_societe', $societe->id)->get();
 
             if ($produitsDeLaSociete->isEmpty()) {
@@ -71,7 +71,7 @@ class DocumentSeeder extends Seeder
                     }
                    
 
-                        // 1. Création de l'en-tête
+                        //  Création de l'en-tête
                         $document = EnTeteDocument::create([
                             'societe_id'    => $societe->id,
                             'code_document' => $codeDocument,
@@ -92,18 +92,23 @@ class DocumentSeeder extends Seeder
                         $totalHTGlobal = 0;
                         $totalTVAGlobal = 0;
 
-                        // 2. Création manuelle des lignes (SANS FACTORY)
+                        //  Création manuelle des lignes 
                         $nbLignes = rand(2, 5);
                         for ($j = 0; $j < $nbLignes; $j++) {
                             $produit = $produitsDeLaSociete->random();
                             $quantite = rand(1, 10);
                             $prixHT = $produit->prix_vente_ht ?? 10.00;
-                            $tauxTva = 20.0; // Ou $produit->taux_tva si tu l'as
-
-                            $ligneHT = $prixHT * $quantite;
-                            $ligneTVA = $ligneHT * ($tauxTva / 100);
-
-                            LigneDocument::create([
+                            $tauxTva = 20.0; 
+                            if ($type=='A'){
+                                $ligneHT = $prixHT * $quantite*-1;
+                                $ligneTVA = $ligneHT * ($tauxTva / 100);
+                            }
+                            else {
+                                $ligneHT = $prixHT * $quantite;
+                                $ligneTVA = $ligneHT * ($tauxTva / 100);
+                            }
+                           
+                                LigneDocument::create([
                                 'document_id'      => $document->id,
                                 'produit_id'       => $produit->id,
                                 'description'      => $produit->description ?? "Produit " . $produit->code_produit,
@@ -112,18 +117,21 @@ class DocumentSeeder extends Seeder
                                 'taux_tva'         => $tauxTva,
                                 'total_ttc'        => round($ligneHT + $ligneTVA, 2),
                             ]);
-
+                            
                             $totalHTGlobal += $ligneHT;
                             $totalTVAGlobal += $ligneTVA;
                         }
 
                         //  Mise à jour des totaux de l'en-tête
-                        $document->update([
+                      
+                            $document->update([
                             'total_ht'  => round($totalHTGlobal, 2),
                             'total_tva' => round($totalTVAGlobal, 2),
                             'total_ttc' => round($totalHTGlobal + $totalTVAGlobal, 2),
                             'solde'     => ($document->statut === 'paye') ? 0 : round($totalHTGlobal + $totalTVAGlobal, 2),
                         ]);
+                        
+                       
                     });
                      $sequence ++; // Incrémente la séquence pour le prochain document de ce type/société
                 }

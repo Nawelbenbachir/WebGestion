@@ -40,11 +40,12 @@ class ReglementSeeder extends Seeder
 
                     Reglement::create([
                         'societe_id'        => $societe->id,
+                        'client_id'=>$document->client_id,
                         'numero_reglement'  => $numeroReglement,
                         'date_reglement'    => now(),
                         'document_id'       => $document->id,
                         'montant'           => $document->total_ttc,
-                        'mode_reglement' => Arr::random(['chèque', 'virement', 'espèces', 'carte bancaire']),
+                        'mode_reglement' => Arr::random(['cheque', 'virement', 'espece', 'carte']),
                     ]);
 
                     $sequence++; 

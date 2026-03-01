@@ -15,7 +15,8 @@ class Reglement extends Model
         'date_reglement',
         'reference',
         'commentaire',
-        'type_document',
+        'client_id',
+        'societe_id'
     ];
 
      public function document()

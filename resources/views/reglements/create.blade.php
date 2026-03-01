@@ -58,6 +58,23 @@
                        class="w-full rounded border-gray-300 dark:bg-gray-800 px-3 py-2">
             </div>
         </div>
+        <div>
+                <x-input-label for="mode_reglement" value="Mode de règlement"/>
+                <select id="mode_reglement" name="mode_reglement"
+                        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="carte" @selected(old('mode_reglement')=='carte')>Carte bancaire</option>
+                    <option value="espece" @selected(old('mode_reglement')=='espece')>Espèces</option>
+                    <option value="cheque" @selected(old('mode_reglement')=='cheque')>Chèque</option>
+                    <option value="virement" @selected(old('mode_reglement')=='virement')>Virement</option>
+
+                </select>
+                @error('mode_reglement')
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
 
         <div>
             <label class="block text-xs font-medium mb-1">Commentaire interne / Note</label>
@@ -85,8 +102,17 @@
             <table class="min-w-full border-separate border-spacing-0" x-show="selectedClient !== ''" x-cloak>
                 <thead>
                         <th class="px-6 py-3 border-b text-center w-10">
-                            <input type="checkbox" @click="selectedDocs = $event.target.checked ? {{ $documents->pluck('id') }} : []" 
-                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <input type="checkbox" 
+                                @click="let ids = Array.from(document.querySelectorAll('tr[style*=\'display: none\']')).length === 0 ? [] : []; 
+                                        {{-- Logique simplifiée : Alpine peut filtrer les IDs par client directement --}}
+                                        if($event.target.checked) {
+                                            selectedDocs = Array.from(document.querySelectorAll('input.document-checkbox'))
+                                                                .filter(i => i.closest('tr').style.display !== 'none')
+                                                                .map(i => i.value);
+                                        } else {
+                                            selectedDocs = [];
+                                        }" 
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                         </th>
                         <th class="px-6 py-3 border-b text-left text-xs font-bold text-gray-500 uppercase">Référence</th>
                         <th class="px-6 py-3 border-b text-center text-xs font-bold text-gray-500 uppercase">Date</th>

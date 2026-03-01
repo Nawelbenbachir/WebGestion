@@ -41,31 +41,63 @@ class ReglementController extends Controller
         return view('reglements.create', compact('documents','clients','prochainNumero'));
     }
 
-    /**
-     * Enregistrement d’un règlement
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'document_id' => 'required|exists:en_tete_documents,id',
-            'mode'        => 'required|string', // CB, chèque, virement…
-            'montant'     => 'required|numeric|min:0.01',
-            'date_paiement' => 'required|date',
-        ]);
+  public function store(Request $request)
+{
+    $validated = $request->validate([
+        'client_id'      => 'required|exists:clients,id',
+        'document_ids'   => 'required|array|min:1',
+        'document_ids.*' => 'exists:en_tete_documents,id',
+        'mode_reglement' => 'required|in:carte,virement,cheque,espece',
+        'date_reglement' => 'required|date',
+        'reference'      => 'nullable|string|max:255',
+        'commentaire'    => 'nullable|string',
+    ]);
 
-        Reglement::create($validated);
+    $societeId = session('current_societe_id');
 
-        return redirect()->route('reglements.index')
-            ->with('success', 'Règlement enregistré avec succès.');
+    // --- ÉTAPE CLÉ : On calcule le compteur de départ avant la boucle ---
+    $compteurDepart = $this->getProchainNumeroBase($societeId);
+
+    try {
+        DB::transaction(function () use ($request, $societeId, $compteurDepart) {
+            $nbCrees = 0;
+
+            foreach ($request->document_ids as $docId) {
+                $document = EnTeteDocument::where('id', $docId)
+                    ->where('client_id', $request->client_id)
+                    ->first();
+
+                if ($document && $document->solde > 0) {
+                    // On construit le numéro manuellement : Départ + Nombre de docs déjà traités
+                    $numero = $this->formaterNumeroFinal($societeId, $compteurDepart + $nbCrees);
+
+                    Reglement::create([
+                        'societe_id'       => $societeId,
+                        'client_id'        => $request->client_id,
+                        'document_id'      => $docId,
+                        'numero_reglement' => $numero,
+                        'mode_reglement'   => $request->mode_reglement,
+                        'montant'          => $document->solde,
+                        'date_reglement'   => $request->date_reglement,
+                    ]);
+
+                    $document->update(['solde' => 0, 'statut' => 'paye']);
+                    
+                    $nbCrees++; 
+                }
+            }
+        });
+
+        return redirect()->route('reglements.index')->with('success', 'Règlements enregistrés.');
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Erreur : ' . $e->getMessage());
     }
-
-    /**
-     * Affichage d’un règlement
-     */
+}
     public function show($id)
     {
         $reglement = Reglement::with('document')->findOrFail($id);
-        return view('reglements.show', compact('reglement'));
+         return view('reglements.show', compact('reglement'));
     }
 
     /**
@@ -106,47 +138,54 @@ class ReglementController extends Controller
         return redirect()->route('reglements.index')
             ->with('success', 'Règlement supprimé.');
     }
-    private function genererNumeroReglement($societeId)
+
+   private function genererNumeroReglement($societeId, $offset = 0) 
     {
-        //  Récupérer le format depuis la table parametres
-        // On cherche directement dans la table parametres liée à la société
-        $formatChoisi = DB::table('societes')
-            ->where('id', $societeId)
-            ->value('format_numero_document') ?? 'simple';
+        $societe = DB::table('societes')->select('format_numero_document')->where('id', $societeId)->first();
+        $formatChoisi = $societe->format_numero_document ?? 'simple';
 
-        $prefix ='REG';
-
-        $annee = now()->format('Y');
-        $mois = now()->format('m');
-
-        //  Construction de la base de recherche
+        $prefix = 'REG';
+        $date = now();
         $baseCode = ($formatChoisi === 'mensuel') 
-            ? "{$prefix}-{$annee}-{$mois}-" 
-            : "{$prefix}-{$annee}-";
+            ? "{$prefix}-{$date->format('Y')}-{$date->format('m')}-" 
+            : "{$prefix}-{$date->format('Y')}-";
 
-        $nbTiretsAttendus = ($formatChoisi === 'mensuel') ? 3 : 2;
-
+        // On cherche le dernier numéro pour cette base précise
         $dernierReg = Reglement::where('societe_id', $societeId)
             ->where('numero_reglement', 'LIKE', $baseCode . '%')
-            // On s'assure que le format correspond (filtrage par nombre de tirets)
-            ->whereRaw("(LENGTH(numero_reglement) - LENGTH(REPLACE(numero_reglement, '-', ''))) = ?", [$nbTiretsAttendus])
-            ->orderByRaw('LENGTH(numero_reglement) DESC')
-            ->orderBy('numero_reglement', 'desc')
+            ->orderByRaw('CAST(SUBSTRING_INDEX(numero_reglement, "-", -1) AS UNSIGNED) DESC')
             ->first();
 
-            $compteur = 1;
-
+        $compteur = 1;
         if ($dernierReg) {
-            // Extraction du dernier segment (le numéro)
             $parties = explode('-', $dernierReg->numero_reglement);
             $dernierNombre = end($parties);
-            if (is_numeric($dernierNombre)) {
-                $compteur = (int)$dernierNombre + 1;
-            }
+            $compteur = is_numeric($dernierNombre) ? (int)$dernierNombre + 1 : 1;
         }
 
-        // Formatage final (ex: F-2024-001 ou F-2024-05-001)
-        return $baseCode . str_pad($compteur, 3, '0', STR_PAD_LEFT);
+        return $baseCode . str_pad($compteur + $offset, 3, '0', STR_PAD_LEFT);
     }
 
+private function getProchainNumeroBase($societeId)
+{
+    $date = now();
+    $prefix = 'REG-' . $date->format('Y') . '-'; // Exemple simplifié
+    
+    $dernier = Reglement::where('societe_id', $societeId)
+        ->where('numero_reglement', 'LIKE', $prefix . '%')
+        ->orderByRaw('CAST(SUBSTRING_INDEX(numero_reglement, "-", -1) AS UNSIGNED) DESC')
+        ->first();
+
+    if (!$dernier) return 1;
+
+    $parties = explode('-', $dernier->numero_reglement);
+    return (int)end($parties) + 1;
+}
+
+// Formate le numéro avec les zéros (ex: 005)
+private function formaterNumeroFinal($societeId, $nombre)
+{
+    $annee = now()->format('Y');
+    return "REG-{$annee}-" . str_pad($nombre, 3, '0', STR_PAD_LEFT);
+}
 }

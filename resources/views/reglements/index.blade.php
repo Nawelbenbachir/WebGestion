@@ -21,9 +21,13 @@
             <table class="min-w-full border-separate border-spacing-0">
                 <thead>
                     <tr class="bg-gray-50/50 dark:bg-gray-700/50">
-                        <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase">Référence</th>
+                        <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase">Numéro</th>
+                        <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Date</th>
                         <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Client</th>
+                        <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Code document</th>
                         <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Total TTC</th>
+                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Reférence</th>
+
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -31,16 +35,24 @@
                         <tr data-id="{{ $reglement->id }}" 
                             
                             class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
-                            
-                       
+
                             <td class="px-6 py-4 text-center font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
                                 {{ $reglement->numero_reglement }}
                             </td>
+                            <td class="px-6 py-4 text-center font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                {{ $reglement->date_reglement }}
+                            </td>
                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
+                                {{ $reglement->document->client_nom}}
+                            </td>
+                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
                                 {{ $reglement->document->code_document}}
                             </td>
                             <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {{ number_format($reglement->montant, 2, ',', ' ') }} €
+                            </td>
+                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
+                                {{ $reglement->reference}}
                             </td>
                         </tr>
                    @endforeach
