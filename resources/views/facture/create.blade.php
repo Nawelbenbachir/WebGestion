@@ -15,21 +15,29 @@
         <div class="md:col-span-5 space-y-2 border-r dark:border-gray-700 pr-4">
             <h3 class="font-bold text-blue-600 dark:text-blue-400 uppercase text-xs">Informations Client</h3>
             
-            <div>
-               <select name="client_id" id="client_id" required
-                    class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1">
-                <option value="">-- Choisir un client --</option>
-                @foreach ($clients as $client)
-                    <option value="{{ $client->id }}" 
-                            data-adresse1="{{ $client->adresse1 }}"
-                            data-adresse2="{{ $client->adresse2 }}"
-                            data-cp="{{ $client->code_postal }}"
-                            data-ville="{{ $client->ville }}"
-                            data-tel="{{ $client->telephone }}"
-                            data-email="{{ $client->email }}">
-                        {{ $client->code_cli }} - {{ $client->societe }} 
-                    </option>
-                @endforeach
+                <div>
+                <x-input-label for="client_id" value="Client" />
+                <select name="client_id" id="client_id" required
+                        class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1"
+                        onchange="updateClientInfos(this)">
+                    <option value="">-- Choisir un client --</option>
+                                @foreach ($clients as $client)
+                        @php 
+                            // On prépare la condition avant, proprement
+                            $isSelected = (old('client_id', $selectedClientId ?? '') == $client->id);
+                        @endphp
+                        
+                        <option value="{{ $client->id }}" 
+                                @if($isSelected) selected @endif
+                                data-adresse1="{{ $client->adresse1 }}"
+                                data-adresse2="{{ $client->adresse2 }}"
+                                data-cp="{{ $client->code_postal }}"
+                                data-ville="{{ $client->ville }}"
+                                data-tel="{{ $client->telephone }}"
+                                data-email="{{ $client->email }}">
+                            {{ $client->code_cli }} - {{ $client->societe }} 
+                        </option>
+                    @endforeach
                 </select>
             </div>
 

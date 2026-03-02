@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use Illuminate\Http\Request;
+use App\Models\EnTeteDocument;
 
 use Illuminate\Validation\Rule;
 
@@ -183,8 +184,16 @@ class ClientController extends Controller
         
         //  SÉCURITÉ : Récupérer et détruire le client en filtrant par la société active
         $client = Client::where('id_societe', $societeId)->findOrFail($id);
+        $document=EnTeteDocument::where('client_id',$client->id)
+                                 ->where('societe_id', $societeId)
+                                 ->exists();
+        if ($document) {
+            return redirect()->route('clients.index')
+                ->withErrors("Impossible de supprimer : ce client est lié à des documents.");
+            }
+            
         
-        $client->delete();
+        
 
         return redirect()->route('clients.index')->with('success', ' Client supprimé avec succès.');
     }

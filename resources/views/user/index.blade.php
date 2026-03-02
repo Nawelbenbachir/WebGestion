@@ -20,6 +20,7 @@
                         @foreach ($users as $user)
                             <tr data-id="{{ $user->id }}" 
                                 data-route="user" 
+                                x-show="isMatch($el)"
                                 class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
                                 
                                 {{-- Actions --}}

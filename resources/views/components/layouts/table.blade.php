@@ -48,7 +48,7 @@
        
 
     {{-- Conteneur du Tableau --}}
-    <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden w-full border border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl w-full border border-gray-100 dark:border-gray-700">
         {{ $slot }}
     </div>
 
@@ -56,8 +56,6 @@
     <div x-show="search !== ''" x-cloak class="mt-4">
         <p class="text-sm text-gray-500 italic" x-text="'Résultats pour : ' + search"></p>
     </div>
-
-    {{-- ... (le reste de ton code Modal et Scripts est identique) ... --}}
 
 @if (!$hideModal)
 {{-- Modal unique pour create/edit --}}
@@ -145,16 +143,17 @@ function openModal(url) {
                     'shadow-sm','focus:border-blue-500','focus:ring-blue-500'
                 );
             });
-
-            // --- GESTION DU CHANGEMENT DE CLIENT ---
             const clientSelect = container.querySelector('#client_id');
+
             if (clientSelect) {
-                clientSelect.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
+                //  On définit la logique de remplissage (une seule fois)
+                const fillInfos = (select) => {
+                    const selectedOption = select.options[select.selectedIndex];
                     if (selectedOption && selectedOption.value !== "") {
                         const setVal = (id, val) => {
                             const el = container.querySelector(`#${id}`);
-                            if(el) el.value = val || '';
+                            // On met la valeur ou une chaîne vide si c'est undefined
+                            if(el) el.value = val || ''; 
                         };
 
                         setVal('adresse1', selectedOption.dataset.adresse1);
@@ -164,7 +163,16 @@ function openModal(url) {
                         setVal('telephone', selectedOption.dataset.tel);
                         setVal('email', selectedOption.dataset.email);
                     }
+                };
+
+                //  On l'appelle quand l'utilisateur change manuellement le client
+                clientSelect.addEventListener('change', function() {
+                    fillInfos(this);
                 });
+
+                if (clientSelect.value !== "") {
+                    fillInfos(clientSelect);
+                }
             }
 
             // Initialisation spécifique aux formulaires de devis/factures

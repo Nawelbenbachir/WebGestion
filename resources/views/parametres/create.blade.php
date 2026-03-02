@@ -17,7 +17,7 @@
                     <x-societes.societe-form :isVueseule="true" />
                 </div>
                 
-                {{-- Petit message d'aide optionnel sous le bloc --}}
+                
                 <p class="text-center text-gray-500 text-xs mt-4">
                     Ces informations seront utilisées pour vos documents légaux.
                 </p>

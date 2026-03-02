@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Produit;
 use Illuminate\Http\Request;
-
+use App\Models\LigneDocument;
 use Illuminate\Validation\Rule;
 
 class ProduitController extends Controller
@@ -200,9 +200,16 @@ class ProduitController extends Controller
     {
         $societeId = session('current_societe_id');
         
-        // SÉCURITÉ : Récupérer et détruire le produit en filtrant par la société active
+       
         $produit = Produit::where('id_societe', $societeId)->findOrFail($id);
-        
+        $lignes=LigneDocument::where('societe_id', $societeId)
+                            ->where('produit_id',$produit->id)
+                             ->exists();
+        if ($lignes){
+            return redirect()->route('produits.index')
+                ->withErrors("Impossible de supprimer : ce produit est lié à des documents.");
+            
+        }
         $produit->delete();
 
         return redirect()->route('produits.index')->with('success', ' Produit supprimé avec succès.');

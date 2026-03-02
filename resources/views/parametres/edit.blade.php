@@ -82,6 +82,42 @@
             </div>
         </div>
     </div>
+    {{-- SECTION COMPTABILITÉ (Ajoutée) --}}
+    <div class="mt-4 p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-lg border border-purple-100 dark:border-purple-900/30">
+        <div class="flex items-center gap-2 mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <h3 class="font-bold text-purple-600 dark:text-purple-400 uppercase text-xs tracking-wider">Configuration Comptable (Exports)</h3>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Journal Ventes</label>
+                <input type="text" name="journal_ventes" value="{{ old('journal_ventes', $societe->journal_ventes ?? 'VT') }}"
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono uppercase text-xs focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Compte Ventes (HT)</label>
+                <input type="text" name="compte_ventes" value="{{ old('compte_ventes', $societe->compte_ventes ?? '707000') }}"
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Compte TVA</label>
+                <input type="text" name="compte_tva" value="{{ old('compte_tva', $societe->compte_tva ?? '445710') }}"
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Racine Client</label>
+                <input type="text" name="racine_compte_client" value="{{ old('racine_compte_client', $societe->racine_compte_client ?? '411') }}"
+                       class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs focus:ring-purple-500 focus:border-purple-500">
+            </div>
+        </div>
+        <p class="mt-2 text-[10px] text-gray-400 italic">Ces paramètres seront utilisés pour générer vos fichiers d'écritures comptables.</p>
+    </div>
 
     {{-- FOOTER : ACTIONS DÉCALÉES EN BAS À DROITE --}}
     <div class="flex justify-end items-center gap-3 p-4 border-t bg-gray-50 dark:bg-gray-900 rounded-b-lg mt-0">

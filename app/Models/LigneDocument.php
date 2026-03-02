@@ -17,6 +17,7 @@ class LigneDocument extends Model
         'taux_tva',
         'total_ttc',
         'commentaire',
+        'societe_id',
     ];
 
 

@@ -27,6 +27,10 @@ class Societe extends Model
         'logo',
         'proprietaire_id',
         'format_numero_document',
+        'journal_ventes',
+        'compte_ventes',
+        'compte_tva',
+        'racine_compte_client',
         
     ];
         public function documents()

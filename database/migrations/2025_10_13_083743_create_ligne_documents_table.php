@@ -14,7 +14,7 @@ return new class extends Migration
     $table->id();
     $table->timestamp('created_at')->useCurrent();
     $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
-
+    $table->foreignId('societe_id')->constrained('societes')->onDelete('cascade');
     // Relation avec l'en-tête du document
     $table->unsignedBigInteger('document_id');
     $table->foreign('document_id')

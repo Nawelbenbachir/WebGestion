@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EnTeteDocument;
+use App\Models\Societe;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Produit;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
 
 class EnTeteDocumentController extends Controller
 {
@@ -97,7 +101,7 @@ class EnTeteDocumentController extends Controller
 
     
     $prochainNumero = $this->genererNumeroDocument($typeCode, $societeId);
-
+    $selectedClientId = $request->query('client_id');
     $clients = Client::where('id_societe', $societeId)->get();
     $produits = Produit::where('id_societe', $societeId)->get();
 
@@ -113,6 +117,7 @@ class EnTeteDocumentController extends Controller
         'produits'       => $produits,
         'societeId'      => $societeId,
         'prochainNumero' => $prochainNumero, 
+        'selectedClientId'=>$selectedClientId
     ]);
 
     }
@@ -199,6 +204,7 @@ class EnTeteDocumentController extends Controller
 
                     LigneDocument::create([
                         'document_id'      => $document->id,
+                        'societe_id'=>$document->societe_id,
                         'produit_id'       => $produit->id,
                         'description'      => $ligne['description'] ?? '',
                         'quantite'         => $ligne['quantite'],
@@ -331,6 +337,7 @@ class EnTeteDocumentController extends Controller
                     } else {
                         $nouvelleLigne = LigneDocument::create([
                             'document_id'      => $document->id,
+                            'societe_id'=>$document->societe_id,
                             'produit_id'       => $produit->id,
                             'description'      => $ligneData['description'] ?? '',
                             'quantite'         => $ligneData['quantite'],
@@ -380,11 +387,16 @@ class EnTeteDocumentController extends Controller
     {
         $societeId = session('current_societe_id');
         
-        // SÉCURITÉ : Récupérer et détruire le document en filtrant par la société active
+        
         $document = EnTeteDocument::where('societe_id', $societeId)->findOrFail($id);
         
         $type = $document->type_document;
-        $document->delete();
+        if ($type=='D' && $document->statut=='envoye'){
+            return back()->withErrors(['error' => 'Ce devis est déjà transformé et ne peut plus être supprimé.']);
+
+        }
+        else{
+            $document->delete();
 
         $typeReverseMap = [
             'F' => 'facture',
@@ -396,6 +408,9 @@ class EnTeteDocumentController extends Controller
         return redirect()
             ->route('documents.index', ['type' => $typeTexte]);
             // ->with('success', ucfirst($typeTexte) . ' supprimé avec succès.');
+        }
+            
+       
     }
 
    /**
@@ -480,7 +495,7 @@ class EnTeteDocumentController extends Controller
             elseif ($nouveauType === 'F' && $original->type_document === 'A') {
                 $multiplicateur = -1;
             }
-            
+
            if ($nouveauType == 'F' && $original->type_document == 'D') { 
            
             $exist = EnTeteDocument::where('devis_id', $original->id)->first();
@@ -495,7 +510,8 @@ class EnTeteDocumentController extends Controller
                 throw new \Exception("Un avoir ({$exist->code_document}) existe déjà pour cette facture.");
             }
         }
-
+            $original->statut='envoye';
+            $original->save();
             $nouveauDoc = $original->replicate();
             $nouveauDoc->devis_id = ($nouveauType == 'F') ? $original->id : null;
             $nouveauDoc->facture_id = ($nouveauType == 'A') ? $original->id : null;
@@ -541,7 +557,7 @@ class EnTeteDocumentController extends Controller
     }
 }
     public function downloadPdf($id)
-{
+    {
     $document = EnTeteDocument::with(['lignes.produit', 'client', 'societe'])->findOrFail($id);
 
     // On prépare les données pour la vue PDF
@@ -560,5 +576,77 @@ class EnTeteDocumentController extends Controller
 
     // On force le téléchargement avec le nom de la facture
     return $pdf->download($libelleType . '_' . $document->code_document . '.pdf');
-}
+    }
+    public function exportCompta()
+    {
+        $societeId = session('current_societe_id');
+        $societe = Societe::findOrFail($societeId);
+
+        // On récupère les factures (F) et Avoirs (A) validés
+        $documents = EnTeteDocument::where('societe_id', $societeId)
+            ->whereIn('type_document', ['F', 'A'])
+            ->where('statut', '!=', 'brouillon')
+            ->with('client')
+            ->get();
+
+        return new StreamedResponse(function() use ($documents, $societe) {
+            $handle = fopen('php://output', 'w');
+            
+            // UTF-8 BOM pour qu'Excel (français) ne casse pas les accents
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // Entêtes attendues par les comptables
+            fputcsv($handle, ['Journal', 'Date', 'Compte', 'Nom Compte', 'Libellé', 'Débit', 'Crédit', 'Référence'], ';');
+
+            foreach ($documents as $doc) {
+                $isAvoir = ($doc->type_document == 'A');
+                $date = Carbon::parse($doc->date_document)->format('d/m/Y');
+                $ref = $doc->code_document;
+                $nomClient = $doc->client_nom;
+
+                // Génération du compte client (ex: 411 + 6 premières lettres)
+                $compteClient = $societe->racine_compte_client . strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $nomClient), 0, 6));
+
+                // --- LIGNE 1 : COMPTE CLIENT (TTC) ---
+                fputcsv($handle, [
+                    $societe->journal_ventes,
+                    $date,
+                    $compteClient,
+                    $nomClient,
+                    "Facture $ref",
+                    $isAvoir ? 0 : $doc->total_ttc,
+                    $isAvoir ? $doc->total_ttc : 0,
+                    $ref
+                ], ';');
+
+                // --- LIGNE 2 : COMPTE DE VENTE (HT) ---
+                fputcsv($handle, [
+                    $societe->journal_ventes,
+                    $date,
+                    $societe->compte_ventes,
+                    'Ventes de marchandises',
+                    $isAvoir ? $doc->total_ht : 0,
+                    $isAvoir ? 0 : $doc->total_ht,
+                    $ref
+                ], ';');
+
+                // --- LIGNE 3 : COMPTE DE TVA ---
+                if ($doc->total_tva > 0) {
+                    fputcsv($handle, [
+                        $societe->journal_ventes,
+                        $date,
+                        $societe->compte_tva,
+                        'TVA collectée',
+                        $isAvoir ? $doc->total_tva : 0,
+                        $isAvoir ? 0 : $doc->total_tva,
+                        $ref
+                    ], ';');
+                }
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="export_compta_' . date('Y-m-d') . '.csv"',
+        ]);
+    }
 }

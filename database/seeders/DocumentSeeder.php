@@ -116,6 +116,7 @@ class DocumentSeeder extends Seeder
                                 'prix_unitaire_ht' => $prixHT,
                                 'taux_tva'         => $tauxTva,
                                 'total_ttc'        => round($ligneHT + $ligneTVA, 2),
+                                'societe_id'=>$document->societe_id,
                             ]);
                             
                             $totalHTGlobal += $ligneHT;

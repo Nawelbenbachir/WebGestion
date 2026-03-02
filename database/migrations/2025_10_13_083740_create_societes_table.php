@@ -26,11 +26,17 @@ return new class extends Migration
             $table->string('pays')->default('France');
             $table->string('iban',34)->nullable();
             $table->string('swift',11)->nullable();
+            $table->string('journal_ventes', 10)->default('VT');
+            $table->string('compte_ventes', 20)->default('707000');
+            $table->string('compte_tva', 20)->default('445710');
+            $table->string('racine_compte_client', 20)->default('411');
             $table->string('tva')->nullable();
             $table->string('logo')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
             $table->string('format_numero_document')->default('simple');
+           
+    
             
         });
     }

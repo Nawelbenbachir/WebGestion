@@ -35,6 +35,8 @@ class DashboardComposer
                 'devis_count'=>0,
                 'factures_count'=>0,
                 'avoirs_count'=>0,
+                'low_stock_products'=>collect(),
+                'low_stock_count'=>0,
            
             ]);
             return;
@@ -91,6 +93,10 @@ class DashboardComposer
                                     $query->where('societe_id', $currentSocieteId);
                                 })
                                 ->count();
+        $low_stock_products = Produit::where('id_societe', $currentSocieteId)
+            ->where('qt_stock', '<=', 2)
+            ->orderBy('qt_stock', 'asc')
+            ->get();
         // On transmet les variables à la vue
         $view->with([
             'monthly_ca' => $monthly_ca,
@@ -104,6 +110,9 @@ class DashboardComposer
             'avoirs_count'=>$avoirs_count,
             'clients_count'=>$clients_count,
             'reglements_count'=>$reglements_count,
+            'low_stock_products'=>$low_stock_products,
+            'low_stock_count'=>$low_stock_products->count(),
+
         ]);
     }
 }

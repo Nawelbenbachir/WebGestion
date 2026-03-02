@@ -83,6 +83,34 @@
             </div>
         </div>
     </div>
+            {{-- NOUVELLE SECTION : COMPTABILITÉ --}}
+        <div class="md:col-span-12 mt-4 space-y-3 p-3 bg-purple-50/30 dark:bg-purple-900/10 rounded-lg border border-purple-100 dark:border-purple-900/30">
+            <h3 class="font-bold text-purple-600 dark:text-purple-400 uppercase text-xs tracking-wider">Configuration Comptable (Export)</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-medium dark:text-gray-400">Journal des Ventes</label>
+                    <input type="text" name="journal_ventes" value="{{ old('journal_ventes', $societe->journal_ventes ?? 'VT') }}" 
+                        class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono uppercase text-xs" placeholder="VT">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium dark:text-gray-400">Compte Ventes (HT)</label>
+                    <input type="text" name="compte_ventes" value="{{ old('compte_ventes', $societe->compte_ventes ?? '707000') }}" 
+                        class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs" placeholder="707000">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium dark:text-gray-400">Compte TVA</label>
+                    <input type="text" name="compte_tva" value="{{ old('compte_tva', $societe->compte_tva ?? '445710') }}" 
+                        class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs" placeholder="445710">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium dark:text-gray-400">Racine Compte Client</label>
+                    <input type="text" name="racine_compte_client" value="{{ old('racine_compte_client', $societe->racine_compte_client ?? '411') }}" 
+                        class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs" placeholder="411">
+                </div>
+            </div>
+            <p class="text-[10px] text-gray-500 italic">Ces codes seront utilisés pour générer vos exports comptables automatiques.</p>
+        </div>
 
     {{-- FOOTER : ACTIONS --}}
     <div class="flex justify-end items-center gap-3 p-4 border-t bg-gray-50 dark:bg-gray-900 rounded-b-lg">
