@@ -2,8 +2,20 @@
     <x-slot name="navigation">
         <x-navigation></x-navigation>
     </x-slot>
-
-    
+    @php
+        $modeLabels = [
+            'carte'    => 'Carte bancaire',
+            'espece'   => 'Espèces',
+            'cheque'   => 'Chèque',
+            'virement' => 'Virement'
+        ];
+        $modeStyles = [
+            'carte'    => 'bg-blue-100 text-blue-800',
+            'espece'   => 'bg-green-100 text-green-800',
+            'cheque'   => 'bg-orange-100 text-amber-800',
+            'virement' => 'bg-purple-100 text-purple-800'
+        ];
+    @endphp
     <x-layouts.table createRoute="reglements.create" createLabel="Nouveau Règlement">
         
         @if(session('success'))
@@ -21,29 +33,33 @@
             <table class="min-w-full border-separate border-spacing-0">
                 <thead>
                     <tr class="bg-gray-50/50 dark:bg-gray-700/50">
+                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Référence</th>
                         <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase">Numéro</th>
                         <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Date</th>
                         <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Client</th>
                         <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase">Code document</th>
                         <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Total TTC</th>
-                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Reférence</th>
+                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Mode de règlement</th>
+                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase">Commentaire</th>
 
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @foreach($reglements as $reglement)
                         <tr data-id="{{ $reglement->id }}" 
-                            
+                            x-show="isMatch($el)"
                             class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
-
+                            <td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">
+                                {{ $reglement->reference}}
+                            </td>
                             <td class="px-6 py-4 text-center font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
                                 {{ $reglement->numero_reglement }}
                             </td>
-                            <td class="px-6 py-4 text-center font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            <td class="px-6 py-4 text-left font-mono text-sm font-semibold text-gray-600 dark:text-gray-400">
                                 {{ $reglement->date_reglement }}
                             </td>
                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $reglement->document->client_nom}}
+                                {{ $reglement->document->client->societe}}
                             </td>
                              <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
                                 {{ $reglement->document->code_document}}
@@ -51,8 +67,13 @@
                             <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {{ number_format($reglement->montant, 2, ',', ' ') }} €
                             </td>
-                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $reglement->reference}}
+                            <td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $modeStyles[$reglement->mode_reglement] ?? 'bg-gray-100' }}">
+                                    {{ $modeLabels[$reglement->mode_reglement] ?? $reglement->mode_reglement }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
+                                {{ $reglement->commentaire}}
                             </td>
                         </tr>
                    @endforeach

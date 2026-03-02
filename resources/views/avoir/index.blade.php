@@ -38,6 +38,7 @@
                         @endphp
                         <tr data-id="{{ $document->id }}" 
                             data-route="documents"
+                            x-show="isMatch($el)"
                             class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
                             
                             <td class="px-6 py-4 text-center whitespace-nowrap">
@@ -74,6 +75,16 @@
                                             <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2.25 2.25 0 113.182 3.182L11.818 13H8v-3.818l8.773-8.773z" />
                                         </svg>
                                     </button>
+                                    @if($document->solde != 0)
+                                        <button type="button"
+                                        onclick="event.stopPropagation(); openModal('{{ route('reglements.create', ['document_id' => $document->id, 'client_id' => $document->client_id]) }}')"
+                                        class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
+                                        title="Enregistrer un règlement">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                             

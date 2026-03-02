@@ -1,7 +1,7 @@
 <form id="reglements-create-form" action="{{ route('reglements.store') }}" method="POST" class="text-sm"
       x-data="{ 
-        selectedClient: '',
-        selectedDocs: [],
+        selectedClient: '{{ $preselectedClientId ?? '' }}',
+        selectedDocs: [ {{ $preselectedDocId ? $preselectedDocId : '' }} ].filter(n => n),
         search: '',
         allIds: {{ $documents->pluck('id') }}, {{-- On récupère tous les IDs via PHP --}}
     
@@ -32,7 +32,7 @@
     <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-t-lg border-b dark:border-gray-700 space-y-4">
         <h3 class="font-bold text-emerald-600 dark:text-emerald-400 uppercase text-xs">Informations du règlement</h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-medium mb-1">Client</label>
                 <select name="client_id" 
@@ -45,29 +45,36 @@
                     @endforeach
                 </select>
             </div>
-
-            <div>
-                <label class="block text-xs font-medium mb-1">N° de Règlement</label>
-                <input type="text" value="{{ $prochainNumero }}" readonly
-                       class="w-full rounded border-gray-200 bg-gray-100 dark:bg-gray-700 px-3 py-2 font-mono text-gray-500">
-            </div>
-
             <div>
                 <label class="block text-xs font-medium mb-1">Date Règlement</label>
                 <input type="date" name="date_reglement" value="{{ date('Y-m-d') }}"
                        class="w-full rounded border-gray-300 dark:bg-gray-800 px-3 py-2">
             </div>
+           <div>
+                <label for="reference" class="block text-xs font-medium mb-1">Référence</label>
+                <input type="text" 
+                    id="reference" 
+                    name="reference" 
+                    value="{{ old('reference') }}"
+                    placeholder="ex: Chèque n°12345"
+                    class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-4 py-2">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">N° de Règlement</label>
+                <input type="text" value="{{ $prochainNumero }}" readonly
+                       class="w-full rounded border-gray-200 bg-gray-100 dark:bg-gray-700 px-3 py-2 font-mono text-gray-500">
+            </div>
+            
         </div>
         <div>
                 <x-input-label for="mode_reglement" value="Mode de règlement"/>
-                <select id="mode_reglement" name="mode_reglement"
-                        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
-                    <option value="">-- Sélectionner --</option>
-                    <option value="carte" @selected(old('mode_reglement')=='carte')>Carte bancaire</option>
-                    <option value="espece" @selected(old('mode_reglement')=='espece')>Espèces</option>
-                    <option value="cheque" @selected(old('mode_reglement')=='cheque')>Chèque</option>
-                    <option value="virement" @selected(old('mode_reglement')=='virement')>Virement</option>
-
+                <select id="mode_reglement" name="mode_reglement" required
+                    class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
+                   
+                    <option value="virement" @selected(old('mode_reglement', 'virement') == 'virement')>Virement</option>
+                    <option value="carte" @selected(old('mode_reglement') == 'carte')>Carte bancaire</option>
+                    <option value="espece" @selected(old('mode_reglement') == 'espece')>Espèces</option>
+                    <option value="cheque" @selected(old('mode_reglement') == 'cheque')>Chèque</option>
                 </select>
                 @error('mode_reglement')
                     <p class="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">

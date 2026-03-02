@@ -29,10 +29,10 @@ class EnTeteDocumentController extends Controller
                 ->with('error', 'Veuillez sélectionner une société de travail pour afficher les documents.');
         }
 
-        // 2. Détermination du type (Priorité au paramètre de route, sinon fallback sur query string)
+        
         $type = $type ?? $request->get('type', 'devis');
 
-        // 3. Mapping des codes pour la base de données
+       
         $typeMap = [
             'facture' => 'F',
             'devis'   => 'D',
@@ -41,7 +41,7 @@ class EnTeteDocumentController extends Controller
 
         $typeCode = $typeMap[$type] ?? 'D';
 
-        // 4. Récupération filtrée des documents
+        
         $documents = EnTeteDocument::with(['societe', 'client'])
             ->where('type_document', $typeCode)
             ->where('societe_id', $societeId)
@@ -49,19 +49,17 @@ class EnTeteDocumentController extends Controller
             ->orderBy('code_document', 'desc')
             ->get();
 
-        // 5. Sélection de la vue dynamique
+       
         $view = match ($type) {
             'facture' => 'facture.index',
             'avoir'   => 'avoir.index',
-            default   => 'devis.index', // Par défaut pour 'devis' ou autre
+            default   => 'devis.index',
         };
         
         return view($view, compact('documents', 'type'));
     }
 
-    /**
-     * Affiche un document précis selon son type
-     */
+    
     public function show($id)
     {
         $societeId = session('current_societe_id');
@@ -465,73 +463,83 @@ class EnTeteDocumentController extends Controller
     }
 
     public function dupliquerDocument($id, $nouveauType, $messageSucces="Opération réussie")
-    {
-        try {
-            return DB::transaction(function () use ($id, $nouveauType, $messageSucces) {
-                
-                $original = EnTeteDocument::find($id);
-                if (!$original) {
-                    throw new \Exception("Document source introuvable.");
-                }
-                $multiplicateur = ($nouveauType === 'A') ? -1 : 1;
+{
+    try {
+        //  On effectue les opérations en base
+        $nouveauDoc = DB::transaction(function () use ($id, $nouveauType) {
+            
+            $original = EnTeteDocument::findOrFail($id);
+            $societeId = session('current_societe_id');
+            $multiplicateur = 1;
 
-                // Vérification si la transformation a déjà eu lieu
-                if ($nouveauType == 'F') {
-                    $exist = EnTeteDocument::where('devis_id', $original->id)->first();
-                    if ($exist) throw new \Exception("Une facture ({$exist->code_document}) existe déjà pour ce devis.");
-                } elseif ($nouveauType == 'A') {
-                    $exist = EnTeteDocument::where('facture_id', $original->id)->first();
-                    if ($exist) throw new \Exception("Un avoir ({$exist->code_document}) existe déjà pour cette facture.");
-                }
-                $societeId = session('current_societe_id');
-                $nouveauDoc = $original->replicate();
-                $nouveauDoc->type_document = $nouveauType;
-                $nouveauDoc->date_document = now();
-                $nouveauDoc->statut = 'brouillon';
-                $nouveauDoc->total_ht = $original->total_ht * $multiplicateur;
-                $nouveauDoc->total_tva = $original->total_tva * $multiplicateur;
-                $nouveauDoc->total_ttc = $original->total_ttc * $multiplicateur;
-                
-                // Appel de la nouvelle logique de numérotation
-                $nouveauDoc->code_document = $this->genererNumeroDocument($nouveauType, $societeId);
+            // Cas spécifique : On crée un Avoir à partir d'une Facture (Inversion)
+            if ($nouveauType === 'A' && $original->type_document !== 'A') {
+                $multiplicateur = -1;
+            } 
+            // Cas spécifique : On crée une Facture à partir d'un Avoir (Ré-inversion)
+            elseif ($nouveauType === 'F' && $original->type_document === 'A') {
+                $multiplicateur = -1;
+            }
+            
+           if ($nouveauType == 'F' && $original->type_document == 'D') { 
+           
+            $exist = EnTeteDocument::where('devis_id', $original->id)->first();
+            if ($exist) {
+                throw new \Exception("Une facture ({$exist->code_document}) existe déjà pour ce devis.");
+            }
+        } 
+        elseif ($nouveauType == 'A' && $original->type_document == 'F') {
+            
+            $exist = EnTeteDocument::where('facture_id', $original->id)->first();
+            if ($exist) {
+                throw new \Exception("Un avoir ({$exist->code_document}) existe déjà pour cette facture.");
+            }
+        }
 
-                // Liaisons
-                if ($nouveauType == 'F') {
-                    $nouveauDoc->devis_id = $original->id;
-                } elseif ($nouveauType == 'A') {
-                    $nouveauDoc->facture_id = $original->id;
-                }
+            $nouveauDoc = $original->replicate();
+            $nouveauDoc->devis_id = ($nouveauType == 'F') ? $original->id : null;
+            $nouveauDoc->facture_id = ($nouveauType == 'A') ? $original->id : null;
+            $nouveauDoc->type_document = $nouveauType;
+            $nouveauDoc->date_document = now();
+            $nouveauDoc->statut = 'brouillon';
+            $nouveauDoc->total_ht = $original->total_ht * $multiplicateur;
+            $nouveauDoc->total_tva = $original->total_tva * $multiplicateur;
+            $nouveauDoc->total_ttc = $original->total_ttc * $multiplicateur;
+            $nouveauDoc->solde = $original->total_ttc * $multiplicateur;
+            
+            // Numérotation
+            $nouveauDoc->code_document = $this->genererNumeroDocument($nouveauType, $societeId);
 
-                if (!$nouveauDoc->save()) {
-                    throw new \Exception("Erreur lors de la création de l'en-tête.");
-                }
+            $nouveauDoc->save();
 
-                // Duplication des lignes
-                $lignes = LigneDocument::where('document_id', $original->id)->get();
-                foreach ($lignes as $ligne) {
-                    $nouvelleLigne = $ligne->replicate();
-                    $nouvelleLigne->document_id = $nouveauDoc->id;
-                    $nouvelleLigne->prix_unitaire_ht = $ligne->prix_unitaire_ht * $multiplicateur;
-                    $nouvelleLigne->total_ttc = $ligne->total_ttc * $multiplicateur;
-                    $nouvelleLigne->save();
-                }
+            // Duplication des lignes
+            $lignes = LigneDocument::where('document_id', $original->id)->get();
+            foreach ($lignes as $ligne) {
+                $nouvelleLigne = $ligne->replicate();
+                $nouvelleLigne->document_id = $nouveauDoc->id;
+                $nouvelleLigne->prix_unitaire_ht = $ligne->prix_unitaire_ht * $multiplicateur;
+                $nouvelleLigne->total_ttc = $ligne->total_ttc * $multiplicateur;
+                $nouvelleLigne->save();
+            }
 
-                // Déterminer la route de destination selon le nouveau type
-                    $routeName = match($nouveauType) {
-                        'D' => 'devis.index',
-                        'F' => 'factures.index',
-                        'A' => 'avoirs.index',
-                        default => 'documents.index',
-                    };
+            return $nouveauDoc; 
+        });
+
+       
+        $routeName = match($nouveauDoc->type_document) {
+            'D' => 'devis.index',
+            'F' => 'factures.index',
+            'A' => 'avoirs.index',
+            default => 'documents.index',
+        };
 
         return redirect()->route($routeName)->with('success', $messageSucces);
-                    });
 
-        } catch (\Exception $e) {
-            Log::error("Erreur duplication : " . $e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
-        }
+    } catch (\Exception $e) {
+        Log::error("Erreur duplication : " . $e->getMessage());
+        return redirect()->back()->with('error', $e->getMessage());
     }
+}
     public function downloadPdf($id)
 {
     $document = EnTeteDocument::with(['lignes.produit', 'client', 'societe'])->findOrFail($id);

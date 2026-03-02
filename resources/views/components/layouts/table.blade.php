@@ -1,31 +1,63 @@
 
-
-   @props([
-'createRoute' => null,
-'createLabel' => 'Ajouter',
-'hideModal' => false,
+@props([
+    'createRoute' => null,
+    'createLabel' => 'Ajouter',
+    'hideModal' => false,
 ])
 
-<div class="w-full p-6">
+<div class="w-full p-6" x-data="{ 
+    search: '',
+    // Cette fonction vérifie si une ligne contient le texte recherché
+    isMatch(el) {
+        if (!this.search) return true;
+        return el.innerText.toLowerCase().includes(this.search.toLowerCase());
+    }
+}">
 
-{{-- En-tête : titre + boutons --}}
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+   <div class="flex flex-col items-start mb-6 gap-4">
+    
+  
     @if($createRoute)
-        <div class="flex gap-3">
-            <x-primary-button
-                type="button"
-                onclick="openModal('{{ route($createRoute) }}{{ request('type') ? '?type=' . request('type') : '' }}')"
-                class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all">
-                {{ $createLabel }}
-            </x-primary-button>
-        </div>
+        <x-primary-button
+            type="button"
+            onclick="openModal('{{ route($createRoute) }}{{ request('type') ? '?type=' . request('type') : '' }}')"
+            class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all px-5 py-2.5 rounded-xl whitespace-nowrap">
+            {{ $createLabel }}
+        </x-primary-button>
     @endif
+
+    <div class="relative w-full max-w-md">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </span>
+        <input 
+            x-model="search" 
+            type="text" 
+            placeholder="Rechercher dans le tableau..." 
+            class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+        >
+        <button x-show="search.length > 0" @click="search = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+        </button>
+    </div>
+
 </div>
 
-{{-- Tableau --}}
-<div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-x-auto w-full border border-gray-100 dark:border-gray-700">
-    {{ $slot }}
-</div>
+       
+
+    {{-- Conteneur du Tableau --}}
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden w-full border border-gray-100 dark:border-gray-700">
+        {{ $slot }}
+    </div>
+
+    {{-- Message "Aucun résultat" --}}
+    <div x-show="search !== ''" x-cloak class="mt-4">
+        <p class="text-sm text-gray-500 italic" x-text="'Résultats pour : ' + search"></p>
+    </div>
+
+    {{-- ... (le reste de ton code Modal et Scripts est identique) ... --}}
 
 @if (!$hideModal)
 {{-- Modal unique pour create/edit --}}
@@ -51,9 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     rows.forEach(row => {
-        // 1. Gestion du clic simple pour la SÉLECTION visuelle
+        // Gestion du clic simple pour la SÉLECTION visuelle
         row.addEventListener('click', (e) => {
-            // MODIFICATION ICI : On vérifie si on clique sur un bouton, un lien, un formulaire OU un élément à l'intérieur (svg, path, etc.)
+            
             if (e.target.closest('button, a, form, input, select')) {
                 return; 
             }
@@ -64,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.classList.add('bg-blue-50', 'dark:bg-blue-900/20', 'selected-row');
         });
 
-        // 2. Gestion du double-clic pour l'ÉDITION
+        //  Gestion du double-clic pour l'ÉDITION
         row.addEventListener('dblclick', (e) => {
             if (e.target.closest('button, a, form, input, select')) return;
 
@@ -76,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. Clic sur les boutons d'édition (crayon)
+    //  Clic sur les boutons d'édition (crayon)
     document.querySelectorAll('[data-edit-url]').forEach(btn => {
         btn.addEventListener('click', e => {
             e.stopPropagation(); 
@@ -156,14 +188,14 @@ function initDevisForm(container) {
     const datalist = container.querySelector('#produits');
     if (!tbody || !datalist) return;
 
-    // --- 1. FONCTION POUR LE SIGNE (+ ou -) ---
+    // ---  FONCTION POUR LE SIGNE (+ ou -) ---
     // On la place ici pour qu'elle soit accessible partout dans initDevisForm
     const getMultiplicateur = () => {
         const typeField = container.querySelector('input[name="type_document"]');
         return (typeField && typeField.value === 'avoir') ? -1 : 1;
     };
 
-    // --- 2. FONCTION DE CALCUL DES TOTAUX ---
+    // ---  FONCTION DE CALCUL DES TOTAUX ---
     const updateTotals = () => {
         let totalHT = 0, totalTVA = 0, totalTTC = 0;
         const m = getMultiplicateur(); 
@@ -208,7 +240,7 @@ function initDevisForm(container) {
         if(container.querySelector('#total_ttc')) container.querySelector('#total_ttc').value = (totalTTC * m).toFixed(2);
     };
 
-    // --- 3. GESTION DU CHOIX DE PRODUIT ET QUANTITÉ ---
+    // --- GESTION DU CHOIX DE PRODUIT ET QUANTITÉ ---
     tbody.addEventListener('input', e => {
         if (e.target.classList.contains('produit-input')) {
             const val = e.target.value;
@@ -228,7 +260,7 @@ function initDevisForm(container) {
         }
     });
 
-    // --- 4. AJOUT ET SUPPRESSION DE LIGNES ---
+    // ---  AJOUT ET SUPPRESSION DE LIGNES ---
     tbody.addEventListener('click', e => {
         if (e.target.closest('.removeRow')) {
             const rows = tbody.querySelectorAll('tr');

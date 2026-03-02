@@ -18,6 +18,7 @@ class ReglementController extends Controller
         $societeId=session('current_societe_id');
         $reglements = Reglement::with('document')
         ->where('societe_id', $societeId)
+        ->orderby('numero_reglement','desc')
         ->get();
         return view('reglements.index', compact('reglements'));
     }
@@ -25,7 +26,7 @@ class ReglementController extends Controller
     /**
      * Formulaire de création d’un règlement
      */
-    public function create()
+    public function create(Request $request)
     {
         $societeId=session('current_societe_id');
         $documents = EnTeteDocument::where('statut','!=','paye')
@@ -38,7 +39,15 @@ class ReglementController extends Controller
         $clients=Client::where('id_societe', $societeId)
         ->get();
         $prochainNumero=$this->genererNumeroReglement($societeId);
-        return view('reglements.create', compact('documents','clients','prochainNumero'));
+        $preselectedClientId = $request->query('client_id');
+        $preselectedDocId = $request->query('document_id');
+        return view('reglements.create',compact(
+        'clients', 
+        'documents', 
+        'prochainNumero', 
+        'preselectedClientId', 
+        'preselectedDocId'
+        ));
     }
 
   public function store(Request $request)
@@ -67,7 +76,7 @@ class ReglementController extends Controller
                     ->where('client_id', $request->client_id)
                     ->first();
 
-                if ($document && $document->solde > 0) {
+                if ($document && $document->solde != 0) {
                     // On construit le numéro manuellement : Départ + Nombre de docs déjà traités
                     $numero = $this->formaterNumeroFinal($societeId, $compteurDepart + $nbCrees);
 
@@ -79,6 +88,8 @@ class ReglementController extends Controller
                         'mode_reglement'   => $request->mode_reglement,
                         'montant'          => $document->solde,
                         'date_reglement'   => $request->date_reglement,
+                        'reference'=>$request->reference,
+                        'commentaire'=>$request->commentaire,
                     ]);
 
                     $document->update(['solde' => 0, 'statut' => 'paye']);
@@ -127,9 +138,6 @@ class ReglementController extends Controller
             ->with('success', 'Règlement mis à jour avec succès.');
     }
 
-    /**
-     * Suppression d’un règlement
-     */
     public function destroy($id)
     {
         $reglement = Reglement::findOrFail($id);

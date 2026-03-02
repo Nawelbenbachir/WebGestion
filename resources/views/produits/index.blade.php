@@ -37,6 +37,7 @@
                     @foreach ($produits as $produit)
                         <tr data-id="{{ $produit->id }}" 
                             data-route="produits" 
+                            x-show="isMatch($el)"
                             class="group cursor-pointer hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
                             
                             <td class="px-6 py-4 whitespace-nowrap text-center">
