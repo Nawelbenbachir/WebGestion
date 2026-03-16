@@ -16,7 +16,7 @@
             
         ];
     @endphp
-      <div>
+      <div >
             <form action="{{ route('export.compta') }}" method="GET" class="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div class="flex items-center gap-1">
                     <select name="mois"  class="text-xs border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-purple-500">

@@ -187,56 +187,53 @@
         </h3>
         
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Code</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Client</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Montant TTC</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            {{-- Boucle sur les factures injectées par le View Composer --}}
-                            @forelse ($latestInvoices as $invoice)
-                                <tr class="hover:bg-gray-700 transition duration-150">
-                                    
-                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
-                                        <a href="{{ route('documents.show', $invoice->id) }}" class="text-indigo-400 hover:text-indigo-300">
-                                            {{ $invoice->code_document }}
-                                        </a>
-                                    </td>
-                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
-                                        {{ $invoice->client->nom ?? 'N/A' }} 
-                                    </td>
-                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300">
-                                        {{ date('d/m/Y', strtotime($invoice->date_document)) }}
-                                    </td>
-                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-300 text-right font-semibold">
-                                        {{ number_format($invoice->total_ttc ?? 0, 2, ',', ' ') }}
-                                    </td>
-                                    <td class="px-4 py-2 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            @if($invoice->statut == 'paye') bg-green-800 text-green-200
-                                            @elseif($invoice->statut == 'impaye') bg-red-800 text-red-200
-                                            @else bg-yellow-800 text-gray-400
-                                            @endif">
-                                            {{ Str::ucfirst($invoice->statut) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-4 py-4 text-center text-sm text-gray-400">
-                                        Aucune facture récente trouvée.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Montant TTC</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Statut</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            @forelse ($latestInvoices as $invoice)
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150">
+                    <td class="px-4 py-2 whitespace-nowrap text-sm">
+                        <a href="{{ route('documents.show', $invoice->id) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">
+                            {{ $invoice->code_document }}
+                        </a>
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {{ $invoice->client->nom ?? 'N/A' }}
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        {{ date('d/m/Y', strtotime($invoice->date_document)) }}
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 text-right font-semibold">
+                        {{ number_format($invoice->total_ttc ?? 0, 2, ',', ' ') }}
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            @if($invoice->statut == 'paye') bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200
+                            @elseif($invoice->statut == 'impaye') bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200
+                            @else bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200
+                            @endif">
+                            {{ Str::ucfirst($invoice->statut) }}
+                        </span>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Aucune facture récente trouvée.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 
             <div class="lg:col-span-1 bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center">

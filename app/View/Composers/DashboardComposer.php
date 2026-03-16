@@ -94,7 +94,7 @@ class DashboardComposer
                                 })
                                 ->count();
         $low_stock_products = Produit::where('id_societe', $currentSocieteId)
-            ->where('qt_stock', '<=', 2)
+            ->where('qt_stock', '<=', 5)
             ->orderBy('qt_stock', 'asc')
             ->get();
         // On transmet les variables à la vue
