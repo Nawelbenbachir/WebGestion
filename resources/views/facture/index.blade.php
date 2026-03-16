@@ -19,7 +19,7 @@
       <div>
             <form action="{{ route('export.compta') }}" method="GET" class="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div class="flex items-center gap-1">
-                    <select name="mois" class="text-xs border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-purple-500">
+                    <select name="mois"  class="text-xs border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-purple-500">
                         @foreach(range(1, 12) as $m)
                             <option value="{{ sprintf('%02d', $m) }}" {{ date('m') == $m ? 'selected' : '' }}>
                                 {{ Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
@@ -38,7 +38,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Exporter
+                    Exporter les factures et avoirs
                 </button>
             </form>
         </div>
@@ -67,7 +67,8 @@
                         <th class="px-6 py-4 border-b text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Client</th>
                         <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total TTC</th>
                         <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Solde</th>
-                         <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-4 border-b text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-4 border-b text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Exporté</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -187,6 +188,17 @@
                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $modeStyles[$document->statut] ?? 'bg-gray-100' }}">
                                     {{ $Etat[$document->statut] ?? $document->statut }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                @if ($document->exporte)
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

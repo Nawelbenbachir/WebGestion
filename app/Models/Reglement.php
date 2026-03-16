@@ -16,7 +16,9 @@ class Reglement extends Model
         'reference',
         'commentaire',
         'client_id',
-        'societe_id'
+        'societe_id',
+        'exporte',
+        'date_export',
     ];
 
      public function document()

@@ -46,6 +46,8 @@ return new class extends Migration
             $table->date('date_validite')->nullable();
             $table->text('commentaire')->nullable();
             $table->enum('statut', ['brouillon', 'envoye', 'paye'])->default('brouillon');
+            $table->boolean('exporte')->default(false);
+            $table->timestamp('date_export')->nullable();
         });
     }
 

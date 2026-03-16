@@ -2,7 +2,32 @@
     <x-slot name="navigation">
         <x-navigation></x-navigation>
     </x-slot>
+    <div>
+            <form action="{{ route('export.compta') }}" method="GET" class="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="flex items-center gap-1">
+                    <select name="mois"  class="text-xs border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-purple-500">
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ sprintf('%02d', $m) }}" {{ date('m') == $m ? 'selected' : '' }}>
+                                {{ Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                    
+                    <select name="annee" class="text-xs border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-purple-500">
+                        @foreach(range(date('Y')-2, date('Y')+1) as $a)
+                            <option value="{{ $a }}" {{ date('Y') == $a ? 'selected' : '' }}>{{ $a }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
+                <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg transition-all shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Exporter les factures et avoirs
+                </button>
+            </form>
+    </div>
     <x-layouts.table createRoute="documents.create" createLabel="Nouvel Avoir">
         
         @if(session('success'))

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class LigneDocument extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
         'document_id',
         'produit_id',

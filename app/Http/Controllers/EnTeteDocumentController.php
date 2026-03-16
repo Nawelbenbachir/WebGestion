@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EnTeteDocument;
 use App\Models\Societe;
+use App\Models\ActiviteLog;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Produit;
@@ -18,14 +19,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 
+
+
 class EnTeteDocumentController extends Controller
 {
-    /**
-     * Affiche la liste des documents (filtrés par type et par société active).
-     */
    public function index(Request $request, $type = null)
     {
-        // 1. Récupération de la société active
+        //  Récupération de la société active
         $societeId = session('current_societe_id');
 
         if (!$societeId) {
@@ -212,6 +212,9 @@ class EnTeteDocumentController extends Controller
                         'taux_tva'         => $ligne['taux_tva'],
                         'total_ttc'        => $ligne['total_ttc'],
                     ]);
+                     if ($typeCode === 'F') {
+                            $produit->decrement('qt_stock', $ligne['quantite']);
+                    }
                 }
 
                 return redirect()
@@ -298,6 +301,7 @@ class EnTeteDocumentController extends Controller
             DB::beginTransaction();
 
             // Mise à jour de l'en-tête
+           
             $document->update([
                 'date_document' => $validated['date_document'],
                 'date_validite' => $validated['date_validite'] ?? null,
@@ -323,6 +327,9 @@ class EnTeteDocumentController extends Controller
 
                     if (isset($ligneData['id']) && !empty($ligneData['id'])) {
                         $ligne = LigneDocument::find($ligneData['id']);
+                        $ancienneQuantite = $ligne->quantite;
+                        $nouvelleQuantite = $ligneData['quantite'];
+                        $diff = $nouvelleQuantite - $ancienneQuantite;
                         if ($ligne) {
                             $ligne->update([
                                 'produit_id'       => $produit->id, 
@@ -332,6 +339,9 @@ class EnTeteDocumentController extends Controller
                                 'taux_tva'         => $ligneData['taux_tva'],
                                 'total_ttc'        => $ligneData['total_ttc'],
                             ]);
+                            if ($document->type_document === 'F') {
+                                $produit->decrement('qt_stock', $diff); // peut être négatif = réincrémente
+                            }
                             $ligneIdsFormulaire[] = $ligne->id;
                         }
                     } else {
@@ -345,13 +355,22 @@ class EnTeteDocumentController extends Controller
                             'taux_tva'         => $ligneData['taux_tva'],
                             'total_ttc'        => $ligneData['total_ttc'],
                         ]);
+                        if ($document->type_document === 'F') {
+                            $produit->decrement('qt_stock', $ligneData['quantite']);
+                        }
                         $ligneIdsFormulaire[] = $nouvelleLigne->id;
                     }
                 }
             }
 
-            // Supprimer les lignes retirées du formulaire
+            if ($document->type_document === 'F') {
+                $lignesSuppr = $document->lignes()->whereNotIn('id', $ligneIdsFormulaire)->get();
+                foreach ($lignesSuppr as $ligneSuppr) {
+                    $ligneSuppr->produit->increment('qt_stock', $ligneSuppr->quantite);
+                }
+            }
             $document->lignes()->whereNotIn('id', $ligneIdsFormulaire)->delete();
+           
 
             DB::commit();
 
@@ -371,7 +390,7 @@ class EnTeteDocumentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Ceci va stopper la redirection et afficher l'erreur précise (ex: colonne manquante)
+            
     dd([
         'Message' => $e->getMessage(),
         'Fichier' => $e->getFile(),
@@ -396,6 +415,7 @@ class EnTeteDocumentController extends Controller
 
         }
         else{
+            $document->logActivite('suppression');
             $document->delete();
 
         $typeReverseMap = [
@@ -558,54 +578,76 @@ class EnTeteDocumentController extends Controller
 }
     public function downloadPdf($id)
     {
-    $document = EnTeteDocument::with(['lignes.produit', 'client', 'societe'])->findOrFail($id);
+        $document = EnTeteDocument::with(['lignes.produit', 'client', 'societe'])->findOrFail($id);
 
-    // On prépare les données pour la vue PDF
-    $data = [
-        'document' => $document,
-        'societe'  => $document->societe,
-        'client'   => $document->client,
-    ];
-    $libelleType = match ($document->type_document) {
-        'F' => 'Facture',
-        'A' => 'Avoir',
-        'D' => 'Devis',
-    };
-    // On charge une vue spécifique pour le design du PDF
-    $pdf = Pdf::loadView('pdf.documents', $data + ['libelleType' => $libelleType]);
+        // On prépare les données pour la vue PDF
+        $data = [
+            'document' => $document,
+            'societe'  => $document->societe,
+            'client'   => $document->client,
+        ];
+        $libelleType = match ($document->type_document) {
+            'F' => 'Facture',
+            'A' => 'Avoir',
+            'D' => 'Devis',
+        };
+        // On charge une vue spécifique pour le design du PDF
+        $pdf = Pdf::loadView('pdf.documents', $data + ['libelleType' => $libelleType]);
 
-    // On force le téléchargement avec le nom de la facture
-    return $pdf->download($libelleType . '_' . $document->code_document . '.pdf');
+        // On force le téléchargement avec le nom de la facture
+        return $pdf->download($libelleType . '_' . $document->code_document . '.pdf');
     }
-    public function exportCompta()
+
+
+
+    public function exportCompta(Request $request)
     {
         $societeId = session('current_societe_id');
         $societe = Societe::findOrFail($societeId);
+        $mois = $request->input('mois');
+        $annee = $request->input('annee');
 
         // On récupère les factures (F) et Avoirs (A) validés
         $documents = EnTeteDocument::where('societe_id', $societeId)
             ->whereIn('type_document', ['F', 'A'])
             ->where('statut', '!=', 'brouillon')
+            ->whereMonth('date_document', $mois)
+            ->whereYear('date_document', $annee)
             ->with('client')
             ->get();
 
+        // Log de l'export
+        ActiviteLog::create([
+            'user_id'    => auth()->id(),
+            'societe_id' => $societeId,
+            'action'     => 'export_compta',
+            'modele'     => 'EnTeteDocument',
+            'modele_id'  => 0, 
+            'donnees'    => ['mois' => $mois, 'annee' => $annee, 'nb_documents' => $documents->count()],
+        ]);
+        EnTeteDocument::whereIn('id', $documents->pluck('id'))
+        ->update(['exporte' => true, 'date_export' => now()]);
         return new StreamedResponse(function() use ($documents, $societe) {
             $handle = fopen('php://output', 'w');
             
             // UTF-8 BOM pour qu'Excel (français) ne casse pas les accents
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
             
-            // Entêtes attendues par les comptables
-            fputcsv($handle, ['Journal', 'Date', 'Compte', 'Nom Compte', 'Libellé', 'Débit', 'Crédit', 'Référence'], ';');
+            fputcsv($handle, ['Journal', 'Date', 'Compte', 'Nom Compte','Code Client','Libellé', 'Débit', 'Crédit','Numéro de TVA'], ';');
 
             foreach ($documents as $doc) {
                 $isAvoir = ($doc->type_document == 'A');
                 $date = Carbon::parse($doc->date_document)->format('d/m/Y');
                 $ref = $doc->code_document;
-                $nomClient = $doc->client_nom;
+                $nomClient = $doc->client->societe;
+                $numTVA = $doc->client->tva;
+                $codecli= $doc->client->code_cli;
+                $totalTtc = abs($doc->total_ttc);
+                $totalHt  = abs($doc->total_ht);
+                $totalTva = abs($doc->total_tva);
 
                 // Génération du compte client (ex: 411 + 6 premières lettres)
-                $compteClient = $societe->racine_compte_client . strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $nomClient), 0, 6));
+                $compteClient = $doc->client->code_comptable;
 
                 // --- LIGNE 1 : COMPTE CLIENT (TTC) ---
                 fputcsv($handle, [
@@ -613,10 +655,12 @@ class EnTeteDocumentController extends Controller
                     $date,
                     $compteClient,
                     $nomClient,
-                    "Facture $ref",
-                    $isAvoir ? 0 : $doc->total_ttc,
-                    $isAvoir ? $doc->total_ttc : 0,
-                    $ref
+                    $codecli,
+                    $ref,
+                    $isAvoir ? 0 : $totalTtc,
+                    $isAvoir ? $totalTtc : 0,
+                    $numTVA
+                    
                 ], ';');
 
                 // --- LIGNE 2 : COMPTE DE VENTE (HT) ---
@@ -624,22 +668,26 @@ class EnTeteDocumentController extends Controller
                     $societe->journal_ventes,
                     $date,
                     $societe->compte_ventes,
+                    '',
                     'Ventes de marchandises',
-                    $isAvoir ? $doc->total_ht : 0,
-                    $isAvoir ? 0 : $doc->total_ht,
-                    $ref
+                    '',
+                    $isAvoir ? $totalHt : 0,
+                    $isAvoir ? 0 : $totalHt,
+                    ''
                 ], ';');
 
                 // --- LIGNE 3 : COMPTE DE TVA ---
-                if ($doc->total_tva > 0) {
+                if ($doc->total_tva != 0) {
                     fputcsv($handle, [
                         $societe->journal_ventes,
                         $date,
                         $societe->compte_tva,
+                        '',
                         'TVA collectée',
-                        $isAvoir ? $doc->total_tva : 0,
-                        $isAvoir ? 0 : $doc->total_tva,
-                        $ref
+                        '',
+                        $isAvoir ? $totalTva : 0,
+                        $isAvoir ? 0 : $totalTva,
+                        ''
                     ], ';');
                 }
             }

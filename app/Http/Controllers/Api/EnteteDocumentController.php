@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActiviteLog;
 use Illuminate\Http\Request;
 use App\Models\EnTeteDocument; 
 use App\Http\Resources\EnteteDocumentResource;

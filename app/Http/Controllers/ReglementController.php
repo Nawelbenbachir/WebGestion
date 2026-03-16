@@ -7,6 +7,10 @@ use App\Models\EnTeteDocument;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Models\Societe;
+use App\Models\ActiviteLog;
+use Carbon\Carbon;
 
 class ReglementController extends Controller
 {
@@ -141,6 +145,9 @@ class ReglementController extends Controller
     public function destroy($id)
     {
         $reglement = Reglement::findOrFail($id);
+        if ($reglement->exporte==true) {
+            return back()->withErrors(['error' => 'Ce règlement est déjà exporté et ne peut plus être supprimé.']);
+        }
         $reglement->delete();
 
         return redirect()->route('reglements.index')
@@ -196,4 +203,73 @@ private function formaterNumeroFinal($societeId, $nombre)
     $annee = now()->format('Y');
     return "REG-{$annee}-" . str_pad($nombre, 3, '0', STR_PAD_LEFT);
 }
+
+public function exportReglements(Request $request)
+    {
+        $societeId = session('current_societe_id');
+        $societe = Societe::findOrFail($societeId);
+        $mois = $request->input('mois');
+        $annee = $request->input('annee');
+
+        // On récupère les factures (F) et Avoirs (A) validés
+       $reglements = Reglement::where('societe_id', $societeId)
+            ->whereMonth('date_reglement', $mois)
+            ->whereYear('date_reglement', $annee)
+            ->with('document.client')
+            ->get();
+
+        // Log de l'export
+        ActiviteLog::create([
+            'user_id'    => auth()->id(),
+            'societe_id' => $societeId,
+            'action'     => 'export_reglements',
+            'modele'     => 'Reglement',
+            'modele_id'  => 0, 
+            'donnees'    => ['mois' => $mois, 'annee' => $annee, 'nb_documents' => $reglements->count()],
+        ]);
+        Reglement::whereIn('id', $reglements->pluck('id'))
+        ->update(['exporte' => true, 'date_export' => now()]);
+        return new StreamedResponse(function() use ($reglements, $societe) {
+            $handle = fopen('php://output', 'w');
+            
+            // UTF-8 BOM pour qu'Excel (français) ne casse pas les accents
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            fputcsv($handle, ['Journal', 'Date', 'Compte', 'Nom Compte','Code Client','Libellé', 'Débit', 'Crédit','Numéro de TVA'], ';');
+
+            foreach ($reglements as $reg) {
+                $montant = $reg->montant;
+                $isNegatif = $montant < 0;
+                $montantAbs = abs($montant);
+                $date = Carbon::parse($reg->date_reglement)->format('d/m/Y');
+                $ref = $reg->numero_reglement;
+                $nomClient = $reg->document->client->societe;
+                $numTVA = $reg->document->client->tva;
+                $codecli= $reg->document->client->code_cli;
+
+                // Génération du compte client (ex: 411 + 6 premières lettres)
+                $compteClient = $reg->document->client->code_comptable;
+
+                // --- LIGNE 1 : COMPTE CLIENT (TTC) ---
+                fputcsv($handle, [
+                    $societe->journal_ventes,
+                    $date,
+                    $compteClient,
+                    $nomClient,
+                    $codecli,
+                    $ref,
+                    $isNegatif ? 0 : $montantAbs,  // débit
+                    $isNegatif ? $montantAbs : 0,  // crédit
+                    $numTVA
+                    
+                ], ';');
+
+                
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="export_reg_' . date('Y-m-d') . '.csv"',
+        ]);
+    }
 }

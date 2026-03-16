@@ -85,6 +85,7 @@ class ClientController extends Controller
             'complement_adresse'=> 'nullable|string',
             'code_postal'       => 'nullable|string|max:10',
             'ville'             => 'nullable|string|max:255',
+            'tva'              => 'nullable|string|max:255',
         ]);
         
         //  Ajouter l'id de la société active aux données validées
@@ -101,7 +102,7 @@ class ClientController extends Controller
         
         Client::create($validate);
 
-        return redirect()->route('clients.index')->with('success', '✅ Client ajouté avec succès.');
+        return redirect()->route('clients.index')->with('success', ' Client ajouté avec succès.');
     }
 
     /**
@@ -168,6 +169,7 @@ class ClientController extends Controller
             'complement_adresse' => 'nullable|string|max:255',
             'code_postal'       => 'nullable|string|max:10',
             'ville'             => 'nullable|string|max:255',
+            'tva'              => 'nullable|string|max:255',
         ]);
 
         $client->update($validated);
@@ -191,9 +193,11 @@ class ClientController extends Controller
             return redirect()->route('clients.index')
                 ->withErrors("Impossible de supprimer : ce client est lié à des documents.");
             }
+        else {
+            $client->logActivite('suppression');
+            $client->delete();
+        }
             
-        
-        
 
         return redirect()->route('clients.index')->with('success', ' Client supprimé avec succès.');
     }

@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\Loggable;
 
 class EnTeteDocument extends Model
 {
     use HasFactory;
+    use Loggable;
     protected $fillable = [
         'societe_id',
         'code_document',
@@ -28,6 +30,8 @@ class EnTeteDocument extends Model
         'date_validite',
         'commentaire',
         'statut',
+        'exporte',
+        'date_export',
 
     ];
     protected $casts = [

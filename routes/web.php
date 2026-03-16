@@ -12,7 +12,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('welcome');
 });
 
 Route::middleware('auth')->group(function () {
@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
     ->name('documents.duplicate');
     //route export comptable 
     Route::get('/export-compta', [EnTeteDocumentController::class, 'exportCompta'])->name('export.compta');
+    Route::get('/export-reglements', [ReglementController::class, 'exportReglements'])->name('export.reglements');
+    Route::delete('reglement/{id}/destroy', [EnTeteDocumentController::class, 'destroy'])->name('reglement.destroy');
 
     Route::prefix('factures')->group(function () {
         Route::get('/', [EnTeteDocumentController::class, 'index'])->defaults('type', 'facture')->name('factures.index');

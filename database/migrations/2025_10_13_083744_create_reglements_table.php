@@ -25,6 +25,8 @@ return new class extends Migration
             $table->decimal('montant', 10, 2)->nullable();
             $table->string('reference')->nullable(); 
             $table->text('commentaire')->nullable();
+            $table->boolean('exporte')->default(false);
+            $table->timestamp('date_export')->nullable();
 
         });
     }

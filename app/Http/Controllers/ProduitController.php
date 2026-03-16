@@ -210,8 +210,9 @@ class ProduitController extends Controller
                 ->withErrors("Impossible de supprimer : ce produit est lié à des documents.");
             
         }
+        $produit->logActivite('suppression');
         $produit->delete();
-
+       
         return redirect()->route('produits.index')->with('success', ' Produit supprimé avec succès.');
     }
 }
