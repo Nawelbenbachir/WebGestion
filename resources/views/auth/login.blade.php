@@ -10,7 +10,9 @@
             font-family: 'Instrument Sans', sans-serif;
              margin: -2rem -1rem;
         }
-        .dark .auth-container { background: #0f172a; }
+       @media (prefers-color-scheme: dark) {
+            .auth-container { background: #0f172a; }
+        }
 
         .auth-card {
             width: 100%;
@@ -21,11 +23,10 @@
             padding: 2.5rem;
             box-shadow: 0 4px 24px rgba(0,0,0,0.06);
         }
-        .dark .auth-card {
-            background: #1E293B;
-            border-color: #334155;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        @media (prefers-color-scheme: dark) {
+            .auth-card { background: #1E293B; border-color: #334155; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
         }
+
 
         .auth-logo {
             font-family: 'Syne', sans-serif;
@@ -37,16 +38,21 @@
             display: block;
             margin-bottom: 0.5rem;
         }
-        .dark .auth-logo { color: #E2E8F0; }
-        .auth-logo span { color: #1E40AF; }
-        .dark .auth-logo span { color: #3B82F6; }
+         .auth-logo span { color: #1E40AF; }
+       @media (prefers-color-scheme: dark) {
+            .auth-logo { color: #E2E8F0; }
+            .auth-logo span { color: #3B82F6; }
+        }
+       
 
         .auth-subtitle {
             font-size: 0.875rem;
             color: #6B6B65;
             margin-bottom: 2rem;
         }
-        .dark .auth-subtitle { color: #94A3B8; }
+        @media (prefers-color-scheme: dark) {
+            .auth-subtitle { color: #94A3B8; }
+        }
 
         .auth-field { margin-bottom: 1.1rem; }
 
@@ -57,7 +63,9 @@
             color: #6B6B65;
             margin-bottom: 0.4rem;
         }
-        .dark .auth-label { color: #94A3B8; }
+        @media (prefers-color-scheme: dark) {
+            .auth-label { color: #94A3B8; }
+        }
 
         .auth-input {
             width: 100%;
@@ -71,20 +79,15 @@
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .dark .auth-input {
-            background: #0f172a;
-            border-color: #334155;
-            color: #E2E8F0;
-        }
-        .auth-input:focus {
+         .auth-input:focus {
             border-color: #1E40AF;
             box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
         }
-        .dark .auth-input:focus {
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+         @media (prefers-color-scheme: dark) {
+            .auth-input { background: #0f172a; border-color: #334155; color: #E2E8F0; }
+            .auth-input:focus {border-color: #3B82F6;box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);}
         }
-
+       
         .auth-remember {
             display: flex;
             align-items: center;
@@ -99,7 +102,9 @@
             color: #6B6B65;
             cursor: pointer;
         }
-        .dark .auth-remember label { color: #94A3B8; }
+        @media (prefers-color-scheme: dark) {
+                .auth-remember label { color: #94A3B8; }
+        }
         .auth-remember input[type="checkbox"] {
             width: 15px; height: 15px;
             accent-color: #1E40AF;
@@ -110,7 +115,9 @@
             color: #1E40AF;
             text-decoration: none;
         }
-        .dark .auth-forgot { color: #3B82F6; }
+        @media (prefers-color-scheme: dark) {
+                .auth-forgot { color: #3B82F6; }
+        }
         .auth-forgot:hover { text-decoration: underline; }
 
         .auth-submit {
@@ -126,25 +133,34 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.15s;
         }
-        .dark .auth-submit { background: #3B82F6; }
+        
         .auth-submit:hover { background: #2563EB; transform: translateY(-1px); }
-        .dark .auth-submit:hover { background: #60A5FA; }
+        @media (prefers-color-scheme: dark) {
+            .auth-submit { background: #3B82F6; }
+            .auth-submit:hover { background: #60A5FA; }
+        }
 
         .auth-divider {
             height: 1px;
             background: #E2DDD6;
             margin: 1.5rem 0;
         }
-        .dark .auth-divider { background: #334155; }
+        @media (prefers-color-scheme: dark) {
+            .auth-divider { background: #334155; }
+        }
 
         .auth-footer {
             text-align: center;
             font-size: 0.85rem;
             color: #6B6B65;
         }
-        .dark .auth-footer { color: #94A3B8; }
+        @media (prefers-color-scheme: dark) {
+            .auth-footer { color: #94A3B8; }
+        }
         .auth-footer a { color: #1E40AF; text-decoration: none; font-weight: 500; }
-        .dark .auth-footer a { color: #3B82F6; }
+        @media (prefers-color-scheme: dark) {
+            .auth-footer a { color: #3B82F6; }
+        }
         .auth-footer a:hover { text-decoration: underline; }
 
         .auth-back {
@@ -157,9 +173,13 @@
             margin-bottom: 1.75rem;
             transition: color 0.2s;
         }
-        .dark .auth-back { color: #94A3B8; }
+        @media (prefers-color-scheme: dark) {
+            .auth-back { color: #94A3B8; }
+        }
         .auth-back:hover { color: #1E40AF; }
-        .dark .auth-back:hover { color: #3B82F6; }
+        @media (prefers-color-scheme: dark) {
+            .auth-back:hover { color: #3B82F6; }
+        }
     </style>
 
     <link rel="preconnect" href="https://fonts.bunny.net">

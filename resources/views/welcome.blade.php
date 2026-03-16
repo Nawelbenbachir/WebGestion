@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html lang="fr" 
-   x-data="{ dark: localStorage.getItem('dark') === 'true' || (!localStorage.getItem('dark') && window.matchMedia('(prefers-color-scheme: dark)').matches) }" 
-    :class="{ 'dark': dark }" 
-     x-init="$watch('dark', val => localStorage.setItem('dark', val))">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>WebGestion – Logiciel de facturation en ligne gratuit</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=syne:400,600,700,800|instrument-sans:400,500" rel="stylesheet" />
+    <!-- <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=syne:400,600,700,800|instrument-sans:400,500" rel="stylesheet" /> -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+        
         :root {
             --bg: #F7F5F0;
             --ink: #1A1A18;
@@ -25,15 +22,17 @@
             --border: #E2DDD6;
         }
 
-        .dark {
-            --bg: #0f172a;
-            --ink: #E2E8F0;
-            --accent: #3B82F6;
-            --accent-light: #60A5FA;
-            --muted: #94A3B8;
-            --card-bg: #1E293B;
-            --border: #334155;
-        }
+       @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #0f172a;
+                    --ink: #E2E8F0;
+                    --accent: #3B82F6;
+                    --accent-light: #60A5FA;
+                    --muted: #94A3B8;
+                    --card-bg: #1E293B;
+                    --border: #334155;
+                }
+            }
 
         body {
             font-family: 'Instrument Sans', sans-serif;
@@ -58,10 +57,14 @@
             border-bottom: 1px solid var(--border);
             transition: background 0.3s;
         }
+       
 
-        .dark nav {
-            background: rgba(15, 23, 42, 0.85);
+        @media (prefers-color-scheme: dark) {
+            nav {
+                background: rgba(15, 23, 42, 0.85);
+            }
         }
+
 
         .nav-logo {
             font-family: 'Syne', sans-serif;
@@ -234,18 +237,7 @@
             transform: translateY(-1px);
         }
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(var(--border) 1px, transparent 1px),
-                linear-gradient(90deg, var(--border) 1px, transparent 1px);
-            background-size: 48px 48px;
-            opacity: 0.4;
-            pointer-events: none;
-            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 0%, transparent 100%);
-        }
+ 
 
         /* ── FEATURES ── */
         .features {
@@ -384,7 +376,7 @@
         }
        
 
-        /* ── ANIMATIONS ── */
+        ── ANIMATIONS ──
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(16px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -397,28 +389,6 @@
     <nav>
         <a href="/" class="nav-logo">Web<span>Gestion</span></a>
         <div class="nav-links">
-            {{-- Toggle dark mode --}}
-            <button class="toggle-dark" @click="dark = !dark" :title="dark ? 'Mode clair' : 'Mode sombre'">
-                {{-- Lune (mode clair actif) --}}
-                <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-
-                {{-- Soleil (mode sombre actif) --}}
-                <svg x-show="dark" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/>
-                    <line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/>
-                    <line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-            </button>
-
-
             @if (Route::has('login'))
                 @auth
                     <a href="{{ url('/tableau-de-bord') }}" class="btn-ghost">Tableau de bord</a>
@@ -434,7 +404,7 @@
 
     {{-- HERO --}}
     <section class="hero">
-        <span class="hero-badge">100% gratuit · Aucune carte bancaire requise</span>
+        
         <h1>Le logiciel de facturation<br><em>simple et gratuit</em></h1>
         <p>Créez vos devis, factures et avoirs en quelques clics. Gérez vos clients, votre stock et votre comptabilité depuis n'importe quel appareil.</p>
         <div class="hero-cta">
@@ -456,27 +426,27 @@
                 <p>Devis, commandes, factures, avoirs et bons de livraison. Transformation automatique d'un document à l'autre.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">👥</div>
+                <div class="feature-icon"></div>
                 <h3>Gestion des clients</h3>
                 <p>Fiche client détaillée, historique des documents, import de fichiers GED et export CSV/PDF.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📦</div>
+                <div class="feature-icon"></div>
                 <h3>Suivi des stocks</h3>
                 <p>Approvisionnements, retraits, inventaires automatisés et alertes sur les produits en rupture.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
+                <div class="feature-icon"></div>
                 <h3>Statistiques & reporting</h3>
                 <p>Chiffre d'affaires, factures payées/impayées, suivi des ventes par produit et des devis acceptés.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">💳</div>
+                <div class="feature-icon"></div>
                 <h3>Suivi des paiements</h3>
                 <p>Enregistrez vos règlements (virement, chèque, espèces) avec multi-règlements sur un même document.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📤</div>
+                <div class="feature-icon"></div>
                 <h3>Export comptabilité</h3>
                 <p>Export des factures et avoirs au format CSV compatible avec votre logiciel de comptabilité.</p>
             </div>

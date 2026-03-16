@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" 
-   x-data="{ dark: localStorage.getItem('dark') === 'true' || (!localStorage.getItem('dark') && window.matchMedia('(prefers-color-scheme: dark)').matches) }" 
-    :class="{ 'dark': dark }" 
-     x-init="$watch('dark', val => localStorage.setItem('dark', val))">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
