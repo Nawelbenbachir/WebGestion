@@ -31,6 +31,8 @@ class Societe extends Model
         'compte_ventes',
         'compte_tva',
         'racine_compte_client',
+        'journal_reglements',
+        'compte_banque',
         
     ];
         public function documents()

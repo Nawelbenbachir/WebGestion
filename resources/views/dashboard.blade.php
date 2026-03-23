@@ -217,8 +217,8 @@
                     <td class="px-4 py-2 whitespace-nowrap text-sm">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                             @if($invoice->statut == 'paye') bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200
-                            @elseif($invoice->statut == 'impaye') bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200
-                            @else bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200
+                            @elseif($invoice->statut == 'envoye') bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200
+                            @else bg-yellow-100 bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-200
                             @endif">
                             {{ Str::ucfirst($invoice->statut) }}
                         </span>
@@ -234,6 +234,7 @@
         </tbody>
     </table>
 </div>
+            </div>
 
             <div class="lg:col-span-1 bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-6">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center">

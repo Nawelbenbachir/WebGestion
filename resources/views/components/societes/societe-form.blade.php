@@ -115,7 +115,7 @@
     {{-- FOOTER : ACTIONS --}}
     <div class="flex justify-end items-center gap-3 p-4 border-t bg-gray-50 dark:bg-gray-900 rounded-b-lg">
         @if ($isVueseule)
-            <a href="{{ route('societes.index') }}" 
+            <a href="{{ route('parametres.index') }}" 
                class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm text-sm font-medium hover:bg-gray-50 transition-colors">
                Annuler
             </a>

@@ -238,34 +238,42 @@ public function exportReglements(Request $request)
             fputcsv($handle, ['Journal', 'Date', 'Compte', 'Nom Compte','Code Client','Libellé', 'Débit', 'Crédit','Numéro de TVA'], ';');
 
             foreach ($reglements as $reg) {
-                $montant = $reg->montant;
-                $isNegatif = $montant < 0;
-                $montantAbs = abs($montant);
-                $date = Carbon::parse($reg->date_reglement)->format('d/m/Y');
-                $ref = $reg->numero_reglement;
-                $nomClient = $reg->document->client->societe;
-                $numTVA = $reg->document->client->tva;
-                $codecli= $reg->document->client->code_cli;
+    $montant = $reg->montant;
+    $isNegatif = $montant < 0;
+    $montantAbs = abs($montant);
+    $date = Carbon::parse($reg->date_reglement)->format('d/m/Y');
+    $ref = $reg->numero_reglement;
+    $nomClient = $reg->document->client->societe;
+    $numTVA = $reg->document->client->tva;
+    $codecli = $reg->document->client->code_cli;
+    $compteClient = $reg->document->client->code_comptable;
 
-                // Génération du compte client (ex: 411 + 6 premières lettres)
-                $compteClient = $reg->document->client->code_comptable;
+    // LIGNE 1 : BANQUE (512) - l'argent rentre
+    fputcsv($handle, [
+        $societe->journal_reglements,
+        $date,
+        $societe->compte_banque,
+        'Banque',
+        $codecli,
+        $ref,
+        $isNegatif ? 0 : $montantAbs,  // débit
+        $isNegatif ? $montantAbs : 0,  // crédit
+        ''
+    ], ';');
 
-                // --- LIGNE 1 : COMPTE CLIENT (TTC) ---
-                fputcsv($handle, [
-                    $societe->journal_ventes,
-                    $date,
-                    $compteClient,
-                    $nomClient,
-                    $codecli,
-                    $ref,
-                    $isNegatif ? 0 : $montantAbs,  // débit
-                    $isNegatif ? $montantAbs : 0,  // crédit
-                    $numTVA
-                    
-                ], ';');
-
-                
-            }
+    // LIGNE 2 : CLIENT (411) - la dette diminue
+    fputcsv($handle, [
+        $societe->journal_reglements,
+        $date,
+        $compteClient,
+        $nomClient,
+        $codecli,
+        $ref,
+        $isNegatif ? $montantAbs : 0,  // débit (inverse)
+        $isNegatif ? 0 : $montantAbs,  // crédit
+        $numTVA
+    ], ';');
+    }
             fclose($handle);
         }, 200, [
             'Content-Type' => 'text/csv',

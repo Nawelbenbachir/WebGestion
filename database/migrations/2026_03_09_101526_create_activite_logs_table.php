@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreign('societe_id')->references('id')->on('societes')->onDelete('cascade');
             $table->string('action');        // 'suppression', 'export', 'validation'
             $table->string('modele');        // 'Facture', 'Client', 'Devis'
-            $table->unsignedBigInteger('modele_id');
             $table->json('donnees')->nullable(); // snapshot des données avant suppression
             $table->timestamps();
         });

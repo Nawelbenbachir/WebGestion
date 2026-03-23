@@ -109,7 +109,20 @@
                 <input type="text" name="compte_tva" value="{{ old('compte_tva', $societe->compte_tva ?? '445710') }}"
                        class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs focus:ring-purple-500 focus:border-purple-500">
             </div>
-
+            <div>
+                <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Journal des Règlements</label>
+                <input type="text" name="journal_reglements" 
+                    value="{{ old('journal_reglements', $societe->journal_reglements ?? 'BQ') }}" 
+                    class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono uppercase text-xs" 
+                    placeholder="BQ">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Compte Banque</label>
+                <input type="text" name="compte_banque" 
+                    value="{{ old('compte_banque', $societe->compte_banque ?? '512000') }}" 
+                    class="w-full rounded border-gray-300 dark:bg-gray-800 dark:text-white px-2 py-1 font-mono text-xs" 
+                    placeholder="512000">
+            </div>
             <div>
                 <label class="block text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">Racine Client</label>
                 <input type="text" name="racine_compte_client" value="{{ old('racine_compte_client', $societe->racine_compte_client ?? '411') }}"

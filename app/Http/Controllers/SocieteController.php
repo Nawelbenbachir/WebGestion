@@ -58,21 +58,23 @@ class SocieteController extends Controller
             'journal_ventes'=>'nullable|string|max:50',
             'compte_ventes'=>'nullable|string|max:50',
             'compte_tva'=>'nullable|string|max:50',
+            'journal_reglements' => 'nullable|string|max:50',
+            'compte_banque' => 'nullable|string|max:50',
             'racine_compte_client'=>'nullable|string|max:50',
         ]);
 
         // On utilise la transaction et on récupère la société créée
         $societe = DB::transaction(function () use ($validated, $user) {
             
-            // 1. Création de la Société
+            //  Création de la Société
             $newSociete = Societe::create(array_merge($validated, [
                 'proprietaire_id' => $user->id,
             ]));
 
-            // 2. Attachement du rôle admin dans la table pivot
+            //  Attachement du rôle admin dans la table pivot
             $newSociete->users()->attach($user->id, ['role_societe' => 'admin']);
 
-            // 3. Mise à jour de l'utilisateur (BDD)
+            //  Mise à jour de l'utilisateur (BDD)
             $user->forceFill([
                 'last_active_societe_id' => $newSociete->id,
             ])->save();
@@ -80,10 +82,10 @@ class SocieteController extends Controller
             return $newSociete;
         });
 
-        // 4. Mise à jour de la Session (UNIQUEMENT si la transaction a réussi)
+        //  Mise à jour de la Session (UNIQUEMENT si la transaction a réussi)
         session(['current_societe_id' => $societe->id]);
 
-        // 5. Redirection
+        //  Redirection
         return redirect()->route('dashboard')
             ->with('success', 'Votre société a été créée avec succès et est maintenant active.');
     }
@@ -138,6 +140,8 @@ public function update(Request $request, Societe $societe)
         'journal_ventes'=>'nullable|string|max:50',
         'compte_ventes'=>'nullable|string|max:50',
         'compte_tva'=>'nullable|string|max:50',
+        'journal_reglements' => 'nullable|string|max:50',
+        'compte_banque' => 'nullable|string|max:50',
         'racine_compte_client'=>'nullable|string|max:50',
     ]);
 
