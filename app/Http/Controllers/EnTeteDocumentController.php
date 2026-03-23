@@ -621,8 +621,7 @@ class EnTeteDocumentController extends Controller
             'user_id'    => auth()->id(),
             'societe_id' => $societeId,
             'action'     => 'export_compta',
-            'modele'     => 'EnTeteDocument',
-            'modele_id'  => 0, 
+            'modele'     => 'EnTeteDocument', 
             'donnees'    => ['mois' => $mois, 'annee' => $annee, 'nb_documents' => $documents->count()],
         ]);
         EnTeteDocument::whereIn('id', $documents->pluck('id'))

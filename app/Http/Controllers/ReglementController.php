@@ -224,7 +224,7 @@ public function exportReglements(Request $request)
             'societe_id' => $societeId,
             'action'     => 'export_reglements',
             'modele'     => 'Reglement',
-            'modele_id'  => 0, 
+            
             'donnees'    => ['mois' => $mois, 'annee' => $annee, 'nb_documents' => $reglements->count()],
         ]);
         Reglement::whereIn('id', $reglements->pluck('id'))
