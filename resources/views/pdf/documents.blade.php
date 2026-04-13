@@ -115,10 +115,12 @@
         <table>
             <tr>
                 <td class="societe-info">
-                    <strong>{{ $societe->nom_societe ?? 'Ma Super Entreprise' }}</strong><br>
-                    {{ $societe->adresse1 ?? '123 Rue du Commerce' }}<br>
-                    {{ $societe->code_postal ?? '75000' }} {{ $societe->ville ?? 'Paris' }}<br>
-                    Tél : {{ $societe->telephone ?? '01 02 03 04 05' }}
+                    <strong>{{ $societe->nom_societe }}</strong><br>
+                    {{ $societe->adresse1  }}<br>
+                    {{ $societe->code_postal }} {{ $societe->ville  }}<br>
+                    Tél : {{ $societe->telephone  }}<br>
+                    SIRET : {{$societe->siret }}<br>
+                    TVA Intra : {{ $societe->tva  }}
                 </td>
                 <td class="client-info">
                     <div class="client-box">

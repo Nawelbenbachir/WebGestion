@@ -275,6 +275,16 @@ function initDevisForm(container) {
             if (rows.length > 1) {
                 e.target.closest('tr').remove();
                 updateTotals();
+            }else {
+                // Dernière ligne → on vide les champs
+                const row = e.target.closest('tr');
+                row.querySelector('.produit-input').value = '';
+                row.querySelector('.description').value = '';
+                row.querySelector('.quantite').value = 1;
+                row.querySelector('.prix').value = '';
+                row.querySelector('.tva').value = '';
+                row.querySelector('.total').value = '';
+                updateTotals();
             }
         }
 

@@ -4,11 +4,17 @@
         selectedDocs: [ {{ $preselectedDocId ? $preselectedDocId : '' }} ].filter(n => n),
         search: '',
         allIds: {{ $documents->pluck('id') }}, {{-- On récupère tous les IDs via PHP --}}
+        montantManuel: null, 
     
         toggleAll(isChecked) {
             this.selectedDocs = isChecked ? [...this.allIds] : [];
+            this.montantManuel = null; // Réinitialiser le montant manuel si on coche/décoche tout
         },
         get totalSelection() {
+            // Si montant manuel défini ET une seule doc → on utilise le manuel
+            if (this.montantManuel !== null && this.selectedDocs.length === 1) {
+                return this.montantManuel;
+            }
             let total = 0;
             this.selectedDocs.forEach(val => {
                 // On force la recherche sur l'attribut value de manière plus robuste
@@ -26,7 +32,7 @@
             });
             return total.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
-      }">
+      }"x-init="$watch('selectedDocs', () => { montantManuel = null; })">
     @csrf
 
     <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-t-lg border-b dark:border-gray-700 space-y-4">
@@ -160,8 +166,17 @@
         </div>
         <div class="text-right">
             <div class="text-sm text-gray-500 dark:text-gray-400 uppercase font-semibold">Total à régler</div>
-            <div class="text-3xl font-black text-indigo-700 dark:text-indigo-400">
-                <span x-text="totalSelection"></span> €
+            <div class="text-3xl font-black text-indigo-700 dark:text-indigo-400 flex items-center justify-end gap-1">
+                <!-- si une seule facture est sélectionnée, permettre de modifier le total mais pas au dessus du montant total -->
+                <input type="number"
+                    x-show="selectedDocs.length === 1"
+                    :value="totalSelection.replace(' ', '').replace(',', '.')" 
+                    @input="montantManuel = parseFloat($event.target.value)"
+                    @change="$watch('selectedDocs', () => montantManuel = null)"
+                    name="montant_manuel"
+                    class="w-32 text-right text-3xl font-black text-indigo-700 dark:text-indigo-400 bg-transparent border-b border-gray-300 focus:outline-none focus:ring-0">
+                    <span x-show="selectedDocs.length !== 1" x-text="totalSelection"></span>
+                    <span>€</span>
             </div>
         
             <button type="submit" 
