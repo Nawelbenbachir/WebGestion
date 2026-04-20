@@ -32,6 +32,7 @@ class EnTeteDocument extends Model
         'statut',
         'exporte',
         'date_export',
+        'reglement_id',
 
     ];
     protected $casts = [

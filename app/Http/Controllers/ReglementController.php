@@ -97,15 +97,13 @@ class ReglementController extends Controller
                 if (!$document || $document->solde == 0) {
                     continue; // on passe au suivant si doc invalide ou déjà réglé
                 }
+                
 
                 // Nouveau solde après règlement
                 $montant = $estManuel
                 ? (float) $request->montant_manuel
                 : $document->solde;
 
-                $reglement->document()->attach($docId, [
-                    'montant' => $montant 
-                ]);
                 
                  // Mise à jour du solde du document
                if ($document->type_document === 'A') {
@@ -113,12 +111,41 @@ class ReglementController extends Controller
                     $nouveauSolde = round($document->solde + abs($montant), 2);
                 } else {
                    
-                    $nouveauSolde = round($document->solde - $montant, 2);
+                    $montantReel = min($montant, $document->solde);
+                    $nouveauSolde = round($document->solde - $montantReel, 2);
                 }
                 $document->update([
                     'solde'  => $nouveauSolde,
                     'statut' => $nouveauSolde <= 0 ? 'paye' : 'envoye',
                 ]); 
+                
+                $reglement->document()->attach($docId, [
+                    'montant' => $montantReel 
+                ]);
+            }
+            // Vérifier si trop perçu
+            if($request->filled('trop_percu') && (float)$request->trop_percu > 0) {
+                
+                // Récupérer le document source pour copier les infos
+                $docSource = EnTeteDocument::find($request->document_ids[0]);
+
+                $trop_percu = (float) $request->trop_percu;
+                $numeroAvoir = $this->genererNumeroAvoir($societeId);
+                
+
+                // Créer l'avoir
+                EnTeteDocument::create([
+                    'societe_id'     => $societeId,
+                    'client_id'      => $request->client_id,
+                    'type_document'  => 'A',
+                    'code_document'  => $numeroAvoir,
+                    'date_document'  => now(),
+                    'total_ttc'      => -$trop_percu,
+                    'total_ht'       => -$trop_percu, 
+                    'solde'          => -$trop_percu,
+                    'statut'         => 'envoye',
+                    'reglement_id'  => $reglement->id,
+                ]);
             }
         });
 
@@ -169,11 +196,33 @@ class ReglementController extends Controller
         if ($reglement->exporte==true) {
             return back()->withErrors(['error' => 'Ce règlement est déjà exporté et ne peut plus être supprimé.']);
         }
-        $reglement->delete();
+        if ($reglement->avoir()->exists()) {
+            return back()->withErrors([
+                'error' => 'Ce règlement a généré un avoir (' . $reglement->avoir->code_document . '). Vous ne pouvez pas le supprimer.'
+            ]);
+        }
+        DB::transaction(function() use ($reglement) {
+        foreach ($reglement->document as $document) {
+            $montantImpute = $document->pivot->montant;
 
-        return redirect()->route('reglements.index')
-            ->with('success', 'Règlement supprimé.');
-    }
+            if ($document->type_document === 'A') {
+                $nouveauSolde = round($document->solde - abs($montantImpute), 2);
+            } else {
+                $nouveauSolde = round($document->solde + $montantImpute, 2);
+            }
+
+            $document->update([
+                'solde'  => $nouveauSolde,
+                'statut' => $nouveauSolde > 0 ? 'envoye' : 'paye',
+            ]);
+        }
+
+        $reglement->delete();
+    });
+
+    return redirect()->route('reglements.index')
+        ->with('success', 'Règlement supprimé.');
+}
 
    private function genererNumeroReglement($societeId, $offset = 0) 
     {
@@ -300,5 +349,40 @@ public function exportReglements(Request $request)
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="export_reg_' . date('Y-m-d') . '.csv"',
         ]);
+    }
+
+    private function genererNumeroAvoir($societeId)
+    {
+        $formatChoisi = DB::table('societes')
+            ->where('id', $societeId)
+            ->value('format_numero_document') ?? 'simple';
+
+        $annee = now()->format('Y');
+        $mois = now()->format('m');
+
+        $baseCode = ($formatChoisi === 'mensuel')
+            ? "A-{$annee}-{$mois}-"
+            : "A-{$annee}-";
+
+        $nbTiretsAttendus = ($formatChoisi === 'mensuel') ? 3 : 2;
+
+        $dernierDoc = EnTeteDocument::where('societe_id', $societeId)
+            ->where('code_document', 'LIKE', $baseCode . '%')
+            ->whereRaw("(LENGTH(code_document) - LENGTH(REPLACE(code_document, '-', ''))) = ?", [$nbTiretsAttendus])
+            ->orderByRaw('LENGTH(code_document) DESC')
+            ->orderBy('code_document', 'desc')
+            ->first();
+
+        $compteur = 1;
+
+        if ($dernierDoc) {
+            $parties = explode('-', $dernierDoc->code_document);
+            $dernierNombre = end($parties);
+            if (is_numeric($dernierNombre)) {
+                $compteur = (int)$dernierNombre + 1;
+            }
+        }
+
+        return $baseCode . str_pad($compteur, 3, '0', STR_PAD_LEFT);
     }
 }

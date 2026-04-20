@@ -112,7 +112,7 @@
                                 {{ $reglement->date_reglement }}
                             </td>
                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $reglement->document->first()->client->societe}}
+                                {{ $reglement->document->first()?->client?->societe ?? 'N/A' }}
                             </td>
                              <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
                                 {{ $reglement->document->pluck('code_document')->join(', ')}}

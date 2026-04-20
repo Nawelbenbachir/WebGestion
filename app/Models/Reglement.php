@@ -22,7 +22,6 @@ class Reglement extends Model
 
      public function document()
     {
-        // Un règlement appartient à un seul document
         return $this->belongsToMany(
             EnTeteDocument::class,
                 'reglement_documents',
@@ -35,6 +34,11 @@ class Reglement extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function avoir()
+    {
+        return $this->hasOne(EnTeteDocument::class, 'reglement_id');
     }
 
 }

@@ -48,6 +48,10 @@ return new class extends Migration
             $table->enum('statut', ['brouillon', 'envoye', 'paye'])->default('brouillon');
             $table->boolean('exporte')->default(false);
             $table->timestamp('date_export')->nullable();
+            $table->foreignId('reglement_id')
+                ->nullable()
+                ->constrained('reglements')
+                ->onDelete('set null');
         });
     }
 

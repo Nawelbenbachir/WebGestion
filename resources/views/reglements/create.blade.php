@@ -6,6 +6,7 @@
         allIds: {{ $documents->pluck('id') }}, {{-- On récupère tous les IDs via PHP --}}
         montantManuel: null, 
         soldeMax:0,
+        tropPercu:0,
     
         toggleAll(isChecked) {
             this.selectedDocs = isChecked ? [...this.allIds] : [];
@@ -35,18 +36,19 @@
         }
       }"
      x-init="
-    $watch('selectedDocs', (val) => {
-        montantManuel = null;
-        if(val.length === 1) {
-            const el = document.querySelector(`input[name='document_ids[]'][value='${val[0]}']`);
-            soldeMax = el ? parseFloat(el.dataset.solde) : 0;
-            if($refs.montantInput) {
-                $refs.montantInput.value = soldeMax.toFixed(2);
+        $watch('selectedDocs', (val) => {
+            montantManuel = null;
+            tropPercu = 0; 
+            if(val.length === 1) {
+                const el = document.querySelector(`input[name='document_ids[]'][value='${val[0]}']`);
+                soldeMax = el ? parseFloat(el.dataset.solde) : 0; // garde le signe
+                if($refs.montantInput) {
+                    $refs.montantInput.value = soldeMax.toFixed(2);
+                }
+            } else {
+                soldeMax = 0;
             }
-        } else {
-            soldeMax = 0;
-        }
-    })
+        })
     ">
     @csrf
 
@@ -185,22 +187,39 @@
                 <!-- si une seule facture est sélectionnée, permettre de modifier le total mais pas au dessus du montant total -->
                 <input type="number"
                     x-show="selectedDocs.length === 1"
-                   x-ref="montantInput"
+                    x-ref="montantInput"
                     step="0.01"
-                    :max="soldeMax"
-                    @input="
+                   @input="
                         let val = parseFloat($event.target.value);
-                        if(val > soldeMax) {
+                        if(isNaN(val)) {
+                            montantManuel = null;
+                            tropPercu = 0;
+                            return;
+                        }
+                        
+                        let absVal = Math.abs(val);
+                        let absMax = Math.abs(soldeMax);
+                        
+                        // Si c'est un avoir (soldeMax négatif) → on bloque au max
+                        if(soldeMax < 0 && absVal > absMax) {
                             $el.value = soldeMax.toFixed(2);
                             montantManuel = soldeMax;
+                            tropPercu = 0;
                         } else {
-                            montantManuel = isNaN(val) ? null : val;
+                            montantManuel = val;
+                            tropPercu = absVal > absMax 
+                                ? parseFloat((absVal - absMax).toFixed(2)) 
+                                : 0;
                         }
                     "
                     name="montant_manuel"
                     class="w-32 text-right text-3xl font-black text-indigo-700 dark:text-indigo-400 bg-transparent border-b border-gray-300 focus:outline-none focus:ring-0"/>
                     <span x-show="selectedDocs.length !== 1" x-text="totalSelection"></span>
                     <span>€</span>
+                    <div x-show="tropPercu > 0" class="text-orange-500 text-xs mt-1">
+                     Trop perçu de <span x-text="tropPercu.toFixed(2)"></span> € → un avoir sera créé automatiquement
+                    </div>
+                    <input type="hidden" name="trop_percu" :value="tropPercu">
             </div>
         
             <button type="submit" 
