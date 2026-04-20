@@ -13,7 +13,6 @@ trait Loggable
             'societe_id' => session('current_societe_id'),
             'action'    => $action,
             'modele'    => class_basename($this),
-            'modele_id' => $this->id,
             'donnees'   => $this->toArray(),
         ]);
     }

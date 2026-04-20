@@ -35,5 +35,8 @@ class Client extends Model
         'tva',
         'interlocuteur',
     ];
+    public function documents(){
+        return $this->hasMany(EnTeteDocument::class,'client_id');
+    }
 }
 

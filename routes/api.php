@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\StatistiqueController; 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EnteteDocumentController;
+use App\Http\Controllers\Api\ClientApiController;
 
 
     Route::get('/user', function (Request $request) {
@@ -32,3 +33,9 @@ use App\Http\Controllers\Api\EnteteDocumentController;
     // Route pour voir UN document spécifique (avec ses lignes)
     Route::get('documents/{id}', [EnteteDocumentController::class, 'show']);
     // ->middleware('auth:sanctum');
+    Route::get('clients/{id}', [ClientApiController::class, 'show'])
+    ->middleware('auth:sanctum');
+    Route::get('clients', [ClientApiController::class, 'index'])
+     ->middleware('auth:sanctum');    
+    Route::get('clients/{id}/documents', [ClientApiController::class, 'show'])
+     ->middleware('auth:sanctum');

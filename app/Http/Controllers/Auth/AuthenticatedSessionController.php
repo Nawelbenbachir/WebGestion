@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Providers\RouteServiceProvider; 
-
+use App\Models\ActiviteLog;
+use App\Traits\Loggable;
+use App\Models\User;
 
 
 class AuthenticatedSessionController extends Controller
@@ -28,7 +30,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate(); // 1. Authentifie l'utilisateur (Email/Password)
+        $request->authenticate(); //  Authentifie l'utilisateur (Email/Password)
         $request->session()->regenerate();
 
         $user = Auth::user();
@@ -42,7 +44,7 @@ class AuthenticatedSessionController extends Controller
         if ($societesCount === 0) {
             //  L'utilisateur n'a aucune société liée.
             
-           Auth::logout();
+            Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
@@ -77,6 +79,14 @@ class AuthenticatedSessionController extends Controller
             if ($user->last_active_societe_id !== $targetSocieteId) {
                  $user->update(['last_active_societe_id' => $targetSocieteId]);
             }
+            // Log de connexion
+            ActiviteLog::create([
+                'user_id'    => $user->id,
+                'societe_id' => $targetSocieteId,
+                'action'     => 'connexion',
+                'modele'     => 'ActiviteLog', 
+            ]);
+            // $user->logActivite('connexion');
         }
         
        

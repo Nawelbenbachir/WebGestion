@@ -10,6 +10,7 @@ use App\Http\Controllers\LigneDocumentController;
 use App\Http\Controllers\ReglementController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ActiviteLogController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -83,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/societe/update-selection', [SocieteController::class, 'updateSelection'])->name('societe.update');
-});
+    Route::get('/log',[ActiviteLogController::class, 'index'])->name('log.index');
+    });
 
 require __DIR__.'/auth.php';
