@@ -5,6 +5,7 @@
         search: '',
         allIds: {{ $documents->pluck('id') }}, {{-- On récupère tous les IDs via PHP --}}
         montantManuel: null, 
+        soldeMax:0,
     
         toggleAll(isChecked) {
             this.selectedDocs = isChecked ? [...this.allIds] : [];
@@ -32,7 +33,21 @@
             });
             return total.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
-      }"x-init="$watch('selectedDocs', () => { montantManuel = null; })">
+      }"
+     x-init="
+    $watch('selectedDocs', (val) => {
+        montantManuel = null;
+        if(val.length === 1) {
+            const el = document.querySelector(`input[name='document_ids[]'][value='${val[0]}']`);
+            soldeMax = el ? parseFloat(el.dataset.solde) : 0;
+            if($refs.montantInput) {
+                $refs.montantInput.value = soldeMax.toFixed(2);
+            }
+        } else {
+            soldeMax = 0;
+        }
+    })
+    ">
     @csrf
 
     <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-t-lg border-b dark:border-gray-700 space-y-4">
@@ -170,9 +185,18 @@
                 <!-- si une seule facture est sélectionnée, permettre de modifier le total mais pas au dessus du montant total -->
                 <input type="number"
                     x-show="selectedDocs.length === 1"
-                    :value="totalSelection.replace(' ', '').replace(',', '.')" 
-                    @input="montantManuel = parseFloat($event.target.value)"
-                    @change="$watch('selectedDocs', () => montantManuel = null)"
+                   x-ref="montantInput"
+                    step="0.01"
+                    :max="soldeMax"
+                    @input="
+                        let val = parseFloat($event.target.value);
+                        if(val > soldeMax) {
+                            $el.value = soldeMax.toFixed(2);
+                            montantManuel = soldeMax;
+                        } else {
+                            montantManuel = isNaN(val) ? null : val;
+                        }
+                    "
                     name="montant_manuel"
                     class="w-32 text-right text-3xl font-black text-indigo-700 dark:text-indigo-400 bg-transparent border-b border-gray-300 focus:outline-none focus:ring-0">
                     <span x-show="selectedDocs.length !== 1" x-text="totalSelection"></span>

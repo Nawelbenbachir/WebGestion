@@ -164,6 +164,7 @@
                 @endif
             </div>
             <div class="flex space-x-4 me-6"> 
+                @if(Auth::user()->hasParametresAccess())
                     <x-nav-link :href="route('log.index')" :active="request()->routeIs('log.index')">
                         <div class="flex items-center space-x-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,7 +173,8 @@
                             </svg>
                             <span>Historique</span>
                         </div>
-                    </x-nav-link>      
+                    </x-nav-link>   
+                @endif   
             </div>
 
                 {{-- Dropdown Utilisateur --}}

@@ -54,9 +54,9 @@ class ReglementController extends Controller
         ));
     }
 
-  public function store(Request $request)
+ public function store(Request $request)
 {
-    $validated = $request->validate([
+    $request->validate([
         'client_id'      => 'required|exists:clients,id',
         'document_ids'   => 'required|array|min:1',
         'document_ids.*' => 'exists:en_tete_documents,id',
@@ -64,15 +64,15 @@ class ReglementController extends Controller
         'date_reglement' => 'required|date',
         'reference'      => 'nullable|string|max:255',
         'commentaire'    => 'nullable|string',
+        'montant_manuel' => 'nullable|numeric|min:0.01',
     ]);
 
     $societeId = session('current_societe_id');
-
-    // --- ÉTAPE CLÉ : On calcule le compteur de départ avant la boucle ---
     $compteurDepart = $this->getProchainNumeroBase($societeId);
+    $estManuel = count($request->document_ids) === 1 && $request->filled('montant_manuel');
 
     try {
-        DB::transaction(function () use ($request, $societeId, $compteurDepart) {
+        DB::transaction(function () use ($request, $societeId, $compteurDepart, $estManuel) {
             $nbCrees = 0;
 
             foreach ($request->document_ids as $docId) {
@@ -80,30 +80,45 @@ class ReglementController extends Controller
                     ->where('client_id', $request->client_id)
                     ->first();
 
-                if ($document && $document->solde != 0) {
-                    // On construit le numéro manuellement : Départ + Nombre de docs déjà traités
-                    $numero = $this->formaterNumeroFinal($societeId, $compteurDepart + $nbCrees);
-
-                    Reglement::create([
-                        'societe_id'       => $societeId,
-                        'client_id'        => $request->client_id,
-                        'document_id'      => $docId,
-                        'numero_reglement' => $numero,
-                        'mode_reglement'   => $request->mode_reglement,
-                        'montant'          => $document->solde,
-                        'date_reglement'   => $request->date_reglement,
-                        'reference'=>$request->reference,
-                        'commentaire'=>$request->commentaire,
-                    ]);
-
-                    $document->update(['solde' => 0, 'statut' => 'paye']);
-                    
-                    $nbCrees++; 
+                if (!$document || $document->solde == 0) {
+                    continue; // on passe au suivant si doc invalide ou déjà réglé
                 }
+
+                // Montant de CE règlement
+                $montantDoc = $estManuel
+                    ? (float) $request->montant_manuel
+                    : $document->solde;
+
+                // Nouveau solde après règlement
+                $nouveauSolde = round($document->solde - $montantDoc, 2);
+
+                // Statut selon si totalement réglé ou non
+                $statut = $nouveauSolde <= 0 ? 'paye' : 'envoye';
+
+                $numero = $this->formaterNumeroFinal($societeId, $compteurDepart + $nbCrees);
+
+                Reglement::create([
+                    'societe_id'       => $societeId,
+                    'client_id'        => $request->client_id,
+                    'document_id'      => $docId,
+                    'numero_reglement' => $numero,
+                    'mode_reglement'   => $request->mode_reglement,
+                    'montant'          => $montantDoc,
+                    'date_reglement'   => $request->date_reglement,
+                    'reference'        => $request->reference,
+                    'commentaire'      => $request->commentaire,
+                ]);
+
+                $document->update([
+                    'solde'  => $nouveauSolde,
+                    'statut' => $statut,
+                ]);
+
+                $nbCrees++;
             }
         });
 
-        return redirect()->route('reglements.index')->with('success', 'Règlements enregistrés.');
+        return redirect()->route('reglements.index')->with('success', 'Règlement(s) enregistré(s) avec succès.');
 
     } catch (\Exception $e) {
         return back()->with('error', 'Erreur : ' . $e->getMessage());
