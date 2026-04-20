@@ -38,14 +38,16 @@ class ReglementSeeder extends Seeder
                         ? sprintf('REG-%s-%s-%03d', $annee, $mois, $sequence)
                         : sprintf('REG-%s-%03d', $annee, $sequence);
 
-                    Reglement::create([
+                    $reglement=Reglement::create([
                         'societe_id'        => $societe->id,
                         'client_id'=>$document->client_id,
                         'numero_reglement'  => $numeroReglement,
                         'date_reglement'    => now(),
-                        'document_id'       => $document->id,
                         'montant'           => $document->total_ttc,
                         'mode_reglement' => Arr::random(['cheque', 'virement', 'espece', 'carte']),
+                    ]);
+                     $reglement->document()->attach($document->id, [
+                        'montant' => $document->total_ttc
                     ]);
 
                     $sequence++; 

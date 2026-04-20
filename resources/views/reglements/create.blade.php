@@ -198,7 +198,7 @@
                         }
                     "
                     name="montant_manuel"
-                    class="w-32 text-right text-3xl font-black text-indigo-700 dark:text-indigo-400 bg-transparent border-b border-gray-300 focus:outline-none focus:ring-0">
+                    class="w-32 text-right text-3xl font-black text-indigo-700 dark:text-indigo-400 bg-transparent border-b border-gray-300 focus:outline-none focus:ring-0"/>
                     <span x-show="selectedDocs.length !== 1" x-text="totalSelection"></span>
                     <span>€</span>
             </div>

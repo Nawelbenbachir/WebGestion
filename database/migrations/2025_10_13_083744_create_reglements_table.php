@@ -18,11 +18,9 @@ return new class extends Migration
             $table->string('numero_reglement');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->onUpdate('CURRENT_TIMESTAMP');
-            $table->unsignedBigInteger('document_id');
-            $table->foreign('document_id')->references('id')->on('en_tete_documents')->onDelete('cascade');
             $table->date('date_reglement')->nullable();
             $table->enum('mode_reglement', ['carte', 'virement', 'cheque','espece']);
-            $table->decimal('montant', 10, 2)->nullable();
+            $table->decimal('montant', 10, 2);
             $table->string('reference')->nullable(); 
             $table->text('commentaire')->nullable();
             $table->boolean('exporte')->default(false);

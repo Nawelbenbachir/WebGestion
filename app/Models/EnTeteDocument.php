@@ -53,7 +53,13 @@ class EnTeteDocument extends Model
     {
         return $this->hasMany(LigneDocument::class, 'document_id');
     }
-    public function reglements() {
-    return $this->hasMany(Reglement::class, 'document_id');
-}
+    public function reglements()
+    {
+        return $this->belongsToMany(
+            Reglement::class,
+            'reglement_documents',
+            'document_id',
+            'reglement_id'
+        )->withPivot('montant');
+    }
 }

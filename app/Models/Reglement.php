@@ -8,7 +8,6 @@ class Reglement extends Model
 {
     protected $fillable = [
         'reglement_id',
-        'document_id',
         'numero_reglement',
         'mode_reglement',
         'montant',
@@ -22,9 +21,21 @@ class Reglement extends Model
     ];
 
      public function document()
-{
-    // Un règlement appartient à un seul document
-    return $this->belongsTo(EnTeteDocument::class, 'document_id');
-}
+    {
+        // Un règlement appartient à un seul document
+        return $this->belongsToMany(
+            EnTeteDocument::class,
+                'reglement_documents',
+                'reglement_id',
+                'document_id'
+            )->withPivot('montant')->withTimestamps();
+    
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
 }
 

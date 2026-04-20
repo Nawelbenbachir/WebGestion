@@ -64,7 +64,7 @@ class ReglementController extends Controller
         'date_reglement' => 'required|date',
         'reference'      => 'nullable|string|max:255',
         'commentaire'    => 'nullable|string',
-        'montant_manuel' => 'nullable|numeric|min:0.01',
+        'montant_manuel' => 'nullable|numeric|not_in:0',
     ]);
 
     $societeId = session('current_societe_id');
@@ -73,7 +73,21 @@ class ReglementController extends Controller
 
     try {
         DB::transaction(function () use ($request, $societeId, $compteurDepart, $estManuel) {
-            $nbCrees = 0;
+            
+            $montantTotal = $estManuel
+            ? (float) $request->montant_manuel
+            : EnTeteDocument::whereIn('id', $request->document_ids)->sum('solde');
+
+            $reglement = Reglement::create([
+                    'societe_id'       => $societeId,
+                    'client_id'        => $request->client_id,
+                    'numero_reglement' => $this->formaterNumeroFinal($societeId, $this->getProchainNumeroBase($societeId)),
+                    'mode_reglement'   => $request->mode_reglement,
+                    'montant'          => $montantTotal,
+                    'date_reglement'   => $request->date_reglement,
+                    'reference'        => $request->reference,
+                    'commentaire'      => $request->commentaire,
+                ]);
 
             foreach ($request->document_ids as $docId) {
                 $document = EnTeteDocument::where('id', $docId)
@@ -84,46 +98,38 @@ class ReglementController extends Controller
                     continue; // on passe au suivant si doc invalide ou déjà réglé
                 }
 
-                // Montant de CE règlement
-                $montantDoc = $estManuel
-                    ? (float) $request->montant_manuel
-                    : $document->solde;
-
                 // Nouveau solde après règlement
-                $nouveauSolde = round($document->solde - $montantDoc, 2);
+                $montant = $estManuel
+                ? (float) $request->montant_manuel
+                : $document->solde;
 
-                // Statut selon si totalement réglé ou non
-                $statut = $nouveauSolde <= 0 ? 'paye' : 'envoye';
-
-                $numero = $this->formaterNumeroFinal($societeId, $compteurDepart + $nbCrees);
-
-                Reglement::create([
-                    'societe_id'       => $societeId,
-                    'client_id'        => $request->client_id,
-                    'document_id'      => $docId,
-                    'numero_reglement' => $numero,
-                    'mode_reglement'   => $request->mode_reglement,
-                    'montant'          => $montantDoc,
-                    'date_reglement'   => $request->date_reglement,
-                    'reference'        => $request->reference,
-                    'commentaire'      => $request->commentaire,
+                $reglement->document()->attach($docId, [
+                    'montant' => $montant 
                 ]);
-
+                
+                 // Mise à jour du solde du document
+               if ($document->type_document === 'A') {
+                   
+                    $nouveauSolde = round($document->solde + abs($montant), 2);
+                } else {
+                   
+                    $nouveauSolde = round($document->solde - $montant, 2);
+                }
                 $document->update([
                     'solde'  => $nouveauSolde,
-                    'statut' => $statut,
-                ]);
-
-                $nbCrees++;
+                    'statut' => $nouveauSolde <= 0 ? 'paye' : 'envoye',
+                ]); 
             }
         });
 
-        return redirect()->route('reglements.index')->with('success', 'Règlement(s) enregistré(s) avec succès.');
+         return redirect()->route('reglements.index')
+                         ->with('success', 'Règlement enregistré avec succès.');
 
     } catch (\Exception $e) {
         return back()->with('error', 'Erreur : ' . $e->getMessage());
     }
 }
+
     public function show($id)
     {
         $reglement = Reglement::with('document')->findOrFail($id);

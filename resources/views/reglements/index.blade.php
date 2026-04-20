@@ -112,10 +112,10 @@
                                 {{ $reglement->date_reglement }}
                             </td>
                             <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $reglement->document->client->societe}}
+                                {{ $reglement->document->first()->client->societe}}
                             </td>
                              <td class="px-6 py-4 text-left font-medium text-gray-900 dark:text-white">
-                                {{ $reglement->document->code_document}}
+                                {{ $reglement->document->pluck('code_document')->join(', ')}}
                             </td>
                             <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                 {{ number_format($reglement->montant, 2, ',', ' ') }} €
