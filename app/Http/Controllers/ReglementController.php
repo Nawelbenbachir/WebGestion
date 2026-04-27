@@ -153,6 +153,8 @@ class ReglementController extends Controller
                          ->with('success', 'Règlement enregistré avec succès.');
 
     } catch (\Exception $e) {
+        \Log::error('Erreur store règlement : ' . $e->getMessage());
+        \Log::error($e->getTraceAsString());
         return back()->with('error', 'Erreur : ' . $e->getMessage());
     }
 }
