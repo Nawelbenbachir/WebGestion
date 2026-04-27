@@ -163,9 +163,7 @@ class ReglementController extends Controller
          return view('reglements.show', compact('reglement'));
     }
 
-    /**
-     * Formulaire d’édition d’un règlement
-     */
+
     public function edit($id)
     {
         $reglement = Reglement::findOrFail($id);
