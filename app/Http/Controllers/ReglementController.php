@@ -77,6 +77,7 @@ class ReglementController extends Controller
             $montantTotal = $estManuel
             ? (float) $request->montant_manuel
             : EnTeteDocument::whereIn('id', $request->document_ids)->sum('solde');
+            
             //création du règlement
             $reglement = Reglement::create([
                     'societe_id'       => $societeId,
@@ -88,7 +89,7 @@ class ReglementController extends Controller
                     'reference'        => $request->reference,
                     'commentaire'      => $request->commentaire,
                 ]);
-
+                
             foreach ($request->document_ids as $docId) {
                 $document = EnTeteDocument::where('id', $docId)
                     ->where('client_id', $request->client_id)
