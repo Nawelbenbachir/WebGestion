@@ -287,7 +287,7 @@ public function exportReglements(Request $request)
        $reglements = Reglement::where('societe_id', $societeId)
             ->whereMonth('date_reglement', $mois)
             ->whereYear('date_reglement', $annee)
-            ->with('document.client')
+            ->with('client')
             ->get();
 
         // Log de l'export

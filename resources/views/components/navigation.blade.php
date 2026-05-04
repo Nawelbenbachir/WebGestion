@@ -163,7 +163,7 @@
                     </x-nav-link>
                 @endif
             </div>
-            <div class="flex space-x-4 me-6"> 
+            <!-- <div class="flex space-x-4 me-6"> 
                 @if(Auth::user()->hasParametresAccess())
                     <x-nav-link :href="route('log.index')" :active="request()->routeIs('log.index')">
                         <div class="flex items-center space-x-2">
@@ -175,7 +175,7 @@
                         </div>
                     </x-nav-link>   
                 @endif   
-            </div>
+            </div> -->
 
                 {{-- Dropdown Utilisateur --}}
                 <x-dropdown align="right" width="48">
