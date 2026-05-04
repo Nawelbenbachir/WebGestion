@@ -143,6 +143,7 @@ class ReglementController extends Controller
                     'date_document'  => now(),
                     'total_ttc'      => -$trop_percu,
                     'total_ht'       => -$trop_percu, 
+                    'total_tva'      => $trop_percu*$docSource->total_tva / $docSource->total_ttc,
                     'solde'          => -$trop_percu,
                     'statut'         => 'envoye',
                     'reglement_id'  => $reglement->id,
