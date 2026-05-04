@@ -283,22 +283,22 @@ public function exportReglements(Request $request)
         $mois = $request->input('mois');
         $annee = $request->input('annee');
 
-        // On récupère les factures (F) et Avoirs (A) validés
+        // On récupère les factures (F) et Avoirs (A) réglés dans le mois
        $reglements = Reglement::where('societe_id', $societeId)
             ->whereMonth('date_reglement', $mois)
             ->whereYear('date_reglement', $annee)
-            ->with('client')
+            ->with(['client','document'])
             ->get();
-
+        
         // Log de l'export
         ActiviteLog::create([
             'user_id'    => auth()->id(),
             'societe_id' => $societeId,
             'action'     => 'export_reglements',
             'modele'     => 'Reglement',
-            
             'donnees'    => ['mois' => $mois, 'annee' => $annee, 'nb_documents' => $reglements->count()],
         ]);
+
         Reglement::whereIn('id', $reglements->pluck('id'))
         ->update(['exporte' => true, 'date_export' => now()]);
         return new StreamedResponse(function() use ($reglements, $societe) {
@@ -310,41 +310,41 @@ public function exportReglements(Request $request)
             fputcsv($handle, ['Journal', 'Date', 'Compte', 'Nom Compte','Code Client','Libellé', 'Débit', 'Crédit','Numéro de TVA'], ';');
 
             foreach ($reglements as $reg) {
-    $montant = $reg->montant;
-    $isNegatif = $montant < 0;
-    $montantAbs = abs($montant);
-    $date = Carbon::parse($reg->date_reglement)->format('d/m/Y');
-    $ref = $reg->numero_reglement;
-    $nomClient = $reg->document->client->societe;
-    $numTVA = $reg->document->client->tva;
-    $codecli = $reg->document->client->code_cli;
-    $compteClient = $reg->document->client->code_comptable;
+                $montant = $reg->montant;
+                $isNegatif = $montant < 0;
+                $montantAbs = abs($montant);
+                $date = Carbon::parse($reg->date_reglement)->format('d/m/Y');
+                $ref = $reg->numero_reglement;
+                $nomClient = $reg->client->societe;
+                $numTVA = $reg->client->tva;
+                $codecli = $reg->client->code_cli;
+                $compteClient = $reg->client->code_comptable;
 
-    // LIGNE 1 : BANQUE (512) - l'argent rentre
-    fputcsv($handle, [
-        $societe->journal_reglements,
-        $date,
-        $societe->compte_banque,
-        'Banque',
-        $codecli,
-        $ref,
-        $isNegatif ? 0 : $montantAbs,  // débit
-        $isNegatif ? $montantAbs : 0,  // crédit
-        ''
-    ], ';');
+                // LIGNE 1 : BANQUE (512) - l'argent rentre
+                fputcsv($handle, [
+                    $societe->journal_reglements,
+                    $date,
+                    $societe->compte_banque,
+                    'Banque',
+                    $codecli,
+                    $ref,
+                    $isNegatif ? 0 : $montantAbs,  // débit
+                    $isNegatif ? $montantAbs : 0,  // crédit
+                    ''
+                ], ';');
 
-    // LIGNE 2 : CLIENT (411) - la dette diminue
-    fputcsv($handle, [
-        $societe->journal_reglements,
-        $date,
-        $compteClient,
-        $nomClient,
-        $codecli,
-        $ref,
-        $isNegatif ? $montantAbs : 0,  // débit (inverse)
-        $isNegatif ? 0 : $montantAbs,  // crédit
-        $numTVA
-    ], ';');
+                // LIGNE 2 : CLIENT (411) - la dette diminue
+                fputcsv($handle, [
+                    $societe->journal_reglements,
+                    $date,
+                    $compteClient,
+                    $nomClient,
+                    $codecli,
+                    $ref,
+                    $isNegatif ? $montantAbs : 0,  // débit (inverse)
+                    $isNegatif ? 0 : $montantAbs,  // crédit
+                    $numTVA
+                ], ';');
     }
             fclose($handle);
         }, 200, [

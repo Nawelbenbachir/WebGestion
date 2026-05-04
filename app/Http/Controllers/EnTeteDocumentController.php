@@ -624,11 +624,11 @@ class EnTeteDocumentController extends Controller
             'modele'     => 'EnTeteDocument', 
             'donnees'    => ['mois' => $mois, 'annee' => $annee, 'nb_documents' => $documents->count()],
         ]);
+
         EnTeteDocument::whereIn('id', $documents->pluck('id'))
         ->update(['exporte' => true, 'date_export' => now()]);
         return new StreamedResponse(function() use ($documents, $societe) {
             $handle = fopen('php://output', 'w');
-            
             // UTF-8 BOM pour qu'Excel (français) ne casse pas les accents
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
             
