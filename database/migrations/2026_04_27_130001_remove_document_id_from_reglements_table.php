@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
 {
     Schema::table('reglements', function (Blueprint $table) {
-        $table->dropForeign(['document_id']);
-        $table->dropColumn('document_id');
+        if (Schema::hasColumn('reglements', 'document_id')) {
+            $table->dropForeign(['document_id']);
+            $table->dropColumn('document_id');
+        }
     });
 }
 

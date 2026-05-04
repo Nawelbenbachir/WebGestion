@@ -255,7 +255,7 @@ class ReglementController extends Controller
 private function getProchainNumeroBase($societeId)
 {
     $date = now();
-    $prefix = 'REG-' . $date->format('Y') . '-'; // Exemple simplifié
+    $prefix = 'REG-' . $date->format('Y') . '-'; 
     
     $dernier = Reglement::where('societe_id', $societeId)
         ->where('numero_reglement', 'LIKE', $prefix . '%')
